@@ -27,5 +27,5 @@ include("includes/classes/simpledisplay.class.php");                        // D
 include("includes/interfaces/simplemodule.interface.php");                  // Interface for modules (simpleModuleI)
 include("includes/abstracts/simplemodule.abstract.php");                    // Abstract class for modules (default properties)
 include("includes/abstracts/simplesite.abstract.php");                      // Main Site Abstract Class - Magic Happens Here 
-include("includes/controllers/${configs['default_controller']}.class.php"); // Class Implementing SimpleSite
+include("includes/sites/${configs['default_controller']}.class.php");       // Class Implementing SimpleSite
 ?>
