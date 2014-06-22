@@ -92,11 +92,8 @@ class SimpleDB
 					print_r($this->configs);
 				}
 			}
-			finally
-			{
-				if($this->connection==null)
-					$this->sdbSetErrorLevel($this->errorLevel+1);
-			}
+			if($this->connection==null)
+				$this->sdbSetErrorLevel($this->errorLevel+1);
 		}
 	}
 	public function disconnect()
