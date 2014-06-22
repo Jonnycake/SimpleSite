@@ -1,0 +1,5 @@
+Color Coding:
+	Red/Poly-line - A -> B means A executes B
+	Blue/Curves   - A -> B means B gets information from A
+	Green/Straight- A -> B means B inherits from A
+	Black/Straight- A -> B means A is a class/anonymous function autoloaded by B
