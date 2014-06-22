@@ -1,0 +1,15 @@
+I. Zip Folder Hierarchy
+    * themeName.zip
+        * templates
+            - overall.template
+                + Overall template used to generate ALL pages unless otherwise
+                  specified by the module.
+            - header.template
+                + The basic header to be used on all pages (what replaces
+                  {HEADER}).
+            - footer.template
+                + The basic footer to be used on all pages (what replaces
+                  {FOOTER}).
+            - index.template
+                + Default index page (what replaces {CONTENT} when no default 
+                  module is specified).
