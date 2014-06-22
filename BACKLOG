@@ -14,3 +14,9 @@ Helper classes/libs:
 			- See line 422
 	* SimpleDebug
 		- Needs to be written
+
+Design Stuff:
+	* SimpleCSS
+		- Pretty much done
+		- Want this to be used in all default templates and themes
+		- Needs to be updated for cross-browser compatability (mainly IE has caused a problem)
