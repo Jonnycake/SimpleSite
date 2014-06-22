@@ -1,0 +1,12 @@
+<div id="regForm" style="width:50%; float:right">
+	<span style="width:83%;float:right;"><input type="text" name="email" value="dmurphy@somewhere.com"/></span><span style="width:15%;float:left;">E-Mail:</span>
+	<span style="width:83%;float:right;"><input type="text" name="fname" value="Dade" onclick="this.value='';"/></span><span style="width:15%;float:left;">First Name:</span>
+	<span style="width:83%;float:right;"><input type="text" name="lname" value="Murphy" onclick="this.value='';"/></span><span style="width:15%;float:left;">Last Name:</span>
+	<span style="width:83%;float:right;"><input type="text" name="handle" value="Crash Override" onclick="this.value='';"/></span><span style="width:15%;float:left;">Handle:</span>
+	<span style="width:83%;float:right;"><input type="password" name="password" value="redherring"/></span><span style="width:15%;float:left;">Password:</span>
+</div>
+<div id="welcome" style="width:48%; font-size:110%;">
+Welcome to SimpleSocial, the social network designed to allow you to share your own customized web page.  Where other social networks make all the design choices for you, we seek to make personalization easy; no templates to download, no code to write, just a simple point-and-click interface for changing the various parts of your profile.<br/>
+With so many choices, from what colors to use to what add-ons to include, SimpleSite is the most flexible social network out there.  Connect to your friends now and get started living the "Simple" life.
+</div>
+<!-- Angelheaded hipsters burning for the ancient heavenly connection to the starry dynamo in the machinery of night. --!>

@@ -1,0 +1,7 @@
+<div style="text-align:center;width:100%;">
+	<span><b>Be very careful when editing this file, if you do something wrong you could break the administrative control panel.</b></span>
+	<form method="post" action="{CONFIGS_path_root}?mod=adminCP&act=configAdmin&func=save">
+		<textarea name="filecontent" style="width:100%;" rows="20">{FILECONTENT}</textarea>
+		<input type="submit" value="Save"/>
+	</form>
+</div>
