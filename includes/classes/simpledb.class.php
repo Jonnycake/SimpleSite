@@ -64,7 +64,7 @@ class SimpleDB
 	}
 	public function connect()
 	{
-		if($this->getErrorLevel()>2)
+		if($this->getGetErrorLevel()>2)
 			return false;
 
 		if(!$this->connected())
