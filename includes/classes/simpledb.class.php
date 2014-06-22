@@ -25,6 +25,7 @@ class SimpleDB
 	private $qryCache=array();
 	private $curConfigs=array();
 	private $tables=array();
+	private $errorLevel=0;
 	protected $compatQrys=array(
 					'SHOW TABLES' => array(
 								'mysql' => 'SHOW TABLES IN `{DATABASE}` LIKE :like'
@@ -63,6 +64,9 @@ class SimpleDB
 	}
 	public function connect()
 	{
+		if($this->getErrorLevel()>2)
+			return false;
+
 		if(!$this->connected())
 		{
 			if(@($this->debug==1))
@@ -91,7 +95,7 @@ class SimpleDB
 			finally
 			{
 				if($this->connection==null)
-					$this->sdbSetErrorLevel(1);
+					$this->sdbSetErrorLevel($this->errorLevel+1);
 			}
 		}
 	}
@@ -129,12 +133,18 @@ class SimpleDB
 	}
 	public function rawQry($query,$params=array(),$save=true)
 	{
+		if($this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		if($save)
 		{
 			if(!isset($this->rows))
 				$this->rows=array();
 			$x=count($this->rows);
 		}
+
 		$stmt=$this->connection->prepare($query);
 		$stmt->execute($params);
 		$rows=$stmt->fetchAll();
@@ -318,6 +328,11 @@ class SDBTable extends SimpleDB
 	}
 	public function select($cols,$conditions=array(),$extra=array(),$union=false)
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$tblPrefix=@$this->configs['tbl_prefix'];
 		$query="SELECT";
 
@@ -405,10 +420,6 @@ class SDBTable extends SimpleDB
 		if ($union) return array('query' => $query, 'params' => $params);
 		else if (isset($extra['UNION'])) $query.=$sorting;
 
-		// This should probably be moved to the beginning, no point in creating a query if not and we can't connect
-		if(!$this->connected())
-			$this->connect();
-
 		// Execute the query and get the rows
 		$stmt=$this->connection->prepare($query);
 		$stmt->execute($params);
@@ -427,6 +438,11 @@ class SDBTable extends SimpleDB
 	}
 	public function insert($values)
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$vals=array();
 		$query='INSERT INTO `'.$this->configs['tbl_prefix'].$this->sdbGetName().'` (';
 
@@ -444,6 +460,11 @@ class SDBTable extends SimpleDB
 	}
 	public function update($values,$conditions=array(),$extra=array())
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$query='UPDATE `'.(@$this->configs['tbl_prefix']).$this->sdbGetName().'` SET';
 		$x=0;
 		$valcount=count($values);
@@ -466,6 +487,11 @@ class SDBTable extends SimpleDB
 	}
 	public function delete($conditions)
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$query='DELETE FROM `'.(@$this->configs['tbl_prefix']).$this->sdbGetName().'`';
 
 		// $conditions=array("id" => 5);
