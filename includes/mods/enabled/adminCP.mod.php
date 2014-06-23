@@ -83,12 +83,20 @@ class adminCP extends SimpleModule
 
 		if($_GET['act']=="login")
 		{
-			$this->db->openTable("admins");
-			$adminTbl=$this->db->sdbGetTable("admins");
-			$count=$adminTbl->select('id',array('AND' => array('username' => array('op' => '=', 'val' => $_POST['username']), 'passwd' => array('op' => '=', 'val' => md5($_POST['password'])))));
-			if($count==1)
+			if($this->db->connected())
 			{
-				$_SESSION['is_admin']=1;
+				$this->db->openTable("admins");
+				$adminTbl=$this->db->sdbGetTable("admins");
+				$count=$adminTbl->select('id',array('AND' => array('username' => array('op' => '=', 'val' => $_POST['username']), 'passwd' => array('op' => '=', 'val' => md5($_POST['password'])))));
+				if($count==1)
+				{
+					$_SESSION['is_admin']=1;
+				}
+			}
+			else
+			{
+				if($_POST['username']==$configs['database']['username'] && $_POST['password']==$configs['database']['password'])
+					$_SESSION['is_admin']=1;
 			}
 		}
 		else if($_GET['act']=="logout")
@@ -120,14 +128,15 @@ class adminCP extends SimpleModule
 		$reqTbls=array(
 				"admins"
 			      );
-			      
+
 		// Check for required files
 		if(!($this->checkReqFiles($reqFiles,$configs)))
 			return FALSE;
-		
-		// Check for required database tables
+
+		/*// Check for required database tables
 		if(!($this->checkReqTbls($reqTbls,$configs)))
-			return FALSE;
+			return FALSE;*/
+
 		return TRUE;
 	}
 	public function install($configs=array())
@@ -157,7 +166,7 @@ class adminCP extends SimpleModule
 			"adminCP_welcome.template" => "V2VsY29tZSB0byB0aGUgU2ltcGxlU2l0ZSBhZG1pbmlzdHJhdG9yIGNvbnRyb2wgcGFuZWwuICBQbGVhc2Ugc2VsZWN0IGEgc2VjdGlvbiBmcm9tIHRoZSBsZWZ0Lg0K",
 			"adminCP_widgetAdmin.template" => "PGRpdiBzdHlsZT0idGV4dC1hbGlnbjpjZW50ZXI7Ij4KCTxmb3JtIGFjdGlvbj0ie0NPTkZJR1NfcGF0aF9yb290fT9tb2Q9YWRtaW5DUCZhY3Q9d2lkZ2V0QWRtaW4mZnVuYz1kZWxldGUiIG1ldGhvZD0icG9zdCI+CgkJPHRhYmxlPgoJCQk8dHI+CgkJCQk8dGQgY29sc3Bhbj0iMyIgc3R5bGU9InRleHQtYWxpZ246Y2VudGVyOyI+V2lkZ2V0cyBBdmFpbGFibGU8L3RkPgoJCQk8L3RyPgoJCQk8dHI+CgkJCQk8dGQ+TmFtZTo8L3RkPjx0ZD5UZW1wbGF0ZSBDb25zdGFudDo8L3RkPjx0ZD5EYXRlIEFkZGVkOjwvdGQ+CgkJCTwvdHI+CgkJCXtXSURHRVRTfQoJCQk8dHI+CgkJCQk8dGQgY29sc3Bhbj0iMyIgc3R5bGU9InRleHQtYWxpZ246Y2VudGVyOyI+PGlucHV0IHR5cGU9InN1Ym1pdCIgdmFsdWU9IkRlbGV0ZSIvPjwvdGQ+CgkJCTwvdHI+CgkJPC90YWJsZT4KCTwvZm9ybT4KCTxmb3JtIGVuY3R5cGU9Im11bHRpcGFydC9mb3JtLWRhdGEiIGFjdGlvbj0ie0NPTkZJR1NfcGF0aF9yb290fT9tb2Q9YWRtaW5DUCZhY3Q9d2lkZ2V0QWRtaW4mZnVuYz11cGxvYWQiIG1ldGhvZD0icG9zdCI+CgkJPGlucHV0IHR5cGU9ImZpbGUiIG5hbWU9InJmaWxlIi8+PGJyLz4KCQk8aW5wdXQgdHlwZT0ic3VibWl0IiB2YWx1ZT0iVXBsb2FkIi8+Cgk8L2Zvcm0+CjwvZGl2Pgo="
 		);
-		
+
 		$this->installReqFiles($defaultFiles,$configs);
 		$this->installReqTbls($defaultTbls,$configs);
 		$dbconf=$configs["database"];
