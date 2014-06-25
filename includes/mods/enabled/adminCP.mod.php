@@ -841,6 +841,7 @@ class adminCP extends SimpleModule
 				if(is_dir("$extractDir/$themename"))
 					$this->recursiveDirCopy($extractDir,$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']);
 			}
+			$this->recursiveDirDelete($extractDir);
 		}
 		else
 		{
