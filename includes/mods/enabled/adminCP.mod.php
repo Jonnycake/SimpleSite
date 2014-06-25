@@ -261,11 +261,11 @@ class adminCP extends SimpleModule
 	{
 		if(@($_GET['func'])=="save")
 		{
-			$f=@fopen($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php","w");
+			$f=@fopen($configs['path']['configs'],"w");
 			@fwrite($f,$_POST['filecontent']);
 			@fclose($f);
 		}
-		return str_replace("{FILECONTENT}",str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars(file_get_contents($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php")))),$content);
+		return str_replace("{FILECONTENT}",str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars(file_get_contents($configs['path']['configs'])))),$content);
 	}
 	
 	// Database Administration
@@ -716,7 +716,7 @@ class adminCP extends SimpleModule
 	}
 	
 	// Template Administration
-	public function templateAdmin($content,$configs) // Think we still have the upload bug....see the echo?  Will require more tests
+	public function templateAdmin($content,$configs)
 	{
 		$basedir=$_SERVER['DOCUMENT_ROOT'].$configs["path"]["root"];
 		if(@($_POST['submit']=="New"))

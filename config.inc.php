@@ -87,6 +87,7 @@ $configs["path"]["custom_templates"]="templates/custom";
 $configs["path"]["includes"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/";
 $configs["path"]["tmpdir"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."/tmp/";
 $configs["path"]["templates"]=$configs["path"]["themes"]."/".(@($_SESSION['selected_theme']=="")?$configs['default_theme']:$_SESSION['selected_theme']);
+$configs["path"]["configs"]=__FILE__;
 
 // Database Configurations
 if(@($_GET['debug']==1))
