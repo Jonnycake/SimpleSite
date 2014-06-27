@@ -1,7 +1,0 @@
-				<div class="nfPost" style="width:70%;float:right;">
-<div style="float:right;width:90%;margin-left:1%;"><a href="{CONFIGS_path_root}?mod=SimpleSocial&act=profile&uid={DataArr_uid}">{DataArr_handle}</a> @ {DataArr_posted}<br/> {DataArr_post}</div>
-					<div class="avatar" style="width:8%;">
-<img src="http://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Glider.svg/220px-Glider.svg.png" style="width:100%;"/>
-					</div>
-				</div>
-				

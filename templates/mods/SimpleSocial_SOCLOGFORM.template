@@ -1,8 +1,0 @@
-{IF "{SESSION_socloggedin_}" gt "0"}
-Welcome <a href="#" onclick="(document.getElementById('profMenu').style.display=='none')?document.getElementById('profMenu').style.display='block':document.getElementById('profMenu').style.display='none';">{SESSION_socuserdata_handle}</a><br/><div id="profMenu" style="float:right;border-right-style:solid;border-right-width:1px;border-left-style:solid;border-left-width:1px;display:none;"><a href="{CONFIGS_path_root}?mod=SimpleSocial&act=profile">My Profile</a><br/><a href="{CONFIGS_path_root}?mod=SimpleSocial&act=messages">My Messages</a><br/><a href="{CONFIGS_path_root}?mod=SimpleSocial&act=logout">Logout</a></div>
-{ELSE}
-<form method="post" action="{CONFIGS_path_root}?mod=SimpleSocial&act=login">
-<input style="width:10%" type="text" name="username" value="E-Mail" onclick="this.value='';"/> <input style="width:10%;" type="password" name="passwd" value="password" onclick="this.value='';"/> <input style="width:10%;" type="submit" value="Log-In" onclick="userLogIn"/><br/>
-<span style="font-size:80%;"><a href="{CONFIGS_path_root}?mod=SimpleSocial&act=register">New User?</a> | <a href="{CONFIGS_path_root}?mod=SimpleSocial&act=rstPassword">Forgot your password?</a></span>
-</form>
-{/IF}

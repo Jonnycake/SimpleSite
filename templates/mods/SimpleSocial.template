@@ -1,5 +1,0 @@
-{TEMPLATE_{CONFIGS_path_themes}/socialNetwork_HEADER.template}
-				<div id="middle">
-					{CONTENT}
-				</div>		
-{TEMPLATE_{CONFIGS_path_themes}/socialNetwork_FOOTER.template}
