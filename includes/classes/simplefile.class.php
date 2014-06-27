@@ -24,23 +24,19 @@ class SimpleFile
 	private $content=null;
 	private $filename=null;
 	private $directory=null;
+	private $path=null;
+	private $delim=null;
 	private $debug=false;
 
-	public function __construct($filepath, $toWrite=false, $delim="/", $debug=false) // Forward slashes are gonna cause a compatability prob..ugh D:
+	public function __construct($filepath, $toWrite=false, $delim="/", $debug=false)
 	{
-		if(substr($filepath,0,1)==$delim)
-		{
-			$pathArr=explode($delim,$filepath);
-			$this->filename=$pathArr[count($pathArr)-1];
-			unset($pathArr[count($pathArr)-1]);
-			$this->directory=implode($delim,$pathArr);
-			$this->debug=false;
-		}
-		else
-		{
-			// Find the full path based on relative location
-			echo "relative";
-		}
+		$filepath=$this->getFullPath($filepath);
+		$pathArr=explode($delim,$filepath);
+		$this->filename=$pathArr[count($pathArr)-1];
+		unset($pathArr[count($pathArr)-1]);
+		$this->directory=implode($delim,$pathArr);
+		$this->debug=false;
+		$this->delim=$delim;
 	}
 	public function __destruct()
 	{
@@ -64,6 +60,7 @@ class SimpleFile
 		{
 			try
 			{
+				echo $this->getFullPath();
 				$this->rfd=(($f=fopen($this->getFullPath(),"r"))?$f:null);
 				if(is_resource($this->rfd))
 					while(!(feof($this->rfd)))
@@ -118,13 +115,13 @@ class SimpleFile
 	{
 		return chgrp($this->getFullPath(),$group);
 	}
-	public function getFullPath()
+	public function getFullPath($pathname=null)
 	{
-		return $this->getFullPath();
+		return ($pathname!=null) ? realpath($pathname) : $this->directory."/".$this->filename;
 	}
 	public function getDirPath()
 	{
-		// Path to the directory the file is in
+		return $this->directory;
 	}
 	public function getFileName()
 	{

@@ -151,7 +151,7 @@ class SimpleDB
 			$x=0;
 			foreach($rows as $row)
 			{
-				$index=(($this->primaryKey=="")?$x++:$this->primaryKey);
+				$index=((isset($this->primaryKey))?(($this->primaryKey=="")?$x++:$this->primaryKey):$x++);
 				$this->rows[$index]=new SDBRes($query);
 				$this->rows[$index]->Values=$row;
 			}
