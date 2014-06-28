@@ -78,7 +78,8 @@ class SimpleFile
 				}
 				catch (Exception $e)
 				{
-					echo $e->getMessage();
+					if($this->debug)
+						echo $e->getMessage();
 				}
 			}
 			else
@@ -88,7 +89,34 @@ class SimpleFile
 		}
 		else
 		{
-			$content=file_get_contents($this->url);
+			if(preg_match("/^[a-z]*:\/\/([^\/]*).*/si",$this->url,$matches) && $matches)
+			{
+				$host=$matches[1];
+				if(!(preg_match("/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/si",$host,$matches2) && $matches2))
+				{
+					$hostip=gethostbyname($host);
+					if($host==$hostip)
+					{
+						if($this->debug)
+							echo "Dbg: Could not resolve hostname...\n";
+						return;
+					}
+				}
+				try
+				{
+					$this->content=file_get_contents($this->url); // I want to avoid connection refused warnings...but apparently gethostbyname() isn't going to fail unless the name's too long -_-
+				}
+				catch (Exception $e)
+				{
+					if($this->debug)
+						echo "Dbg: ".$e->getMessage()."\n";
+				}
+			}
+			else
+			{
+				if($this->debug)
+					echo "Dbg: Invalid URL.\n";
+			}
 		}
 	}
 	public function close()
