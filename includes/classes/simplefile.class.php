@@ -27,16 +27,24 @@ class SimpleFile
 	private $path=null;
 	private $delim=null;
 	private $debug=false;
+	private $url=null;
 
 	public function __construct($filepath, $toWrite=false, $delim="/", $debug=false)
 	{
-		$filepath=$this->getFullPath($filepath);
-		$pathArr=explode($delim,$filepath);
-		$this->filename=$pathArr[count($pathArr)-1];
-		unset($pathArr[count($pathArr)-1]);
-		$this->directory=implode($delim,$pathArr);
-		$this->debug=false;
-		$this->delim=$delim;
+		if(preg_match("/((http)|(ftp))s?:\/\//si",$filepath,$match) && $match)
+		{
+			$this->url=$filepath;
+		}
+		else
+		{
+			$filepath=$this->getFullPath($filepath);
+			$pathArr=explode($delim,$filepath);
+			$this->filename=$pathArr[count($pathArr)-1];
+			unset($pathArr[count($pathArr)-1]);
+			$this->directory=implode($delim,$pathArr);
+			$this->delim=$delim;
+		}
+		$this->debug=$debug;
 	}
 	public function __destruct()
 	{
@@ -56,24 +64,31 @@ class SimpleFile
 	// File descriptor functions
 	public function open()
 	{
-		if(file_exists($this->getFullPath()))
+		if(is_null($this->url))
 		{
-			try
+			$fullPath=$this->getFullPath();
+			if(file_exists($fullPath) && !is_dir($fullPath))
 			{
-				echo $this->getFullPath();
-				$this->rfd=(($f=fopen($this->getFullPath(),"r"))?$f:null);
-				if(is_resource($this->rfd))
-					while(!(feof($this->rfd)))
-						$this->content.=fread($this->rfd, 250);
+				try
+				{
+					$this->rfd=(($f=fopen($fullPath,"r"))?$f:null);
+					if(is_resource($this->rfd))
+						while(!(feof($this->rfd)))
+							$this->content.=fread($this->rfd, 250);
+				}
+				catch (Exception $e)
+				{
+					echo $e->getMessage();
+				}
 			}
-			catch (Exception $e)
+			else
 			{
-				echo $e->getMessage();
+				echo "File not found...\n";
 			}
 		}
 		else
 		{
-			echo "File not found...\n";
+			$content=file_get_contents($this->url);
 		}
 	}
 	public function close()
