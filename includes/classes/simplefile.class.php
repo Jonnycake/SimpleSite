@@ -67,24 +67,31 @@ class SimpleFile
 		if(is_null($this->url))
 		{
 			$fullPath=$this->getFullPath();
+			if($this->debug)
+				echo "Dbg: Attempting to open $fullPath...";
 			if(file_exists($fullPath) && !is_dir($fullPath))
 			{
 				try
 				{
 					$this->rfd=(($f=fopen($fullPath,"r"))?$f:null);
 					if(is_resource($this->rfd))
+					{
+						echo "Success.\n";
 						while(!(feof($this->rfd)))
 							$this->content.=fread($this->rfd, 250);
+					}
+					else if($this->debug)
+						echo "Failed.\n";
 				}
 				catch (Exception $e)
 				{
 					if($this->debug)
-						echo $e->getMessage();
+						echo "\nDbg: ".$e->getMessage()."\n";
 				}
 			}
-			else
+			else if($this->debug)
 			{
-				echo "File not found...\n";
+				echo "File not found.\n";
 			}
 		}
 		else
@@ -121,6 +128,8 @@ class SimpleFile
 	}
 	public function close()
 	{
+		if($this->debug)
+			echo "Dbg: Closing file descriptor.";
 		if(is_resource($this->rfd))
 		{
 			fclose($this->rfd);
@@ -128,14 +137,24 @@ class SimpleFile
 	}
 	public function reload()
 	{
+		if($this->debug)
+			echo "Dbg: Reloading file...";
 		$this->close();
 		$this->content="";
 		$this->open();
+		if($this->isOpen())
+			echo "Sucess.\n";
+		else
+			echo "Failure.\n";
 	}
 
 	// Access information
 	public function isOpen()
 	{
+		if($this->wfd)
+			$fd=$this->wfd;
+		else
+			$fd=$this->rfd;
 		return is_resource($fd);
 	}
 	public function isWritable()
