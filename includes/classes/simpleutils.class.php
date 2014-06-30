@@ -103,7 +103,7 @@ class SimpleUtils
 			{
 				if(array_key_exists($match[1],$data)){
 					if($bbencode)
-						$data[$match[1]]=$this->bbencode($data[$match[1]]);
+						$data[$match[1]]=$this->bbencode($data[$match[1]]); // Protected function in SimpleDisplay
 					$piece=str_replace($match[0],$data[$match[1]],$piece);
 				}
 				else

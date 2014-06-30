@@ -45,7 +45,7 @@
 		echo "Dbg: Start".time()."\n";
 	define('SIMPLESITE',1);
 	include("include.php");
-	$ssite=new DefaultSite($configs);
+	$ssite=new $configs['default_controller']($configs);
 	if(@($_GET['debug'])==1)
 		echo "Dbg: End".time()."\n";
 ?>

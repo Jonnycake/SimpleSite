@@ -42,12 +42,18 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 		return true;
 	}
 
-	// Parse bbcodes
-	protected function bbencode($post,$getcodes=0,$codetop="<table style='font-size:75%;margin-bottom:2%;'>",$codeformat="<tr><td>{CODE}</td><td>{RESULT}</td></tr>",$codebottom="</table>")
+	// Parse bbcodes -- should move this to a separate widget
+	protected function bbencode($post,$getcodes=0,$codetop=null,$codeformat=null,$codebottom=null)
 	{
 		if(@($_GET['debug'])==1)
 			echo "Dbg: bbencode(\$post,$getcodes)".time()."\n";
 
+		if(is_null($codetop))
+		{
+			$codetop="<table style='font-size:75%;margin-bottom:2%;'>";
+			$codeformat="<tr><td>{CODE}</td><td>{RESULT}</td></tr>";
+			$codebottom="</table>";
+		}
 		// Built-in bbcodes
 		$search=array(  "/\[b\](.*?)\[\/b\]/si",
 						"/\[i\](.*?)\[\/i\]/si",
