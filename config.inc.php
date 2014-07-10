@@ -18,6 +18,7 @@
  */
 if(!SIMPLESITE)
 	die("Can't access this file directly.");
+
 $configs=array();
 
 /*********************************
@@ -55,7 +56,7 @@ $configs["default_controller"]="DefaultSite";
  * $configs["path"]["templates"]        - Don't edit unless you know what you're doing, previous   *
  *                                        configurations generate this value                       *
  *                                                                                                 *
- * $configs["database"]["type"]         - This is the type of database you plan to use, may be:    *
+- * $configs["database"]["type"]         - This is the type of database you plan to use, may be:    *
  *                                                 MySQL                                           *
  *                                                 MSSQL                                           *
  *                                                 Oracle                                          *
@@ -84,10 +85,6 @@ $configs["path"]["root"]="/SimpleSite/";
 $configs["path"]["themes"]="templates/themes";
 $configs["path"]["mod_templates"]="templates/mods";
 $configs["path"]["custom_templates"]="templates/custom";
-$configs["path"]["includes"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/";
-$configs["path"]["tmpdir"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."/tmp/";
-$configs["path"]["templates"]=$configs["path"]["themes"]."/".(@($_SESSION['selected_theme']=="")?$configs['default_theme']:$_SESSION['selected_theme']);
-$configs["path"]["configs"]=__FILE__;
 
 // Database Configurations
 if(@($_GET['debug']==1))
@@ -106,4 +103,44 @@ $configs["blocked"]=array();
 // Debugging
 $configs["debug"]["type"]="site";
 $configs["debug"]["level"]=0;
+
+
+// The following configurations should not be changed unless you know what you are doing as they are dynamically set
+
+// Set up super-globals in case they aren't already defined
+// Note, in the case of this being called through a symlink,
+// the path it points to is what is defined here
+// However since both situations are edge cases for now this works
+if(!isset($_SERVER))
+{
+	$_SERVER=array();
+}
+if(!isset($_SERVER['DOCUMENT_ROOT']))
+{
+	$dirArr=array();
+	$tmpDirArr=explode($configs['path']['root'], __DIR__."/");
+	$tmpArrCnt=count($tmpDirArr);
+	$curSpot=0;
+
+	if($tmpArrCnt>1)
+	{
+		foreach($tmpDirArr as $directory)
+		{
+			if(++$curSpot < $tmpArrCnt)
+			{
+				$dirArr[]=$directory;
+			}
+			else
+				break;
+		}
+	}
+
+	$_SERVER['DOCUMENT_ROOT']=implode($configs['path']['root'],$dirArr);
+	if($_GET['debug']==1)
+		echo "Dbg: Setting DOCUMENT_ROOT to ${SERVER['DOCUMENT_ROOT']}.\n";
+}
+$configs["path"]["includes"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/";
+$configs["path"]["tmpdir"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."/tmp/";
+$configs["path"]["templates"]=$configs["path"]["themes"]."/".(@($_SESSION['selected_theme']=="")?$configs['default_theme']:$_SESSION['selected_theme']);
+$configs["path"]["configs"]=__FILE__;
 ?>
