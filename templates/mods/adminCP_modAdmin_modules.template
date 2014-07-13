@@ -1,3 +1,0 @@
-<tr>
-	<td>{NAME}</td><td>{AUTHOR}</td><td>{DATE}</td><td style="padding:5px;"><a href="{CONFIGS_path_root}?mod=adminCP&act=modAdmin&func=toggleEnabled&module={MODFILE}&currentState={ENABLED}">{ENABLED}</a></td>
-</tr>

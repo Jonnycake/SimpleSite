@@ -1,6 +1,0 @@
-<form action="{CONFIGS_path_root}?mod=Guestbook" method="post">
-	<label for="name">Name:</label><input type="text" name="name"/><br/>
-	<label for="message">Message: </label><input type="text" name="message"/><br/>
-	<input type="submit" value="Post"/>
-</form><br/>
-{ENTRIES}

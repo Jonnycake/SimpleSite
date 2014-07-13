@@ -1,8 +1,0 @@
-<div style="width:100%;text-align:center;">
-	{LOGINSUCCESS}
-	<form action="{CONFIGS_path_root}?mod=adminCP&act=login" method="post">
-		<input type="text" name="username" value="Username" onclick="this.value='';"/><br/>
-		<input type="password" name="password" value="Password" onclick="this.value='';"/><br/>
-		<input type="submit" value="Login">
-	</form>
-</div>
