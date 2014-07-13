@@ -1,8 +1,9 @@
-<form action="{CONFIGS_path_root}?mod=adminCP&act=themeMgr&func=setTheme" method="post">
+<form action="{CONFIGS_path_root}?mod=adminCP&act=themeMgr" method="post">
 	<select name="filename">
 {THEMES}
 	</select><br/>
-	<input type="submit" value="Set Theme"/>
+	<input name="submit" type="submit" value="Set Theme"/>
+	<input name="submit" type="submit" value="Delete"/>
 </form>
 <form enctype="multipart/form-data" action="{CONFIGS_path_root}?mod=adminCP&act=themeMgr&func=upload" method="post">
 	<input type="file" name="rfile"/><br/>

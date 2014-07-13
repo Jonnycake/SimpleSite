@@ -2,12 +2,18 @@
 *
 {
 	word-wrap:break-word;
+	background-color:inherit;
+}
+a
+{
+	color:#600;
 }
 body
 {
+	background-color:#AAA;
 	min-height:100%;
 	width:100%;
-	min-width:850px;
+	min-width:1024px;
 }
 html
 {
@@ -21,7 +27,14 @@ img
 }
 input, textarea
 {
-	width:50%;
+	width:49%;
+	background-color:#AAA;
+}
+select
+{
+	border-style:solid;
+	border-width:1px;
+	border-color:black;
 }
 table
 {
@@ -35,43 +48,48 @@ td
 }
 
 /* Vertically Organized Divs */
-#center
-{
-	padding-left:4px;
-	width:97%;
-	margin-left:1%;
-	margin-right:1%;
-	min-height:50%;
-}
 #container
 {
+	margin-left:1%;
+	margin-right:1%;
 	min-height:100%;
 	width:97%;
 }
 #footer
 {
-	padding-left:4px;
-	width:97%;
-	margin-left:1%;
-	margin-right:1%;
+	border-top-style:solid;
+	border-top-width:1px;
+	border-bottom-style:solid;
+	border-bottom-width:1px;
 	margin-top:1%;
+	background-color:#999;
 	text-align: center;
+	clear:both;
+	width:100%;
 }
 #top
 {
+	background-color:#999;
 	width:100%;
 	border-bottom-style:solid;
 	border-bottom-width:1px;
+	border-top-style:solid;
+	border-top-width:1px;
 	margin-bottom:1%;
 	text-align:center;
 }
 
-/* Horizontally Organized Divs */
 #middle
 {
+	border-bottom-style:solid;
+	border-bottom-width:1px;
+	border-top-style:solid;
+	border-top-width:1px;
+	margin-bottom:1%;
+	background-color: #999;
 	width:100%;
-	float:left;
-	padding-right:10px;
+	clear:both;
+	overflow:auto;
 }
 
 /* Basic Classes */
