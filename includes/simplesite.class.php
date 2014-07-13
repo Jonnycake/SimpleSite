@@ -1,7 +1,7 @@
 <?php
 /*
- *    SimpleSite Main Class v0.1: Main program logic.
- *    Copyright (C) 2012 Jon Stockton
+ *    SimpleSite Main Class v1.5: Main program logic.
+ *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,11 +21,29 @@ if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
 class SimpleSite extends SimpleDisplay
 {
+	public function autoload($name)
+	{
+		if(@($_GET['debug'])==1)
+			echo "Dbg: Attempting to autoload $name...";
+		if((in_array($name,$this->mods)) && !(in_array($name,$this->loaded)))
+		{
+			@include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php");
+			if(!(class_exists($name)))
+			{
+				if(@($_GET['debug']==1)) echo "Error!";
+			}
+			else
+			{
+				$this->loaded[]=$name;
+				if(@($_GET['debug'])==1) echo "Good.\n";
+			}
+		}
+	}
 	public function __call($method, $args)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: __call($method,\$args)\n";
-		if (@(isset($this->$method) && is_callable($this->$method)))
+			echo "Dbg: SimpleSite->__call($method,\$args)\n";
+		if(@(isset($this->$method) && is_callable($this->$method)))
 		{
 			$func = $this->$method;
 			return $func($args);
@@ -36,19 +54,52 @@ class SimpleSite extends SimpleDisplay
 
 	function __construct()
 	{
-		include("config.inc.php");
 		if(@($_GET['debug'])==1)
-			echo "Dbg: __construct()\n";
-		$mods=$this->loadModules();
-		if(@(in_array($_GET['mod'],$mods)))
+			echo "Dbg: SimpleSite->__construct()\n";
+		spl_autoload_register('SimpleSite::autoload');
+
+		// Configs
+		if(!(isset($this->configs)))
+		{
+			include("config.inc.php");
+			$this->configs=$configs;
+			$this->db=new SimpleDB($this->configs['database']);
+
+			if(!$this->db->sdbGetErrorLevel())
+			{
+				// Constants
+				$constantsTbl=$this->db->openTable('constants');
+				$constantsTbl->select(array('name','value'));
+				$constants=$constantsTbl->sdbGetRows();
+				if($constants!=false)
+					foreach($constants as $row)
+					{
+						define($row->getName(),$row->getValue());
+					}
+				// Block List
+				$blockedTbl=$this->db->openTable('blocked');
+				$blockedTbl->select(array('remote_addr'));
+				$blocked=$blockedTbl->sdbGetRows();
+				if($blocked!=false)
+					foreach($blocked as $row)
+						$this->configs['blocked'][]=$row->getRemote_addr();
+			}
+		}
+		if($this->checkBlocked())
+			die("Your IP has been blocked, please contact the administrator for more information.");
+
+		$this->loadModules($this->configs);
+		if(@(in_array($_GET['mod'],$this->mods)))
 			$this->showSite($_GET['mod']);
 		else 
 		{
-			if($configs['default_mod']!="")
-				$this->showSite($configs['default_mod']);
-			else
-				$this->showSite("");
+			$this->showSite($configs['default_mod']);
 		}
+	}
+
+	function __destruct()
+	{
+		$this->db->__destruct();
 	}
 }
 ?>

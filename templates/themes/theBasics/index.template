@@ -1,1 +1,5 @@
-<b>It works!</b>
+{EDITABLE}Editable sample #1{/EDITABLE}<br/>
+{EDITABLE}Editable sample #2{/EDITABLE}<br/>
+<div id="demo" onclick="this.innerHTML='<img src=\'{CONFIGS_path_root}/images/Editables.jpg\'/>'">
+Click on this to see what it looks like to edit them.
+</div>
