@@ -1,7 +1,7 @@
 <?php
 /*
- *    SimpleDirectory 0.1: Basic directory access functions.
- *    Copyright (C) 2014 Jon Stockton
+ *    SimpleSite SimpleModule Interface: Basic structure of modules.
+ *    Copyright (C) 2012 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,47 +16,15 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+ 
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
-
-class SimpleDirectory
+interface simpleModule
 {
-	private $fullpath=null;
-
-	public function __construct($path)
-	{
-	}
-
-	// Informational Functions
-	public function isAccessible()
-	{
-	}
-	public function canBeModified()
-	{
-	}
-	public function getFullPath()
-	{
-	}
-	public function getSubDirs()
-	{
-	}
-	public function getFiles()
-	{
-	}
-
-	// Modification Functions
-	public function copy($newPath=null)
-	{
-	}
-	public function delete()
-	{
-	}
-	public function move($newPath)
-	{
-	}
-	public function rename($newName)
-	{
-	}
+	public function sideparse($content);
+	public function choosePage();
+	public function isInstalled();
+	public function install();
+	public function getContent();
 }
 ?>

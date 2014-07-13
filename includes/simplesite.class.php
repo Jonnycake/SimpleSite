@@ -1,7 +1,7 @@
 <?php
 /*
- *    SimpleSite Main Class v2.0: Main program logic.
- *    Copyright (C) 2014 Jon Stockton
+ *    SimpleSite Main Class v0.1: Main program logic.
+ *    Copyright (C) 2012 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,32 +19,13 @@
  
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
-abstract class SimpleSite extends SimpleDisplay
+class SimpleSite extends SimpleDisplay
 {
-	abstract function __construct();
-	public function simpleLoader($name)
-	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: Attempting to autoload $name...";
-		if((in_array($name,$this->mods)) && !(in_array($name,$this->loaded)))
-		{
-			@include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php");
-			if(!(class_exists($name)))
-			{
-				if(@($_GET['debug']==1)) echo "Error!";
-			}
-			else
-			{
-				$this->loaded[]=$name;
-				if(@($_GET['debug'])==1) echo "Good.\n";
-			}
-		}
-	}
 	public function __call($method, $args)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: SimpleSite->__call($method,\$args)\n";
-		if(@(isset($this->$method) && is_callable($this->$method)))
+			echo "Dbg: __call($method,\$args)\n";
+		if (@(isset($this->$method) && is_callable($this->$method)))
 		{
 			$func = $this->$method;
 			return $func($args);
@@ -53,9 +34,21 @@ abstract class SimpleSite extends SimpleDisplay
 			die("Invalid method: $method");
 	}
 
-	function __destruct()
+	function __construct()
 	{
-		$this->db->__destruct();
+		include("config.inc.php");
+		if(@($_GET['debug'])==1)
+			echo "Dbg: __construct()\n";
+		$mods=$this->loadModules();
+		if(@(in_array($_GET['mod'],$mods)))
+			$this->showSite($_GET['mod']);
+		else 
+		{
+			if($configs['default_mod']!="")
+				$this->showSite($configs['default_mod']);
+			else
+				$this->showSite("");
+		}
 	}
 }
 ?>

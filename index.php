@@ -1,7 +1,7 @@
 <?php
 /*
- *    SimpleSite v1.0: Create an extendable website.
- *    Copyright (C) 2014 Jon Stockton
+ *    SimpleSite v0.1: Create an extendable website.
+ *    Copyright (C) 2012 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -35,17 +35,14 @@
  * Dbg: readtemplate("/var/www/templates/default/footer.template","")
  * Dbg: parsetemplate($content,"")
  */
-	error_reporting(E_ALL);
 	session_start();
-	if(@($_SESSION['is_admin']!=1))
-	{
-		$_GET['debug']=0;
-	}
 	if(@($_GET['debug'])==1)
-		echo "Dbg: Start".time()."\n";
+		echo "Dbg: Start\n";
 	define('SIMPLESITE',1);
 	include("include.php");
-	$ssite=new $configs['default_controller']($configs);
+	if(SimpleUtils::checkBlocked($configs))
+		die("Your IP has been blocked, please contact the administrator for more information.");
+	$ssite=new SimpleSite();
 	if(@($_GET['debug'])==1)
-		echo "Dbg: End".time()."\n";
+		echo "Dbg: End\n";
 ?>
