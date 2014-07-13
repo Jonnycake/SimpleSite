@@ -1,0 +1,82 @@
+* Push to production mode for high efficiency
+	- Automatically rewrite main simplesite classes?
+	- Have all classes in one file?  Could be less efficient
+* Mobile mode
+	- This is going to take some research:
+		- Mobile website development
+		- Detecting mobile device vs desktop
+			- I'd assume user-agent, but what string am i looking for
+* Integrate modules with adminCP
+	- Just add an extra required function maybe
+		- Or don't make it required, do a check if(is_function("Guestbook::getAdmActPage()")) { /* Do Something */ }
+* Offline testing
+	- Need a lot more research to get it fully working, I did have a script before that helped basic testing, but it's gone
+	- Globals Needed
+		- $_SESSION
+		- $_GET
+		- $_POST
+		- $_REQUEST
+		- $_SERVER
+* Easily connect to social networkings sites (facebook, tumblr, linkedin, g+, twitter)
+	- The idea is to have a wrapper that can use whatever API you tell it to
+	- This requires a bit of research to get working, probably need to have a couple tables
+		- SS_SocialNetworks
+		- SS_SocialNetworks_configs
+		- SS_SocialNetworks_processes
+	- We can probably make SocialNetworks a module, then we don't have to worry about name conflicts either
+		- Conflicts would arise from table naming conventions: "SS_ModName"
+* Input Validation...
+	- Check required fields
+		- trim(field), not blank
+	- Check unique fields
+		- Going to be a bit more difficult
+		- Requires checking the db so the table/field has to be supplied
+	- E-Mail validation
+	- Address validation
+	- Phone number validation
+	- Character set validation
+	- Length validation
+* "PrettyURL" support...
+	- Just use mod_rewrite
+		- Limits use to Apache, probably not a good idea
+	- Default variables:
+		- mod
+		- act
+		- func
+	- Custom fields can be within url
+		- Example: http://www.example.com/adminCP/dbAdmin/selectDb/dbname/simplesite
+	- Maybe allow modules to specify their own format?
+* Add Edit/Delete tables in DBAdmin
+	- Shouldn't be too difficult, probably need a SimpleDB compat query though
+* editorCP - for all editables???
+	- Not too sure about this, I guess if editables were tracked in the DB the first time they were found?
+* Secondary module embedding
+	- Not really needed, widgets may suffice, but we'll see
+* Automated Upgrading
+	- Need a reliable host first
+* Util function genModUrl()
+* Syntax check all modules before loading to prevent error
+	- Not sure if this is a possibility
+	- register_shutdown_function() maybe??
+	- error_get_last()
+* Syntax check all widgets before loading to prevent error
+	- Not sure if this is a possibility
+	- register_shutdown_function() maybe??
+	- error_get_last()
+* User Roles/Privilege Management
+* Error Logging
+	- Probably going to write a logger class
+* User Action Logging
+	- This will be taken care of with logger class
+* Automatic System Installation
+	- Take advantage of module install process
+* Replace ZipArchive with Phar
+	- requires PHP 5.3.0
+* Syntax highlighting for templates/module editor
+	- Not quite sure about this one, might use third party
+* How will widgets have persistent data?
+	- Database
+	- Files
+	- Separate module?
+* Plugins for additional features (such as bbencoding)...?
+	- Can basically use the widget code, then widgets can be switched over to archives like mods and themes

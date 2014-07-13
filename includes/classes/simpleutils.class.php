@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Utils Class v1.5: Basic back-end utilities.
+ *    SimpleSite Utils Class v2.0: Basic back-end utilities.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ class SimpleUtils
 		$tree=array();
 		$dir=opendir($curdir);
 		while(@($file=readdir($dir)) and ($depth!=$maxdepth))
-			if(is_dir($curdir."/".$file) and !($file=="." or $file=="..") and !(is_link("$curdir/$file")))
+			if(is_dir($curdir."/".$file) and !($file=="." or $file=="..") and !(is_link("$curdir/$file"))) // Maybe we can check more in depth with links
 				$tree[$file]=$this->createDirTree("$curdir/$file",$maxdepth,$depth+1);
 			else
 				if($file!="." && $file!="..")
@@ -45,11 +45,15 @@ class SimpleUtils
 		ksort($tree,SORT_STRING);
 		return $tree;
 	}
+
+	/* START: Replaced by SimpleDirectory */
 	public function recursiveDirDelete($curdir="/tmp/",$depth=0)
 	{
+		// This can probably be re-designed to be more efficient - createDirTree, go from top down
 		$dir=@opendir($curdir);
 		while(@($file=readdir($dir)))
 		{
+			// Note: This function will fail if there is a link in the directory as the directory won't be empty and therefore can't be deleted
 			if(is_dir($curdir."/".$file) and !($file=="." or $file=="..") and !(is_link("$curdir/$file"))) // Linked parent directories, .., and . create endless loops
 			{
 				if(!(@rmdir("$curdir/$file")))
@@ -67,7 +71,7 @@ class SimpleUtils
 	{
 		if(!(is_dir($newdir)))
 		{
-			@unlink($newdir);
+			@unlink($newdir); // Do we really want to do this?  This seems kind of weird to me
 			@mkdir($newdir);
 		}
 		$dir=@opendir($curdir);
@@ -84,10 +88,12 @@ class SimpleUtils
 			}
 		}
 	}
+	/* END: Replaced By SimpleDirectory */
 
 	// Output Utils
 	public function arr2Feed($feedTemplate,$dataArr=array(),$configs=array(),$bbencode=false)
 	{
+		// This will get cleaned up by SimpleFile
 		$content="";
 		$template=$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$feedTemplate,$_GET['mod']);
 		$piece=$template;
@@ -97,7 +103,7 @@ class SimpleUtils
 			{
 				if(array_key_exists($match[1],$data)){
 					if($bbencode)
-						$data[$match[1]]=$this->bbencode($data[$match[1]]);
+						$data[$match[1]]=$this->bbencode($data[$match[1]]); // Protected function in SimpleDisplay
 					$piece=str_replace($match[0],$data[$match[1]],$piece);
 				}
 				else
@@ -108,13 +114,21 @@ class SimpleUtils
 		}
 		return $content;
 	}
+	public function runApp($path)
+	{
+		ob_start();
+		include($path);
+		$output=ob_get_contents();
+		ob_end_clean();
+		return $output;
+	}
 
 	// Modules
-	public function loadModules($configs=array(),$enabled=1)
+	public function loadModules($configs=array(),$enabled=true)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: loadModules($enabled)\n";
-		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".(($enabled==1)?"enabled":"disabled")."/";
+			echo "Dbg: loadModules($enabled)".time()."\n";
+		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".(($enabled)?"enabled":"disabled")."/";
 		$dir=opendir($modsdir);
 		while(@($file=readdir($dir)))
 			if(preg_match("/(.*)\.mod\.php/si",$file,$matches) && (@$matches))
@@ -123,14 +137,15 @@ class SimpleUtils
 	public function checkReqFiles($reqFiles,$configs=array())
 	{
 		foreach($reqFiles as $file)
-			if(!(is_file($file)))
-				return FALSE;
+			if(!(is_file($file))) // Maybe we can use some default path stuff here
+				return FALSE; // Also should probably add some debug output here
 		return TRUE;
 	}
 	public function installReqFiles($defaultFiles,$configs=array())
 	{
+		// Maybe we should make a SimpleInstaller class....hmmmm
 		if(@($_GET['debug'])==1)
-			echo "Dbg: Installing required files...";
+			echo "Dbg: Installing required files...".time();
 		foreach($defaultFiles as $name => $value)
 		{
 			if(!(file_exists($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['mod_templates']."/$name")))
@@ -144,13 +159,13 @@ class SimpleUtils
 				catch(Exception $e)
 				{
 					if(@($_GET['debug'])==1)
-						echo "\nError on ${name}.";
+						echo "\nError on ${name}.".time();
 					return false;
 				}
 			}
 		}
 		if(@($_GET['debug'])==1)
-			echo "installed.\n";
+			echo "installed.".time()."\n";
 		return true;
 	}
 	public function checkReqTbls($reqTbls,$configs=array())
@@ -158,7 +173,7 @@ class SimpleUtils
 		$dbconf=$configs['database'];
 		foreach($reqTbls as $table)
 		{
-			if(!count($this->db->sdbGetColumns($dbconf['tbl_prefix'].$table)))
+			if(!count($this->db->sdbGetColumns($dbconf['tbl_prefix'].$table))) // We should make a better way to do this in SimpleDB
 			{
 				return false;
 			}
@@ -167,8 +182,9 @@ class SimpleUtils
 	}
 	public function installReqTbls($defaultTbls,$configs=array())
 	{
+		// We need to add a table creator to SimpleDB....
 		if(@($_GET['debug'])==1)
-			echo "Dbg: Installing required tables...";
+			echo "Dbg: Installing required tables...".time();
 		$dbconf=$configs["database"];
 		foreach($defaultTbls as $name => $columns)
 		{
@@ -183,12 +199,14 @@ class SimpleUtils
 			$this->db->rawQry($query);
 		}
 		if(@($_GET['debug'])==1)
-			echo "installed.\n";
+			echo "installed.".time()."\n";
 	}
 
 	// Template Conditional Handler
 	public function tempConditional($match=array())
 	{
+		// This is really ugly, should probably be split up or have some sort of implementation in SimpleFile
+		// I guess we could have another class - SimpleConditional...
 		if(count($match)==2)
 			return $match[1];
 		switch($match[2])
@@ -270,11 +288,11 @@ class SimpleUtils
 	}
 
 	// User input utils
-	public function simpleFilter($input,$db=1)
+	public function simpleFilter($input,$db=true)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: simplefilter\n";
-		return str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars((($db==1)?$this->db->quote($input):$input))));
+			echo "Dbg: simplefilter".time()."\n";
+		return str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars((($db)?$this->db->quote($input):$input))));
 	}
  }
  ?>

@@ -19,12 +19,12 @@
  
 if(@SIMPLESITE!=1)
 	die("Can't access this file directly.");
-class adminCP extends SimpleDisplay implements simpleModule
+class adminCP extends SimpleModule
 {
 	public static $info=array( "author"  => "Jon Stockton",
 						"name"    => "SimpleAdmin",
-						"version" => "1.5",
-						"date"    => "Apr 27, 2014"
+						"version" => "2.0",
+						"date"    => "November ??, 2014"
 					 );
 	public function sideparse($content,$configs=array())
 	{
@@ -83,7 +83,7 @@ class adminCP extends SimpleDisplay implements simpleModule
 
 		if($_GET['act']=="login")
 		{
-			if(!$this->db->sdbGetErrorLevel())
+			if($this->db->connected())
 			{
 				$this->db->openTable("admins");
 				$adminTbl=$this->db->sdbGetTable("admins");
@@ -95,10 +95,8 @@ class adminCP extends SimpleDisplay implements simpleModule
 			}
 			else
 			{
-				if(($_POST['username']==$configs['database']['username']) && ($_POST['password']==$configs['database']['password']))
-				{
+				if($_POST['username']==$configs['database']['username'] && $_POST['password']==$configs['database']['password'])
 					$_SESSION['is_admin']=1;
-				}
 			}
 		}
 		else if($_GET['act']=="logout")
@@ -128,16 +126,17 @@ class adminCP extends SimpleDisplay implements simpleModule
 				$_SERVER['DOCUMENT_ROOT'].$configs["path"]["root"].$configs["path"]["mod_templates"]."/adminCP_widgetAdmin.template"
 			       );
 		$reqTbls=array(
-				//"admins"
+				"admins"
 			      );
-			      
+
 		// Check for required files
 		if(!($this->checkReqFiles($reqFiles,$configs)))
 			return FALSE;
-		
-		// Check for required database tables
+
+		/*// Check for required database tables
 		if(!($this->checkReqTbls($reqTbls,$configs)))
-			return FALSE;
+			return FALSE;*/
+
 		return TRUE;
 	}
 	public function install($configs=array())
@@ -167,7 +166,7 @@ class adminCP extends SimpleDisplay implements simpleModule
 			"adminCP_welcome.template" => "V2VsY29tZSB0byB0aGUgU2ltcGxlU2l0ZSBhZG1pbmlzdHJhdG9yIGNvbnRyb2wgcGFuZWwuICBQbGVhc2Ugc2VsZWN0IGEgc2VjdGlvbiBmcm9tIHRoZSBsZWZ0Lg0K",
 			"adminCP_widgetAdmin.template" => "PGRpdiBzdHlsZT0idGV4dC1hbGlnbjpjZW50ZXI7Ij4KCTxmb3JtIGFjdGlvbj0ie0NPTkZJR1NfcGF0aF9yb290fT9tb2Q9YWRtaW5DUCZhY3Q9d2lkZ2V0QWRtaW4mZnVuYz1kZWxldGUiIG1ldGhvZD0icG9zdCI+CgkJPHRhYmxlPgoJCQk8dHI+CgkJCQk8dGQgY29sc3Bhbj0iMyIgc3R5bGU9InRleHQtYWxpZ246Y2VudGVyOyI+V2lkZ2V0cyBBdmFpbGFibGU8L3RkPgoJCQk8L3RyPgoJCQk8dHI+CgkJCQk8dGQ+TmFtZTo8L3RkPjx0ZD5UZW1wbGF0ZSBDb25zdGFudDo8L3RkPjx0ZD5EYXRlIEFkZGVkOjwvdGQ+CgkJCTwvdHI+CgkJCXtXSURHRVRTfQoJCQk8dHI+CgkJCQk8dGQgY29sc3Bhbj0iMyIgc3R5bGU9InRleHQtYWxpZ246Y2VudGVyOyI+PGlucHV0IHR5cGU9InN1Ym1pdCIgdmFsdWU9IkRlbGV0ZSIvPjwvdGQ+CgkJCTwvdHI+CgkJPC90YWJsZT4KCTwvZm9ybT4KCTxmb3JtIGVuY3R5cGU9Im11bHRpcGFydC9mb3JtLWRhdGEiIGFjdGlvbj0ie0NPTkZJR1NfcGF0aF9yb290fT9tb2Q9YWRtaW5DUCZhY3Q9d2lkZ2V0QWRtaW4mZnVuYz11cGxvYWQiIG1ldGhvZD0icG9zdCI+CgkJPGlucHV0IHR5cGU9ImZpbGUiIG5hbWU9InJmaWxlIi8+PGJyLz4KCQk8aW5wdXQgdHlwZT0ic3VibWl0IiB2YWx1ZT0iVXBsb2FkIi8+Cgk8L2Zvcm0+CjwvZGl2Pgo="
 		);
-		
+
 		$this->installReqFiles($defaultFiles,$configs);
 		$this->installReqTbls($defaultTbls,$configs);
 		$dbconf=$configs["database"];
@@ -249,11 +248,11 @@ class adminCP extends SimpleDisplay implements simpleModule
 				if(is_dir("$curdir/$k") and !(is_link("$curdir/$k")))
 				{
 					include("includes/config.inc.php");
-					$output.=str_replace("{TYPE}","${type}_",str_replace("{PREVDIRS}",$prevdirs,str_replace("{SELECTED}",(@($configs['filename']=="${type}_${prevdirs}${k}")?" selected=\"selected\"":(($type==2 && $k==$configs['default_theme'])?" selected=\"selected\"":"")),str_replace("{DEPTH}",str_repeat($depthdelim,$depth),str_replace("{FILE}",$dirdisplay.$this->simpleFilter($k,0),$template)).$this->genDirTreeOut($tree[$k],"$curdir/$k",$depthdelim,$template,$dirdisplay,$type,$prevdirs."${k}/",$depth+1))));
+					$output.=str_replace("{TYPE}","${type}_",str_replace("{PREVDIRS}",$prevdirs,str_replace("{SELECTED}",(@($configs['filename']=="${type}_${prevdirs}${k}")?" selected=\"selected\"":(($type==2 && $k==$configs['default_theme'])?" selected=\"selected\"":"")),str_replace("{DEPTH}",str_repeat($depthdelim,$depth),str_replace("{FILE}",$dirdisplay.$this->simpleFilter($k,false),$template)).$this->genDirTreeOut($tree[$k],"$curdir/$k",$depthdelim,$template,$dirdisplay,$type,$prevdirs."${k}/",$depth+1))));
 				}
 				else
 					if(!(is_link("$curdir/$k")))
-						$output.=str_replace("{TYPE}","${type}_",str_replace("{PREVDIRS}",$prevdirs,str_replace("{SELECTED}",(@($_POST['filename']=="${type}_${prevdirs}${k}")?" selected=\"selected\"":""),str_replace("{DEPTH}",str_repeat($depthdelim,$depth),str_replace("{FILE}",$this->simpleFilter($k,0),$template)))));
+						$output.=str_replace("{TYPE}","${type}_",str_replace("{PREVDIRS}",$prevdirs,str_replace("{SELECTED}",(@($_POST['filename']=="${type}_${prevdirs}${k}")?" selected=\"selected\"":""),str_replace("{DEPTH}",str_repeat($depthdelim,$depth),str_replace("{FILE}",$this->simpleFilter($k,false),$template)))));
 		return $output;
 	}
 	
@@ -262,11 +261,11 @@ class adminCP extends SimpleDisplay implements simpleModule
 	{
 		if(@($_GET['func'])=="save")
 		{
-			$f=@fopen($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php","w");
+			$f=@fopen($configs['path']['configs'],"w");
 			@fwrite($f,$_POST['filecontent']);
 			@fclose($f);
 		}
-		return str_replace("{FILECONTENT}",str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars(file_get_contents($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php")))),$content);
+		return str_replace("{FILECONTENT}",str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars(file_get_contents($configs['path']['configs'])))),$content);
 	}
 	
 	// Database Administration
@@ -394,7 +393,6 @@ class adminCP extends SimpleDisplay implements simpleModule
 			{
 				$tblInfo[$table]=$this->db->sdbGetColumns($table,$_POST['curdb']);
 			}
-
 			foreach($tblInfo as $name => $cols)
 			{
 				$subcontent.='<form action="{CONFIGS_path_root}?mod=adminCP&act=dbAdmin&func=tblInteract" method="post">
@@ -428,6 +426,7 @@ class adminCP extends SimpleDisplay implements simpleModule
 					}
 					$subcontent.="\t</tr>\n";
 				}
+				$inserts="";
 				foreach($cols as $col)
 				{
 					$inserts .="<td><input style=\"width:70%;float:right;\" type=\"text\" name=\"insert_${col['Field']}\"/></td>";
@@ -644,7 +643,7 @@ class adminCP extends SimpleDisplay implements simpleModule
 		$modsAvailable=array();
 		$modsAvailable['enabled']=$this->mods;
 		$this->mods=array();
-		$this->loadModules($configs,0);
+		$this->loadModules($configs,false);
 		$modsAvailable['disabled']=$this->mods;
 		natcasesort($modsAvailable["enabled"]);
 		natcasesort($modsAvailable["disabled"]);
@@ -717,7 +716,7 @@ class adminCP extends SimpleDisplay implements simpleModule
 	}
 	
 	// Template Administration
-	public function templateAdmin($content,$configs) // Think we still have the upload bug....see the echo?  Will require more tests
+	public function templateAdmin($content,$configs)
 	{
 		$basedir=$_SERVER['DOCUMENT_ROOT'].$configs["path"]["root"];
 		if(@($_POST['submit']=="New"))
@@ -766,7 +765,7 @@ class adminCP extends SimpleDisplay implements simpleModule
 		$content=str_replace("{MODTEMPFILES}",$this->genDirTreeOut($this->createDirTree($basedir.$configs['path']['mod_templates']),$basedir.$configs['path']['mod_templates'],"&nbsp;&nbsp;","<option value=\"{TYPE}{PREVDIRS}{FILE}\"{SELECTED}>{DEPTH}{FILE}</option>\n","[DIR] ",1,"",1),$content);
 		$content=str_replace("{CUSTOMTEMPLATES}",$this->genDirTreeOut($this->createDirTree($basedir.$configs['path']['custom_templates']),$basedir.$configs['path']['custom_templates'],"&nbsp;&nbsp;","<option value=\"{TYPE}{PREVDIRS}{FILE}\"{SELECTED}>{DEPTH}{FILE}</option>\n","[DIR] ",2,"",1),$content);
 		$content=str_replace("{TEMPFILE}",@$_POST['filename'],$content);
-		$content=str_replace("{FILECONTENT}",((preg_match("/([0-9])_(.*)/si",@($_POST['filename']),$match) && $match)?(($match[1]==0)?$this->simpleFilter(file_get_contents($basedir.$configs['path']['templates']."/${match[2]}"),0):$this->simpleFilter(file_get_contents($basedir.(($match[1]==1)?$configs['path']['mod_templates']:$configs['path']['custom_templates'])."/${match[2]}"),0)):""),$content);
+		$content=str_replace("{FILECONTENT}",((preg_match("/([0-9])_(.*)/si",@($_POST['filename']),$match) && $match)?(($match[1]==0)?$this->simpleFilter(file_get_contents($basedir.$configs['path']['templates']."/${match[2]}"),false):$this->simpleFilter(file_get_contents($basedir.(($match[1]==1)?$configs['path']['mod_templates']:$configs['path']['custom_templates'])."/${match[2]}"),false)):""),$content);
 
 		return $content;
 	}
@@ -842,6 +841,7 @@ class adminCP extends SimpleDisplay implements simpleModule
 				if(is_dir("$extractDir/$themename"))
 					$this->recursiveDirCopy($extractDir,$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']);
 			}
+			$this->recursiveDirDelete($extractDir);
 		}
 		else
 		{

@@ -1,7 +1,7 @@
 <?php
 /*
- *    SimpleSite v0.1: Create an extendable website.
- *    Copyright (C) 2012 Jon Stockton
+ *    SimpleSite v1.0: Create an extendable website.
+ *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -39,13 +39,13 @@
 	session_start();
 	if(@($_SESSION['is_admin']!=1))
 	{
-		//$_GET['debug']=0;
+		$_GET['debug']=0;
 	}
 	if(@($_GET['debug'])==1)
-		echo "Dbg: Start\n";
+		echo "Dbg: Start".time()."\n";
 	define('SIMPLESITE',1);
 	include("include.php");
-	$ssite=new SimpleSite();
+	$ssite=new $configs['default_controller']($configs);
 	if(@($_GET['debug'])==1)
-		echo "Dbg: End\n";
+		echo "Dbg: End".time()."\n";
 ?>
