@@ -1,0 +1,23 @@
+<div style="text-align:center;width:100%;">
+	<form action="{CONFIGS_path_root}?mod=adminCP&act=templateAdmin&func=load" method="post">
+		<select name="filename">
+			<option value="">Current Theme Templates</option>
+			<option value="">=====</option>
+			{TEMPFILES}
+			<option value=""> </option>
+			<option value="">Module Templates</option>
+			<option value="">=====</option>
+			{MODTEMPFILES}
+			<option value=""> </option>
+			<option value="">Custom Templates</option>
+			<option value="">=====</option>
+			{CUSTOMTEMPLATES}
+		</select><br/>
+		<input type="submit" value="Edit"/>
+	</form>
+	<form action="{CONFIGS_path_root}?mod=adminCP&act=templateAdmin" method="post">
+		<textarea style="width:100%;" rows="20" name="filecontent">{FILECONTENT}</textarea><br/>
+		<input type="hidden" name="filename" value="{TEMPFILE}"/>
+		<input type="submit" name="submit" value="Save"/><input type="submit" name="submit" value="Delete"/>
+	</form>
+</div>

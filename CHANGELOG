@@ -1,0 +1,33 @@
+v0.1 (Released 12/07/12):
+=========================
+   * SimpleSite Started
+
+v1.0 (Released 03/01/13):
+=========================
+   General:
+   --------
+      * Config file changed (new version number: 1.0)
+      * simplewidget.interface.php deleted (unnecessary)
+
+   Documents:
+   ----------
+      * Changelog
+
+   "Built-In" Modules:
+   -------------------
+      * AdminCP v1.0 - Administrative control panel
+
+   Features:
+   ---------
+      * IP based blocking
+      * Widgets
+
+   Template Constants:
+   -------------------
+      * ISADMIN - Display text if the user is admin ex. {ISADMIN}Hi Admin!{/ISADMIN}
+
+   Template Access Features:
+   -------------------------
+      * Added template includes - {TEMPLATE_/path/to.template}
+      * Added template based session variable access - ex. {SESSION_varname}
+      * Added template based user input (GET/POST) access - ex. {GET_varname} {POST_varname}
