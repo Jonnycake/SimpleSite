@@ -19,7 +19,29 @@
 if(!SIMPLESITE)
 	die("Can't access this file directly.");
 
+// Initialize config array and super-global arrays
 $configs=array();
+if(!isset($_SERVER))
+{
+	$_SERVER=array();
+}
+if(!isset($_GET))
+{
+	$_GET=array();
+}
+if(!isset($_POST))
+{
+	$_POST=array();
+}
+if(!isset($_REQUEST))
+{
+	$_REQUEST=array();
+}
+if(!isset($_SESSION))
+{
+	$_SESSION=array();
+}
+
 
 /*********************************
  *    Display Configurations     *
@@ -111,10 +133,6 @@ $configs["debug"]["level"]=0;
 // Note, in the case of this being called through a symlink,
 // the path it points to is what is defined here
 // However since both situations are edge cases for now this works
-if(!isset($_SERVER))
-{
-	$_SERVER=array();
-}
 if(!isset($_SERVER['DOCUMENT_ROOT']))
 {
 	$dirArr=array();
@@ -139,6 +157,7 @@ if(!isset($_SERVER['DOCUMENT_ROOT']))
 	if($_GET['debug']==1)
 		echo "Dbg: Setting DOCUMENT_ROOT to ${SERVER['DOCUMENT_ROOT']}.\n";
 }
+
 $configs["path"]["includes"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/";
 $configs["path"]["tmpdir"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."/tmp/";
 $configs["path"]["templates"]=$configs["path"]["themes"]."/".(@($_SESSION['selected_theme']=="")?$configs['default_theme']:$_SESSION['selected_theme']);
