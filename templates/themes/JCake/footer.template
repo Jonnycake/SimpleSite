@@ -1,0 +1,8 @@
+			<div id="footer">
+				{FOOTERTEXT}
+			</div>
+		</div>
+		{ISADMIN}<script type="text/javascript">editArray='{EDITARRAY}';</script>{/ISADMIN}
+	</body>
+</html>
+

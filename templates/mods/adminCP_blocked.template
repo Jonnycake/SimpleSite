@@ -1,0 +1,17 @@
+	<form action="{CONFIGS_path_root}?mod=adminCP&act=blocked" method="post">
+		<table>
+			<tr>
+				<td colspan="3" style="text-align:center;">Blocked Hosts</td>
+			</tr>
+			<tr>
+				<td>ID:</td><td>Hostname/I.P.:</td><td>Date Blocked:</td>
+			</tr>
+			{BLOCKTBL}
+			<tr>
+				<td> </td><td><input type="text" name="add_remote_addr" value=""/></td><td><input type="submit" name="submit" value="Add"/></td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align:center;"><input type="submit" name="submit" value="Delete"/></td>
+			</tr>
+		</table>
+	</form>

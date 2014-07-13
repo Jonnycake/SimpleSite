@@ -1,0 +1,1 @@
+<tr><td><input type="checkbox" name="delete_{id}" value="{id}"/>{id}</td><td>{remote_addr}</td><td>{date}</td></tr>

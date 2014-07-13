@@ -31,3 +31,9 @@ v1.0 (Released 03/01/13):
       * Added template includes - {TEMPLATE_/path/to.template}
       * Added template based session variable access - ex. {SESSION_varname}
       * Added template based user input (GET/POST) access - ex. {GET_varname} {POST_varname}
+
+v1.5 (Released 5/4/14):
+=======================
+	* Major changes: SimpleDB class added
+	* Minor changes: Unknown at this time (disorganized & interrupted development).
+

@@ -1,7 +1,7 @@
 <?php
 /*
- *    SimpleSite Configuration File v1.0: Define necessary variables.
- *    Copyright (C) 2012 Jon Stockton
+ *    SimpleSite Configuration File v1.5: Define necessary variables.
+ *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,34 +25,21 @@ if(@($_GET['debug']==1))
 	echo "Dbg: \$configs[]\n";
 $configs["default_theme"]="theBasics";
 $configs["default_mod"]="";
-$configs["path"]["root"]="/SimpleSite_v1.0/";
+$configs["path"]["root"]="/SimpleSite_v1.5/";
 $configs["path"]["themes"]="templates/themes";
 $configs["path"]["templates"]=$configs["path"]["themes"]."/".(@($_SESSION['selected_theme']=="")?$configs['default_theme']:$_SESSION['selected_theme']);
 $configs["path"]["mod_templates"]="templates/mods";
-$configs["path"]["tmpdir"]="/tmp/simplesite";
+$configs["path"]["custom_templates"]="templates/custom";
+$configs["path"]["tmpdir"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."/tmp/";
 
 // Database Configurations
 if(@($_GET['debug']==1))
 	echo "Dbg: Database Configs\n";
 $configs["database"]=array();
-$configs["database"]["host"]="127.0.0.1";
-$configs["database"]["username"]="username";
-$configs["database"]["password"]="password";
-$configs["database"]["database"]="database";
+$configs["database"]["type"]="mysql";
+$configs["database"]["host"]="1.1";
+$configs["database"]["username"]="root";
+$configs["database"]["password"]="";
+$configs["database"]["database"]="simplesite";
 $configs["database"]["tbl_prefix"]="SS_";
-
-// Permanently blocked IPs
-if(@($_GET['debug']==1))
-	echo "Dbg: Blocked IPs\n";
-$configs["blocked"]=array();
-
-// Load up the constants
-if(@($_GET['debug']==1))
-	echo "Dbg: Database Constants\n";
-$conn=mysql_connect($configs["database"]["host"],$configs["database"]["username"],$configs["database"]["password"]);
-mysql_select_db($configs["database"]["database"]);
-$res=mysql_query("SELECT * FROM ".$configs["database"]["tbl_prefix"]."constants;",$conn);
-while(@($row=mysql_fetch_array($res)))
-	define($row['name'],$row['value']);
-mysql_close($conn);
 ?>

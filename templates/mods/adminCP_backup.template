@@ -1,0 +1,20 @@
+<b>Note: Backups are stored in the temporary directory as specified in the configuration file.</b><br/>
+<form action="{CONFIGS_path_root}?mod=adminCP&act=backup&func=create" method="post">
+	<select name="btype">
+		<option value="all">All</option>
+		<option value="back">Back-End</option>
+		<option value="db">Database</option>
+		<option value="mods">Modules</option>
+		<option value="temps">Templates</option>
+	</select>
+	<input type="submit" value="Backup!"/>
+</form><br/><br/>
+<table>
+	<tr>
+		<td colspan="2"><b>Available Backups:</b></td>
+	</tr>
+{BACKUPSAVAIL}
+</table>
+<form action="{CONFIGS_path_root}?mod=adminCP&act=backup&func=clear" method="post">
+	<input type="submit" value="Delete Backups"/>
+</form>
