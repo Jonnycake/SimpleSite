@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Display Class v1.0: Create a user interface from templates.
+ *    SimpleSite Display Class v1.1: Create a user interface from templates.
  *    Copyright (C) 2012 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -76,7 +76,7 @@ class SimpleDisplay extends SimpleUtils
 	function readTemplate($template, $mod)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: readtemplate(\"$template\",\"$mod\")\n";
+			echo "Dbg: readtemplate(\"".str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)."\",\"$mod\")\n";
 		$f=fopen($template,"r");
 		$content="";
 		while(($line=fgets($f)))
@@ -96,7 +96,7 @@ class SimpleDisplay extends SimpleUtils
 			$obj=new $mod();
 			if(@($_GET['debug'])==1)
 				echo "Dbg: \$obj->isInstalled()\n";
-			if($obj->isInstalled())
+			if($obj->isInstalled($configs))
 			{
 				if(@($_GET['debug'])==1)
 					echo "Dbg: \$obj->sideparse()\n";
@@ -106,7 +106,7 @@ class SimpleDisplay extends SimpleUtils
 			{
 				if(@($_GET['debug'])==1)
 					echo "Dbg: \$obj->install()\n";
-				if($obj->install())
+				if($obj->install($configs))
 				{
 					if(@($_GET['debug'])==1)
 						echo "Dbg: \$obj->sideparse(\$content,\$configs)\n";
@@ -165,7 +165,7 @@ class SimpleDisplay extends SimpleUtils
 			}
 
 		// Configuration file variables
-		while((preg_match("/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9]*)}/si",$content,$match)) && $match)
+		while((preg_match("/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9_]*)}/si",$content,$match)) && $match)
 		{
 			if(isset($configs[$match[1]]))
 				if(is_array($configs[$match[1]]))
@@ -181,7 +181,7 @@ class SimpleDisplay extends SimpleUtils
 		// Include Templates
 		while((preg_match("/{TEMPLATE_(.*)}/si",$content,$match)) && $match)
 		{
-			$content=str_replace($match[0],$this->readTemplate($match[1],$mod),$content);
+			$content=str_replace($match[0],$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$match[1],$mod),$content);
 		}
 		
 		// Widgets
@@ -191,8 +191,11 @@ class SimpleDisplay extends SimpleUtils
 			if(is_file($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/widgets/$widget.widget.php"))
 			{
 				include($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/widgets/$widget.widget.php");
-				if(function_exists($widget))
-					$content=str_replace($match[0],$match[1]($this,$configs),$content);
+				$content=str_replace($match[0],((@($widgetTemp=$this->$widget($this,$configs))!="")?$widgetTemp:"Widget Failed: $widget"),$content);
+				if(function_exists($this->$widget))
+					$content=str_replace($match[0],$this->$widget($this,$configs),$content);
+				else
+					$content=str_replace($match[0],"Widget Failed: $widget; ",$content);
 			}
 			$content=str_replace($match[0],"",$content);
 		}

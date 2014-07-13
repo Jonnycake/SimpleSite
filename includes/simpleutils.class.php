@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Utils Class v1.0: Basic back-end utilities.
+ *    SimpleSite Utils Class v1.1: Basic back-end utilities.
  *    Copyright (C) 2012 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -50,6 +50,69 @@ class SimpleUtils
 						echo "Dbg: Invalid module.  ${matches[1]} class does not exist.\n";
 			}
 		return $mods;
+	}
+	function checkReqFiles($reqFiles,$configs=array())
+	{
+		foreach($reqFiles as $file)
+		{
+			if(!(is_file($file)))
+				return FALSE;
+		}
+		return TRUE;
+	}
+	function installReqFiles($defaultFiles,$configs=array())
+	{
+		if(@($_GET['debug'])==1)
+			echo "Dbg: Installing required files...";
+		foreach($defaultFiles as $name => $value)
+		{
+			$f=fopen($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['mod_templates']."/$name","w");
+			fwrite($f,base64_decode($value));
+			fclose($f);
+		}
+		if(@($_GET['debug'])==1)
+			echo "installed\n";
+	}
+	function checkReqTbls($reqTbls,$configs=array())
+	{
+		$dbconf=$configs['database'];
+		$conn=@mysql_connect($dbconf['host'],$dbconf['username'],$dbconf['password']);
+		mysql_select_db($dbconf['database'],$conn);
+		foreach($reqTbls as $table)
+		{
+			$res=@mysql_query("SELECT * FROM ${dbconf['tbl_prefix']}$table;");
+			$err=mysql_errno();
+			if($err==1146)
+			{
+				mysql_close($conn);
+				return FALSE;
+			}
+		}
+		mysql_close($conn);
+		return TRUE;
+	}
+	function installReqTbls($defaultTbls,$configs=array())
+	{
+		if(@($_GET['debug'])==1)
+			echo "Dbg: Installing required tables...";
+		$dbconf=$configs["database"];
+		$conn=@mysql_connect($dbconf["host"],$dbconf["username"],$dbconf["password"]);
+		@mysql_select_db($dbconf["database"]);
+		foreach($defaultTbls as $name => $columns)
+		{
+			$x=0;
+			$query="CREATE TABLE IF NOT EXISTS `${dbconf['tbl_prefix']}$name` (";
+			foreach($columns as $column => $properties)
+			{
+				$x++;
+				$query.="`$column` $properties".(($x<count($columns))?",":"");
+			}
+			$query.=");";
+			mysql_query($query);
+		}
+		mysql_close($conn);
+		if(@($_GET['debug'])==1)
+			echo "installed.\n";
 	}
 	
 	// User input utils
