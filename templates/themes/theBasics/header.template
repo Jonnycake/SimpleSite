@@ -1,12 +1,11 @@
 <html>
 	<head>
-		<title>SimpleSite Default Site</title>
+		<title>{TITLE}</title>
 		<link rel="stylesheet" type="text/css" href="{CONFIGS_path_root}{CONFIGS_path_templates}/css/main.css"/>
-		{ISADMIN}<script type="text/javascript" src="{CONFIGS_path_root}js/editable.js"></script>{/ISADMIN}
 	</head>
 	<body>
 		<div id="container">
 			<div id="center">
 				<div id="top">
-					<a href="{CONFIGS_path_root}">Index</a> | <a href="{CONFIGS_path_root}?mod=Guestbook">Guestbook</a>{ISADMIN} | <a href="{CONFIGS_path_root}?mod=adminCP">Admin CP</a> | <a href="{CONFIGS_path_root}?mod=adminCP&act=logout">Logout</a>{/ISADMIN}
+					<a href="{CONFIGS_path_root}">Index</a>{ISADMIN} | <a href="{CONFIGS_path_root}?mod=adminCP">Admin CP</a>{/ISADMIN}
 				</div>

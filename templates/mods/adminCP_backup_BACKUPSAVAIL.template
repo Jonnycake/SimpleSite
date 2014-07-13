@@ -1,3 +1,0 @@
-	<tr>
-		<td><a href="{CONFIGS_path_root}?mod=adminCP&act=backup&func=get&backup={FILE}">{TYPE}</a></td><td>{DATE}<td>
-	</tr>

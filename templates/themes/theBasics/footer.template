@@ -1,9 +1,8 @@
 			</div>
 			<div id="footer">
-				Powered by Simplesite v1.5 &copy; 2014<br/>Jonathan Stockton <br/>&lt;<a href="mailto:jonstockton1416@gmail.com">jonstockton1416@gmail.com</a>&gt;
+				{FOOTERTEXT}
 			</div>
 		</div>
-		{ISADMIN}<script type="text/javascript">editArray='{EDITARRAY}';</script>{/ISADMIN}
 	</body>
 </html>
 
