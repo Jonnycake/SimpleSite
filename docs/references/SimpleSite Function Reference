@@ -1,0 +1,1268 @@
+----------------
+| Controllers: |
+----------------
+DefaultSite (extends SimpleSite):
+---------------------------------
+	public function __construct()
+		Arguments:
+		----------
+		None
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+------------
+| Classes: |
+------------
+SimpleUtils:
+------------
+	public function checkBlocked($configs=array())
+		Arguments:
+		----------
+		(array) $configs - The SimpleSite configuration array
+
+		Functionality:
+		--------------
+		Checks $configs['blocked'] for the user's $_SERVER['REMOTE_ADDR'].
+
+		Returns (bool):
+		---------------
+		true  - User is blocked
+		false - User is not blocked
+ 
+	public function createDirTree($curdir="./",$maxdepth=-1,$depth=0)
+		Arguments:
+		----------
+		(string) $curdir   - The directory to start the directory tree from
+		(int)    $maxdepth - Maximum depth the traverse to
+		(int)    $depth    - Current depth, really should never be set when calling the function,
+		                     used for keeping track of recursion depth
+
+		Functionality:
+		--------------
+		Recursively reads through directories and puts the results into a multi-dimensional array
+
+		Returns (array):
+		----------------
+		Multi-dimensional array of files, i.e. 
+			array(
+				"directory 1" => array(
+							"file foo",
+							"subdirectory" => array(
+										"file bar"
+										),
+						),
+				 "file 3"
+			)
+
+
+	public function recursiveDirDelete($curdir="/tmp/",$depth=0) - Deprecated
+		Arguments:
+		----------
+		(string) $curdir - The directory to delete
+		(int)    $depth  - Current depth in the tree, should never really be set when calling,
+		                   the function, used for keeping track of recursion depth.
+
+		Functionality:
+		--------------
+
+		Returns (bool):
+		---------------
+		true  - Successful delete
+		false - Failed delete
+
+	public function recursiveDirCopy($curdir="/tmp/",$newdir="./") - Deprecated
+		Arguments:
+		----------
+		(string) $curdir - The directory to copy
+		(string) $newdir - The path to copy $curdir to
+
+		Functionality:
+		--------------
+
+		Returns (int):
+		--------------
+		0 - Successful read and write
+		1 - Failed read
+		2 - Failed write
+
+	public function arr2Feed($feedTemplate,$dataArr=array(),$configs=array(),$bbencode=false)
+		Arguments:
+		----------
+		(string) $feedTemplate - Path to template from SimpleSite root directory
+		(array)  $dataArr      - Array of associative arrays with information referenced by {DataArr_associativeKey}
+		(array)  $configs      - SimpleSite configuration array 
+		(bool)   $bbencode     - Whether or not to use bbencode (false means don't)
+
+		Functionality:
+		--------------
+
+		Returns (string):
+		------------------
+
+	public function loadModules($configs=array(),$enabled=true)
+		Arguments:
+		----------
+		(array) $configs - SimpleSite configuration array
+		(bool)  $enabled - Which list of modules to get (true is enabled modules)
+
+		Functionality:
+		--------------
+
+		Returns: null
+
+	public function checkReqFiles($reqFiles,$configs=array())
+		Arguments:
+		----------
+		(array) $reqFiles - List of files required for proper operation
+		(array) $configs  - SimpleSite configuration array
+
+		Functionality:
+		--------------
+
+		Returns (bool):
+		---------------
+		true  - All required files exist
+		false - One or more of the required files do not exist
+
+	public function installReqFiles($defaultFiles,$configs=array())
+		Arguments:
+		----------
+		(array) $defaultFiles - Associative array, keys being the file path and the value being their base-64 encoded equivilents
+		(array) $configs      - SimpleSite configuration array
+
+		Functionality:
+		--------------
+
+		Returns (bool):
+		---------------
+		true  - Installation was successful
+		false - Installation failed
+
+	public function checkReqTbls($reqTbls,$configs=array())
+		Arguments:
+		----------
+		(array) $reqTbls - Array of database tables required for proper operation
+		(array) $configs - SimpleSite configuration array
+
+		Functionality:
+		--------------
+
+		Returns (bool):
+		---------------
+		true  - All required tables exist
+		false - One or more of the required tables exist
+
+	public function installReqTbls($defaultTbls,$configs=array())
+		Arguments:
+		----------
+		(array) $defaultTbls - Associative array of associative array for default table configurations example:
+						array(
+							"tblName" => array(
+							             		"column" => "int not null primary key"
+							             )
+						)
+		(array) $configs     - SimpleSite configuration array
+
+		Functionality:
+		--------------
+
+		Returns (bool):
+		---------------
+		true  - Installation was successful
+		false - Installation failed
+
+	public function tempConditional($match=array())
+		Arguments:
+		----------
+		(array) $match - The full match found which requires parsing as a conditional
+
+		Functionality:
+		--------------
+		Likely to change
+
+		Returns: Likely to change
+		
+	public function simpleFilter($input,$db=false)
+		Arguments:
+		----------
+		(string) $input - The user input that needs to be sanitized
+		(bool)   $db    - Whether or not the input needs to be sanitized for the database (true means yes)
+
+		Functionality:
+		--------------
+
+		Returns (string):
+		-----------------
+		A sanitized version of $input.
+SimpleDisplay (extends SimpleUtils implements simpleDisplayI):
+--------------------------------------------------------------
+	public $templateLengths=array();
+		Description:
+		------------
+
+	public $editables=0;
+		Description:
+		------------
+
+	public $editArray=array();
+		Description:
+		------------
+
+	public function displayIsInstalled()
+	public function displayInstall()
+	public function displayUninstall()
+	public function readTemplate($template, $mod)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function parseTemplate($content, $mod, $templateName="")
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function showSite($mod)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+
+SimpleDatabase:
+---------------
+	SimpleDB:
+	---------
+		private $qryCache=array();
+		private $curConfigs=array();
+		private $tables=array();
+		private $name="";
+		private $primaryKey="";
+		private $foreignKeys=array();
+		private $rows=array();
+		private $query="";
+		private $canChange=false;
+		private $columns=array();
+		public function __construct($configs=array("type" => "mysql", "host" => "127.0.0.1", "username" => "root", "password" => "", "database" => "", "tbl_prefix" => ""),$debug=0)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function __destruct()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function connected()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function connect()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function disconnect()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function openTable($name, $primaryKey="")
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function closeTable($name)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function rawQry($query,$params=array(),$save=true)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetTable($name)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetConfigs()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetErrorLevel()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetDatabases()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetTables($database=null, $like='%')
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetTblCreate($table, $database=null)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetColumns($table="",$database=null,$like='%')
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetRows()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function resetRows()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbSetConfigs($configs)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbSetErrorLevel($errorLevel)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function quote($string,$extraFilter=null)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+	SDBTable (extends SimpleDB):
+	----------------------------
+		public function __construct($conn,$name,$configs,$primaryKey="")
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function __destruct()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetByKey($key)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function where($conditions=array())
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function select($cols,$conditions=array(),$extra=array(),$union=false)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function insert($values)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function update($values,$conditions=array(),$extra=array())
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function delete($conditions)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetName()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetPrimaryKey()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetForeignKeys()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetRows()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbSetName($name)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbSetForeignKeys($keys)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function resetRows()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+	SDBRes (extends SDBTable):
+	--------------------------
+		public function __call($method,$args)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function __construct($query="",$columns=array())
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbUpdateValues()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetColumns($table="",$database=null,$like='%')
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetQuery()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbGetValues()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbSetColumns($columns)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbSetQuery($query)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sdbSetValues($values)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+SimpleFile:
+-----------
+	private $rfd=null;
+	private $wfd=null;
+	private $content=null;
+	private $filename=null;
+	private $directory=null;
+	private $debug=false;
+	public function __construct($filepath, $toWrite=false, $delim="/", $debug=false) // Forward slashes are gonna cause a prob..ugh D:
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function __destruct()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getDebug()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function setDebug($debug)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function open()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function close()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function reload()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function isOpen()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function isWritable()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getOwner()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function setOwner($owner)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getGroup()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function setGroup($group)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getFullPath()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getDirPath()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getFileName()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getFileType()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getModified()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getCreated()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getSize()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function copy($newPath=null)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function move($newPath)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function delete()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getContent()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function setContent($content)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function head()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function tail()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getSection($offset, $length=false)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function append($string)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function write()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function regReplace($regex, $replacement="", $handler=null, $limit=-1)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function strReplace($search, $replace, $permanent=false)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+
+SimpleDirectory:
+----------------
+	private $fullpath=null;
+	public function __construct($path)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function isAccessible()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function canBeModified()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getFullPath()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getSubDirs()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function getFiles()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function copy($newPath=null)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function delete()
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function move($newPath)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+
+---------------------
+| Abstract Classes: |
+---------------------
+SimpleSite (extends SimpleDisplay):
+-----------------------------------
+	public function simpleLoader($name)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+	public function __call($method, $args)
+		Arguments:
+		----------
+
+		Functionality:
+		--------------
+
+		Returns:
+		--------
+
+
+SimpleModule (extends SimpleDisplay implements simpleModuleI):
+--------------------------------------------------------------
+	Variables:
+	----------
+		public static $info
+		public static $debug
+	Public Functions:
+	-----------------
+		public function choosePage()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function getContent()
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function sideparse($content)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+		public function __construct($configs=array(), $db=null, $debug=false)
+			Arguments:
+			----------
+
+			Functionality:
+			--------------
+
+			Returns:
+			--------
+
+	Abstract Public Functions:
+	--------------------------
+		abstract public function isInstalled()
+			Description:
+			------------
+
+		abstract public function install()
+			Description:
+			------------
+
+		abstract public function uninstall()
+			Description:
+			------------
+
+---------------
+| Interfaces: |
+---------------
+simpleModuleI:
+-------------
+	public function sideparse($content)
+		Description:
+		------------
+
+	public function choosePage()
+		Description:
+		------------
+
+	public function isInstalled()
+		Description:
+		------------
+
+	public function install()
+		Description:
+		------------
+
+	public function getContent()
+		Description:
+		------------
+
+
+simpleDisplayI:
+--------------
+	public function readTemplate($template, $mod)
+		Description:
+		------------
+
+	public function parseTemplate($content, $mod)
+		Description:
+		------------
+
+	public function showSite($mod)
+		Description:
+		------------
+
+	public function displayIsInstalled()
+		Description:
+		------------
+
+	public function displayInstall()
+		Description:
+		------------
+
+	public function displayUninstall()
+		Description:
+		------------

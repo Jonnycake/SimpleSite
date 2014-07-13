@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Display Class v1.5: Create a user interface from templates.
+ *    SimpleSite Display Class v2.0: Create a user interface from templates.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -21,19 +21,39 @@ if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
 
 $funcsperformed=0;
-class SimpleDisplay extends SimpleUtils
+class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 {
 	public $templateLengths=array();
 	public $editables=0;
 	public $editArray=array();
 	protected $db=NULL;
 
-	// Parse bbcodes
-	protected function bbencode($post,$getcodes=0,$codetop="<table style='font-size:75%;margin-bottom:2%;'>",$codeformat="<tr><td>{CODE}</td><td>{RESULT}</td></tr>",$codebottom="</table>")
+	// Install/Uninstall functions
+	public function displayIsInstalled()
+	{
+		return true;
+	}
+	public function displayInstall()
+	{
+		return true;
+	}
+	public function displayUninstall()
+	{
+		return true;
+	}
+
+	// Parse bbcodes -- should move this to a separate widget
+	protected function bbencode($post,$getcodes=0,$codetop=null,$codeformat=null,$codebottom=null)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: bbencode(\$post,$getcodes)\n";
+			echo "Dbg: bbencode(\$post,$getcodes)".time()."\n";
 
+		if(is_null($codetop))
+		{
+			$codetop="<table style='font-size:75%;margin-bottom:2%;'>";
+			$codeformat="<tr><td>{CODE}</td><td>{RESULT}</td></tr>";
+			$codebottom="</table>";
+		}
 		// Built-in bbcodes
 		$search=array(  "/\[b\](.*?)\[\/b\]/si",
 						"/\[i\](.*?)\[\/i\]/si",
@@ -74,67 +94,58 @@ class SimpleDisplay extends SimpleUtils
 	}
 
 	// Template display
-	protected function readTemplate($template, $mod)
+	public function readTemplate($template, $mod)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: readtemplate(\"".str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)."\",\"$mod\")\n";
+			echo "Dbg: readtemplate(\"".str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)."\",\"$mod\")".time()."\n";
+
+		// This will be replaced by SimpleFile
 		$f=fopen($template,"r");
 		$content="";
 		while(($line=fgets($f)))
 			$content.=$line;
+
+		// Editable stuff
 		if(!(array_key_exists(str_replace($_SERVER['DOCUMENT_ROOT'],"",$template))))
 			$this->templateLengths[str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)]=strlen($content);
-		if(@($_GET['noparse']==1))
+
+		if(@($_GET['noparse']==1)) // Yeah...no? o.O
 			return $content;
+
 		return $this->parseTemplate($content, $mod, $template);
 	}
-	protected function parseTemplate($content, $mod, $templateName="")
+
+	// This entire function will probably be cleaned up with SimpleFile
+	public function parseTemplate($content, $mod, $templateName="")
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: parsetemplate(\$content,\"$mod\")\n";
+			echo "Dbg: parsetemplate(\$content,\"$mod\")".time()."\n";
+
+		// Should replace with a util function loadConfigs()
 		if(!isset($this->configs))
 		{
 			if(@($_GET['debug'])==1)
-				echo "Dbg: Loading module's configurations from config file...\n";
+				echo "Dbg: Loading module's configurations from config file...".time()."\n";
 			include("config.inc.php");
 			$this->configs=$configs;
 		}
-		// Template variables from function call
+
+		// Template variables from function call - see below <--- wtf does this mean? lmfao don't think it applies anymore
 		$funcconsts=array();
 		if($mod!="")
 		{
-			$obj=new $mod();
-			$obj->db=$this->db;
-			if(@($_GET['debug'])==1)
-				echo "Dbg: \$obj->isInstalled()\n";
-			if($obj->isInstalled($this->configs))
+			$obj=new $mod($this->configs,$this->db);
+			if(@$obj->isInstalled($this->configs))
 			{
-				if(@($_GET['debug'])==1)
-					echo "Dbg: \$obj->sideparse()\n";
-				$content=$obj->sideparse($content,$this->configs);
-			}
-			else
-			{
-				if(@($_GET['debug'])==1)
-					echo "Dbg: \$obj->install()\n";
-				$obj->install($this->configs);
-				if($obj->isInstalled($this->configs))
-				{
-					if(@($_GET['debug'])==1)
-						echo "Dbg: \$obj->sideparse(\$content,\$this->configs)\n";
-					$content=$obj->sideparse($content,$this->configs);
-				}
-				else
-					if(@($_GET['debug'])==1)
-						echo "Dbg: Mod unable to be installed...\n";
+				$content=$obj->sideparse($content,$this->configs); // I wish we could move this toward the end so we could take advantage of tail recursion
 			}
 		}
 
-		// Overall constants
+		// Overall constants - maybe put these into a separate function - mainparse?
 		if((preg_match("/{HEADER}/si",$content,$match)))
 		{
 			while((preg_match("/{HEADER}/si",$content,$match)))
-				$content=@str_replace("{HEADER}",$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/header.template"),$content);
+				$content=@str_replace("{HEADER}",$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/header.template",$mod),$content);
 		}
 		if((preg_match("/{CONTENT}/si",$content,$match)))
 		{
@@ -144,8 +155,8 @@ class SimpleDisplay extends SimpleUtils
 					if((@$obj->isInstalled($this->configs))?TRUE:@$obj->install($this->configs))
 					{
 						if(@($_GET['debug'])==1)
-							echo "Dbg: \$obj->getContent(\$this->configs)\n";
-						$content=@str_replace("{CONTENT}",$obj->getContent($this->configs),$content);
+							echo "Dbg: \$obj->getContent(\$this->configs)".time()."\n";
+						$content=@str_replace("{CONTENT}",(!is_null($replacement=$obj->getContent($this->configs))?$replacement:($content="")),$content);
 					}
 			}
 			else
@@ -154,10 +165,11 @@ class SimpleDisplay extends SimpleUtils
 		if((preg_match("/{FOOTER}/si",$content,$match)))
 		{
 			if(@$_GET['debug']==1)
-				echo "Dbg: Replacing {FOOTER}\n";
+				echo "Dbg: Replacing {FOOTER}".time()."\n";
 			while((preg_match("/{FOOTER}/si",$content,$match)))
 				$content=@str_replace("{FOOTER}",$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/footer.template",$mod),$content);
 		}
+
 		// Administrator only content
 		while((preg_match("/{ISADMIN}(.*?){\/ISADMIN}/si",$content,$match)) && $match)
 		{
@@ -192,7 +204,7 @@ class SimpleDisplay extends SimpleUtils
 			else
 			{
 				if(@$_GET['debug']==1)
-					echo "Dbg: Replacing &#123;${match[1]}&#125;\n";
+					echo "Dbg: Replacing &#123;${match[1]}&#125;".time()."\n";
 				$content=str_replace($match[0],"&#123;".$match[1]."&#125;",$content);
 			}
 
@@ -254,7 +266,7 @@ class SimpleDisplay extends SimpleUtils
 		while((preg_match("/{GET_(.*?)}/si",$content,$match)) && $match)
 		{
 			if(isset($_GET[$match[1]]))
-				$content=str_replace($match[0],$this->simpleFilter($_GET[$match[1]],0),$content);
+				$content=str_replace($match[0],$this->simpleFilter($_GET[$match[1]],false),$content);
 			$content=str_replace($match[0],"",$content);
 		}
 
@@ -262,10 +274,10 @@ class SimpleDisplay extends SimpleUtils
 		while((preg_match("/{POST_(.*?)}/si",$content,$match)) && $match)
 		{
 			if(isset($_POST[$match[1]]))
-				$content=str_replace($match[0],$this->simpleFilter($_POST[$match[1]],0),$content);
+				$content=str_replace($match[0],$this->simpleFilter($_POST[$match[1]],false),$content);
 			$content=str_replace($match[0],"",$content);
 		}
-		$this->templateLengths[str_replace($_SERVER['DOCUMENT_ROOT'],"",$templateName)]=strlen($content);
+		$this->templateLengths[str_replace($_SERVER['DOCUMENT_ROOT'],"",$templateName)]=strlen($content); // Uhmm...this probably isn't too good for editables o.O
 
 		// Conditional Statements
 		while((preg_match("/{IF \"(.*?)\" (eq|ne|gt|lt|gte|lte) \"(.*?)\"}(.*?){\/IF}/si",$content,$match)) && $match)
@@ -275,17 +287,58 @@ class SimpleDisplay extends SimpleUtils
 		}
 		return $content;
 	}
-	protected function showSite($mod)
+	public function showSite($mod)
 	{
 		if(@($_GET['debug'])==1)
-			echo "Dbg: showsite(\"$mod\")\n";
+			echo "Dbg: showsite(\"$mod\")".time()."\n";
 		if($mod!="")
-			$obj=new $mod();
+			$obj=new $mod($this->configs,$this->db);
 		if(@($_GET['debug'])==1)
-			echo "Dbg: \$obj->choosePage(\$this->configs)\n";
+			echo "Dbg: \$obj->choosePage(\$this->configs)".time()."\n";
 		if(@($_POST['ajax']!=1))
-			echo @$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/".((isset($obj))?((($page=$obj->choosePage($this->configs)))?(($page==-1)?"":$page):"overall"):"overall").".template",$mod);
-		else
+		{
+			$chosenPage=(isset($obj)) ? $obj->choosePage($this->configs) : "";
+			if(is_string($chosenPage))
+			{
+				$path=$this->configs["path"]["templates"]."/".$chosenPage;
+			}
+			else if(is_array($chosenPage) && count($chosenPage)>=2) // Can't remember what I was doing here
+			{
+				$path="";
+				switch($chosenPage[0])
+				{
+					case "mod":
+						break;
+					case "theme":
+						break;
+					case "custom":
+						break;
+					case "widget":
+						break;
+				}
+			}
+
+			// This should probably be cleaned up...
+			echo @$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/".
+(
+	(isset($obj))
+	?
+		(
+			(
+				($page=$obj->choosePage($this->configs))
+			)
+			? (
+				($page==-1)
+				?""
+				:$page
+			)
+			:"overall"
+		)
+	:
+		"overall"
+).".template",$mod);
+		}
+		else // This will get cleaned up by SimpleFile
 		{
 			switch($_POST['ajaxFunc'])
 			{

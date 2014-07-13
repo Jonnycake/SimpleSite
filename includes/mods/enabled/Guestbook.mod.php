@@ -1,30 +1,12 @@
 <?php
-/*
- *    SimpleSite Guestbook Module v0.1: Guestbook page for SimpleSite based website.
- *    Copyright (C) 2014 Jon Stockton
- * 
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
-class Guestbook extends SimpleDisplay implements simpleModule
+class Guestbook extends SimpleModule
 {
 	public static $info=array(  "author"  => "Jon Stockton",
-	"name"=> "Guestbook",
-	"version" => "0.1",
-	"date"=> "Apr 27, 2014"
+				    "name"=> "Guestbook",
+				    "version" => "0.1",
+				    "date"=> "??? ??, 2014"
 	);
 	public function choosePage()
 	{
@@ -78,6 +60,10 @@ class Guestbook extends SimpleDisplay implements simpleModule
 		$defaultFiles=array("Guestbook.template" => "PGZvcm0gYWN0aW9uPSJ7Q09ORklHU19wYXRoX3Jvb3R9P21vZD1HdWVzdGJvb2siIG1ldGhvZD0icG9zdCI+Cgk8bGFiZWwgZm9yPSJuYW1lIj5OYW1lOjwvbGFiZWw+PGlucHV0IHR5cGU9InRleHQiIG5hbWU9Im5hbWUiLz48YnIvPgoJPGxhYmVsIGZvcj0ibWVzc2FnZSI+TWVzc2FnZTogPC9sYWJlbD48aW5wdXQgdHlwZT0idGV4dCIgbmFtZT0ibWVzc2FnZSIvPjxici8+Cgk8aW5wdXQgdHlwZT0ic3VibWl0IiB2YWx1ZT0iUG9zdCIvPgo8L2Zvcm0+PGJyLz4Ke0VOVFJJRVN9");
 		$this->installReqFiles($defaultFiles,$configs);
 		return TRUE;
+	}
+	public function uninstall($configs=array())
+	{
+		return FALSE;
 	}
 	public function getContent($configs=array())
 	{

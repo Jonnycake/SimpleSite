@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleDB Class v0.1: Allow for easy and secure database access.
+ *    SimpleDB Class v0.2: Allow for easy and secure database access.
  *    Copyright (C) 2014 Jon Stockton
  *
  *    This program is free software: you can redistribute it and/or modify
@@ -21,10 +21,11 @@ class SimpleDB
 {
 	protected $configs=array();
 	protected $connection=null;
-	
+	protected $debug=0;
 	private $qryCache=array();
 	private $curConfigs=array();
 	private $tables=array();
+	private $errorLevel=0;
 	protected $compatQrys=array(
 					'SHOW TABLES' => array(
 								'mysql' => 'SHOW TABLES IN `{DATABASE}` LIKE :like'
@@ -40,10 +41,11 @@ class SimpleDB
 							),
 				);
 
-	public function __construct($configs=array("type" => "mysql", "host" => "127.0.0.1", "username" => "root", "password" => "", "database" => "", "tbl_prefix" => ""))
+	public function __construct($configs=array("type" => "mysql", "host" => "127.0.0.1", "username" => "root", "password" => "", "database" => "", "tbl_prefix" => ""),$debug=0)
 	{
 		$this->configs=$configs;
 		$this->curConfigs=$this->configs;
+		$this->debug=$debug;
 
 		// Create a connection
 		$this->connect();
@@ -62,40 +64,45 @@ class SimpleDB
 	}
 	public function connect()
 	{
-		if(@($_GET['debug']==1))
-		{
-			echo "Dbg: Attempting database connection...";
-		}
-		$dsn=$this->configs['type'].':host='.$this->configs['host'].';dbname='.$this->configs['database'];// Construct connection string from $this->configs
+		if($this->sdbGetErrorLevel()>2)
+			return false;
 
-		// Attempt to create a PDO database connection
-		try
+		if(!$this->connected())
 		{
-			$this->connection=new PDO($dsn,$this->configs['username'],$this->configs['password'], array(PDO::ATTR_PERSISTENT => true, PDO::ATTR_TIMEOUT => "1"));
-			if(@($_GET['debug']==1))
+			if(@($this->debug==1))
 			{
-				echo "Success!\n";
+				echo "Dbg: Attempting database connection...";
 			}
-		}
-		catch(Exception $e)
-		{
-			if(@($_GET['debug']==1))
+			$dsn=$this->configs['type'].':host='.$this->configs['host'].';dbname='.$this->configs['database'];// Construct connection string from $this->configs
+
+			// Attempt to create a PDO database connection
+			try
 			{
-				echo "Error: ".$e->getMessage()."\n";
+				$this->connection=new PDO($dsn,$this->configs['username'],$this->configs['password'], array(PDO::ATTR_PERSISTENT => true));
+				if(@($this->debug==1))
+				{
+					echo "Success!\n";
+				}
 			}
-		}
-		finally
-		{
+			catch(Exception $e)
+			{
+				if(@($this->debug==1))
+				{
+					echo "Error: ".$e->getMessage()."\n";
+					print_r($this->configs);
+				}
+			}
 			if($this->connection==null)
-				$this->sdbSetErrorLevel(1);
+				$this->sdbSetErrorLevel($this->errorLevel+1);
 		}
 	}
 	public function disconnect()
 	{
-		if(@($_GET['debug']==1))
+		if(@($this->debug==1))
 		{
 			echo "Dbg: Disconnecting from database.\n";
 		}
+
 		// Close $this->connection
 		if(!$this->connected())
 			return true;
@@ -104,10 +111,11 @@ class SimpleDB
 	}
 	public function openTable($name, $primaryKey="")
 	{
-		if(@($_GET['debug']==1))
+		if(@($this->debug==1))
 		{
 			echo "Dbg: Opening table $name.\n";
 		}
+
 		// Create a new table object in the current DBO
 		if(!(isset($this->tables[$name])))
 			$this->tables[$name]=new SDBTable($this->connection,$name,$this->configs,$primaryKey);
@@ -122,12 +130,18 @@ class SimpleDB
 	}
 	public function rawQry($query,$params=array(),$save=true)
 	{
+		if($this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		if($save)
 		{
 			if(!isset($this->rows))
 				$this->rows=array();
 			$x=count($this->rows);
 		}
+
 		$stmt=$this->connection->prepare($query);
 		$stmt->execute($params);
 		$rows=$stmt->fetchAll();
@@ -137,7 +151,7 @@ class SimpleDB
 			$x=0;
 			foreach($rows as $row)
 			{
-				$index=(($this->primaryKey=="")?$x++:$this->primaryKey);
+				$index=((isset($this->primaryKey))?(($this->primaryKey=="")?$x++:$this->primaryKey):$x++);
 				$this->rows[$index]=new SDBRes($query);
 				$this->rows[$index]->Values=$row;
 			}
@@ -311,6 +325,11 @@ class SDBTable extends SimpleDB
 	}
 	public function select($cols,$conditions=array(),$extra=array(),$union=false)
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$tblPrefix=@$this->configs['tbl_prefix'];
 		$query="SELECT";
 
@@ -385,7 +404,7 @@ class SDBTable extends SimpleDB
 			$query.=$extra['LIMIT'];
 		}
 
-		// "UNION" => array(); // Uses recursion to create the query...
+		// "UNION" => array(); // Uses recursion to create the query...could cause problems
 		if (isset($extra['UNION']))
 		{
 			foreach ($extra['UNION'] as $tbl => $details)
@@ -398,17 +417,17 @@ class SDBTable extends SimpleDB
 		if ($union) return array('query' => $query, 'params' => $params);
 		else if (isset($extra['UNION'])) $query.=$sorting;
 
-		if(!$this->connected())
-			$this->connect();
+		// Execute the query and get the rows
 		$stmt=$this->connection->prepare($query);
 		$stmt->execute($params);
 		$rows=$stmt->fetchAll();
 
+		// Set up the array with SDBRes elements
 		$ret=array();
 		$x=0;
 		foreach($rows as $row)
 		{
-			$index=(($this->primaryKey=="")?$x++:$this->primaryKey);
+			$index=(($this->primaryKey=="")?$x++:$this->primaryKey); // This really isn't going to work, x++ isn't necessarily the same element, could also have multiple primary keys
 			$this->rows[$index]=new SDBRes($query);
 			$this->rows[$index]->Values=$row;
 		}
@@ -416,6 +435,11 @@ class SDBTable extends SimpleDB
 	}
 	public function insert($values)
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$vals=array();
 		$query='INSERT INTO `'.$this->configs['tbl_prefix'].$this->sdbGetName().'` (';
 
@@ -433,6 +457,11 @@ class SDBTable extends SimpleDB
 	}
 	public function update($values,$conditions=array(),$extra=array())
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$query='UPDATE `'.(@$this->configs['tbl_prefix']).$this->sdbGetName().'` SET';
 		$x=0;
 		$valcount=count($values);
@@ -455,6 +484,11 @@ class SDBTable extends SimpleDB
 	}
 	public function delete($conditions)
 	{
+		if(!$this->connected())
+			$this->connect();
+		if($this->sdbGetErrorLevel())
+			return false;
+
 		$query='DELETE FROM `'.(@$this->configs['tbl_prefix']).$this->sdbGetName().'`';
 
 		// $conditions=array("id" => 5);

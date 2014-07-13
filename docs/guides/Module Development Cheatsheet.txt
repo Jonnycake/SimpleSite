@@ -1,0 +1,138 @@
+I. Zip Folder Hierarchy and Naming Convention)
+    * moduleName.zip
+        * includes
+            - moduleName.mod.php
+            - moduleName_component.mod.php
+        * templates
+            - moduleName.template
+            - moduleName_component.template
+            - moduleName_component_CONSTANT.template
+
+II. Definition
+    * Code
+        - class moduleName extends SimpleDisplay implements simpleModule {/*code*/}
+    * Rules
+        - moduleName must be the same as the filename: (ex. class testModule in testModule.mod.php)
+
+III. Required Functions
+    * sideparse()
+        - Arguments
+            - String $content - The current template (prior to being parsed)
+            - Array $configs - The configuration array from config.inc.php (optional)
+        - Return
+            - Should return the parsed version of $content (creating/overriding any constants)
+    * choosePage()
+        - Arguments
+            - Array $configs - The configuration array from config.inc.php (optional)
+        - Return
+            - Should return the name of the template to be used ("" for default)
+    * isInstalled()
+        - Arguments
+            - Array $configs - The configuration array from config.inc.php (optional)
+        - Return
+            - Should return TRUE if the module has all the required pieces, FALSE otherwise.
+    * install()
+        - Arguments
+            - Array $configs - The configuration array from config.inc.php (optional)
+        - Return
+            - Should attempt to install missing pieces and return TRUE on success, FALSE otherwise.
+    * getContent()
+        - Arguments
+            - Array $configs - The configuration array from config.inc.php (optional)
+         - Return
+            - Should return whatever {CONTENT} should be replaced with.
+
+IV. Optional Functions
+    * uninstall()
+        - Arguments
+            - Should attempt to uninstall extra module pieces (templates, database tables, etc. - not code)
+              and return TRUE on success, FALSE otherwise.
+        - Return
+            - Should return TRUE on success, FALSE otherwise.
+
+V. Useful Functions
+    * SimpleDisplay::bbencode( // Returns encoded version of $post (codes stored in config.inc.php
+                               // as well as $configs['database']['tbl_prefix']bbcodes
+                              $post, // Content that you wish to bbencode
+                              $getcodes=0, // If this is set to 1 it returns a code table formatted as 
+                                           // specified
+                              $codetop="<table style='font-size:75%;margin-bottom:2%;'>", // Header for
+                                                                                          // code table.
+                              $codeformat="<tr><td>{CODE}</td><td>{RESULT}</td></tr>", // Template to
+                                                                                       // display code.
+                              $codebottom="</table>" // Footer for code table
+                             )
+    * SimpleDisplay::readTemplate( // Returns parsed version of template
+                                  $template, // Path to template
+                                  $mod // Name of the module to use
+                                 )
+    * SimpleUtils::checkReqFiles( // Return TRUE if all files exist, FALSE otherwise
+                                 $reqFiles, // Array of required files
+                                 $configs=array() // Configs to use (might return a false negative without 
+                                                  // this)
+                                )
+    * SimpleUtils::installReqFiles( // Returns nothing
+                                   $defaultFiles, // Array of required files where the file name is the
+                                                  // key and the content of which is base_64 encoded in
+                                                  // the value
+                                   $configs=array() // Configs to use (might install at incorrect paths
+                                                    // without this)
+                                  )
+    * SimpleUtils::checkReqTbls( // Returns TRUE if all tables exist, FALSE otherwise
+                                $reqTbls, // Array of required database tables without the prefix
+                                $configs=array() // Configs to use (might return a false negative without
+                                                 // this)
+                               )
+    * SimpleUtils::installReqTbls( // Returns nothing
+                                  $defaultTbls, // Array of database tables setup as: 
+                                                // array($tableName => array($columnName => $properties))
+                                                                                     
+                                  $configs=array() // Configs to use (will install tables without the
+                                                   // prefix without this)
+                                 )
+    * SimpleUtils::simpleFilter( // Returns filtered version of $input
+                                $input, // User input to filter
+                                $db=1 // Decides whether or not to filter for a database (using
+                                      // mysql_real_escape_string())
+                               )
+
+VI. Sample Module
+    <?php
+    if(SIMPLESITE!=1)
+        die("Can't access this file directly.");
+    class testModule extends SimpleDisplay implements simpleModule
+    {
+        public static $info=array(  "author"  => "Jon Stockton",
+                                    "name"    => "Test Module",
+                                    "version" => "1.0",
+                                    "date"    => "April 9, 2012"
+                                );
+					  
+        public function choosePage()
+        {
+            return "";
+        }
+        public function sideparse($content)
+        {
+            return str_replace("{TEST}","Hello World!",$content);
+        }
+        public function isInstalled($configs=array())
+        {
+            return $this->checkReqFiles(
+                                        array(
+                                         $_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['mod_templates']."/testModule.template"
+                                        ),
+                                        $configs
+                                       );
+        }
+        public function install($configs=array())
+        {
+            $this->installReqFiles(array("testModule.template" => "e1RFU1R9"),$configs);
+            return TRUE;
+        }
+        public function getContent($configs=array())
+        {
+            return $this->readTemplate($_SERVER['DOCUMENT_ROOT'].$configs["path"]["root"].$configs["path"]["mod_templates"]."/testModule.template","testModule");
+        }
+    }
+    ?>
