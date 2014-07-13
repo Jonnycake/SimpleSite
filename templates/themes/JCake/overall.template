@@ -1,0 +1,6 @@
+{HEADER}
+			<div id="middle">
+				{CONTENT}
+			</div>		
+{FOOTER}
+

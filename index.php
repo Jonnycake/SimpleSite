@@ -35,13 +35,16 @@
  * Dbg: readtemplate("/var/www/templates/default/footer.template","")
  * Dbg: parsetemplate($content,"")
  */
+	error_reporting(E_ALL);
 	session_start();
+	if(@($_SESSION['is_admin']!=1))
+	{
+		//$_GET['debug']=0;
+	}
 	if(@($_GET['debug'])==1)
 		echo "Dbg: Start\n";
 	define('SIMPLESITE',1);
 	include("include.php");
-	if(SimpleUtils::checkBlocked($configs))
-		die("Your IP has been blocked, please contact the administrator for more information.");
 	$ssite=new SimpleSite();
 	if(@($_GET['debug'])==1)
 		echo "Dbg: End\n";
