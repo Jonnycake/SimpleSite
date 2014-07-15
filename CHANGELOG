@@ -89,13 +89,11 @@ v1.7 (Released 7/21/14):
 ├── CHANGELOG
 ├── config.inc.php
 ├── CONTRIBUTORS
-├── css
-│   └── SimpleCSS.css
 ├── docs
 │   ├── CHANGELOG.txt
 │   ├── class_tests
 │   │   ├── simpledb.test.php
-│   │   └── simplefile.test.php
+TODO│   │   └── simplefile.test.php
 │   ├── diagrams
 │   │   ├── Diagram Notes
 │   │   └── SimpleSite Overall.dia
@@ -177,6 +175,7 @@ v1.7 (Released 7/21/14):
 
 * Issues Addressed:
     - Issue #1 (enhancement): Finally block not allowed in PHP 5.3
-    - Issue #3 (bugfix): Themes which are uploaded aren't deleted from the temporary directory
     - Issue #2 (bugfix): adminCP Returns Blank Page With Invalid DB Credentials
+    - Issue #3 (bugfix): Themes which are uploaded aren't deleted from the temporary directory
     - Issue #5 (enhancement): adminCP Unusable Without Database 
+    - Issue #6 (bugfix): Mod Admin in adminCP Should Show Info
