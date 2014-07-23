@@ -24,19 +24,48 @@ abstract class SimpleSite extends SimpleDisplay
 	abstract function __construct();
 	public function simpleLoader($name)
 	{
+		global $loadDisabled;
 		if(@($_GET['debug'])==1)
 			echo "Dbg: Attempting to autoload $name...";
-		if((in_array($name,$this->mods)) && !(in_array($name,$this->loaded)))
+		if((in_array($name,$this->mods)) && !(in_array($name,$this->loaded))) // Disabled modules aren't put into $this->mods
 		{
-			@include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php");
-			if(!(class_exists($name)))
+			if(file_exists($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php"))
 			{
-				if(@($_GET['debug']==1)) echo "Error!";
+				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php");
+				if(!(class_exists($name)))
+				{
+					if(@($_GET['debug']==1)) echo "Error!";
+				}
+				else
+				{
+					$this->loaded[]=$name;
+					if(@($_GET['debug'])==1) echo "Good.\n";
+				}
 			}
 			else
 			{
-				$this->loaded[]=$name;
-				if(@($_GET['debug'])==1) echo "Good.\n";
+				if(@($_GET['debug']==1)) echo "Error!";
+			}
+		}
+		else if($loadDisabled && !(in_array($name, $this->loaded)))
+		{
+			if(file_exists($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/disabled/${name}.mod.php"))
+			{
+				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/disabled/${name}.mod.php");
+				if(!(class_exists($name)))
+				{
+					if(@($_GET['debug']==1)) echo "Error!";
+				}
+				else
+				{
+					$this->loaded[]=$name;
+					if(@($_GET['debug']==1)) echo "Good.\n";
+				}
+			}
+			else
+			{
+				if(@($_GET['debug']==1)) echo "Could not find disabled module...creating false class.";
+				eval("class $name { public static \$info=array(\"name\" => \"$name (Unknown Module)\", \"author\" => \"Unknown Module\", \"date\" => \"Unknown Module\"); }");
 			}
 		}
 	}
