@@ -665,9 +665,19 @@ class adminCP extends SimpleModule
 				$feed=str_replace("{NAME}", $mod, $feed);
 				$feed=str_replace("{AUTHOR}", "No Data Available...", $feed);
 				$feed=str_replace("{DATE}", "No Data Available...", $feed);
-				//$feed=str_replace("{NAME}",((isset($mod::$info))?((isset($mod::$info["name"]))?$mod::$info["name"]:$mod):$mod),$feed);
-				//$feed=str_replace("{AUTHOR}",((isset($mod::$info))?((isset($mod::$info["author"]))?$mod::$info["author"]:"No data..."):"No data..."),$feed);
-				//$feed=str_replace("{DATE}",((isset($mod::$info))?((isset($mod::$info["date"]))?$mod::$info["date"]:"No data..."):"No data..."),$feed);
+				if($mod!="adminCP")
+				{
+					echo $mod;
+					$feed=str_replace("{NAME}",((isset($mod::$info))?((isset($mod::$info["name"]))?$mod::$info["name"]:$mod):$mod),$feed);
+					$feed=str_replace("{AUTHOR}",((isset($mod::$info))?((isset($mod::$info["author"]))?$mod::$info["author"]:"No data..."):"No data..."),$feed);
+					$feed=str_replace("{DATE}",((isset($mod::$info))?((isset($mod::$info["date"]))?$mod::$info["date"]:"No data..."):"No data..."),$feed);
+				}
+				/*else
+				{
+					$feed=str_replace("{NAME}",((isset($this->$info))?((isset($this->$info["name"]))?$this->$info["name"]:$mod):$mod),$feed);
+					$feed=str_replace("{AUTHOR}",((isset($this->$info))?((isset($this->$info["author"]))?$this->$info["author"]:"No data..."):"No data..."),$feed);
+					$feed=str_replace("{DATE}",((isset($this->$info))?((isset($this->$info["date"]))?$this->$info["date"]:"No data..."):"No data..."),$feed);
+				}*/
 				$feed=str_replace("{ENABLED}",(($x==1)?"Yes":"No"),$feed);
 			}
 		}
