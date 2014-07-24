@@ -93,7 +93,6 @@ v1.7 (Released 7/21/14):
 	│   ├── CHANGELOG.txt
 	│   ├── class_tests
 	│   │   ├── simpledb.test.php
-	│   │   └── simplefile.test.php
 	│   ├── diagrams
 	│   │   ├── Diagram Notes
 	│   │   └── SimpleSite Overall.dia
