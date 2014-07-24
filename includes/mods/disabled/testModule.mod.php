@@ -7,8 +7,7 @@
                                     "name"    => "Test Module",
                                     "version" => "1.1",
                                     "date"    => "April 9, 2012"
-                                );
-					  
+                              ); 
         public function sideparse($content)
         {
             return str_replace("{TEST}","Hello World!",$content);

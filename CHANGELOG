@@ -84,94 +84,94 @@ v1.5 (Released 5/4/14):
 v1.7 (Released 7/21/14):
 ====================
 * Major changes: Re-organized directory structure - new tree:
-./
-├── BACKLOG
-├── CHANGELOG
-├── config.inc.php
-├── CONTRIBUTORS
-├── docs
-│   ├── CHANGELOG.txt
-│   ├── class_tests
-│   │   ├── simpledb.test.php
-TODO│   │   └── simplefile.test.php
-│   ├── diagrams
-│   │   ├── Diagram Notes
-│   │   └── SimpleSite Overall.dia
-│   ├── guides
-│   │   ├── DEV INSTALL.txt
-│   │   └── Module Development Cheatsheet.txt
-│   └── references
-│       ├── SimpleSite Function Reference
-│       ├── Template Constants Guide.txt
-│       └── Theme Development Cheatsheet.txt
-├── GENERAL IDEAS
-├── images
-│   └── edit.jpg
-├── include.php
-├── includes
-│   ├── abstracts
-│   │   ├── simplemodule.abstract.php
-│   │   └── simplesite.abstract.php
-│   ├── classes
-│   │   ├── simpledb.class.php
-│   │   ├── simpledisplay.class.php
-│   │   └── simpleutils.class.php
-│   ├── interfaces
-│   │   ├── simpledisplay.interface.php
-│   │   └── simplemodule.interface.php
-│   ├── mods
-│   │   ├── disabled
-│   │   │   └── testModule.mod.php
-│   │   └── enabled
-│   │       ├── adminCP.mod.php
-│   │       └── Guestbook.mod.php
-│   ├── sites
-│   │   └── DefaultSite.class.php
-│   └── widgets
-│       └── simpleWidgetTest.widget.php
-├── index.php
-├── js
-│   └── editable.js
-├── LICENSE
-├── MODULE WISHLIST
-├── README.md
-├── templates
-│   ├── mods
-│   │   ├── adminCP_backup_BACKUPSAVAIL.template
-│   │   ├── adminCP_backup.template
-│   │   ├── adminCP_blocked_BLOCKTBL.template
-│   │   ├── adminCP_blocked.template
-│   │   ├── adminCP_configAdmin.template
-│   │   ├── adminCP_dbAdmin_table.template
-│   │   ├── adminCP_dbAdmin.template
-│   │   ├── adminCP_login.template
-│   │   ├── adminCP_modAdmin_modules.template
-│   │   ├── adminCP_modAdmin.template
-│   │   ├── adminCP.template
-│   │   ├── adminCP_templateAdmin.template
-│   │   ├── adminCP_testEnv.template
-│   │   ├── adminCP_themeMgr.template
-│   │   ├── adminCP_welcome.template
-│   │   ├── adminCP_widgetAdmin.template
-│   │   ├── Guestbook_ENTRIES.template
-│   │   ├── Guestbook.template
-│   │   └── testModule.template
-│   └── themes
-│       ├── JCake
-│       │   ├── css
-│       │   │   └── main.css
-│       │   ├── footer.template
-│       │   ├── header.template
-│       │   ├── index.template
-│       │   └── overall.template
-│       └── theBasics
-│           ├── css
-│           │   └── main.css
-│           ├── footer.template
-│           ├── header.template
-│           ├── index.template
-│           └── overall.template
-└── WIDGETS WISHLIST
+	./
+	├── BACKLOG
+	├── CHANGELOG
+	├── config.inc.php
+	├── CONTRIBUTORS
+	├── docs
+	│   ├── CHANGELOG.txt
+	│   ├── class_tests
+	│   │   ├── simpledb.test.php
+	│   │   └── simplefile.test.php
+	│   ├── diagrams
+	│   │   ├── Diagram Notes
+	│   │   └── SimpleSite Overall.dia
+	│   ├── guides
+	│   │   ├── DEV INSTALL.txt
+	│   │   └── Module Development Cheatsheet.txt
+	│   └── references
+	│       ├── SimpleSite Function Reference
+	│       ├── Template Constants Guide.txt
+	│       └── Theme Development Cheatsheet.txt
+	├── GENERAL IDEAS
+	├── images
+	│   └── edit.jpg
+	├── include.php
+	├── includes
+	│   ├── abstracts
+	│   │   ├── simplemodule.abstract.php
+	│   │   └── simplesite.abstract.php
+	│   ├── classes
+	│   │   ├── simpledb.class.php
+	│   │   ├── simpledisplay.class.php
+	│   │   └── simpleutils.class.php
+	│   ├── interfaces
+	│   │   ├── simpledisplay.interface.php
+	│   │   └── simplemodule.interface.php
+	│   ├── mods
+	│   │   ├── disabled
+	│   │   │   └── testModule.mod.php
+	│   │   └── enabled
+	│   │       ├── adminCP.mod.php
+	│   │       └── Guestbook.mod.php
+	│   ├── sites
+	│   │   └── DefaultSite.class.php
+	│   └── widgets
+	│       └── simpleWidgetTest.widget.php
+	├── index.php
+	├── js
+	│   └── editable.js
+	├── LICENSE
+	├── MODULE WISHLIST
+	├── README.md
+	├── templates
+	│   ├── mods
+	│   │   ├── adminCP_backup_BACKUPSAVAIL.template
+	│   │   ├── adminCP_backup.template
+	│   │   ├── adminCP_blocked_BLOCKTBL.template
+	│   │   ├── adminCP_blocked.template
+	│   │   ├── adminCP_configAdmin.template
+	│   │   ├── adminCP_dbAdmin_table.template
+	│   │   ├── adminCP_dbAdmin.template
+	│   │   ├── adminCP_login.template
+	│   │   ├── adminCP_modAdmin_modules.template
+	│   │   ├── adminCP_modAdmin.template
+	│   │   ├── adminCP.template
+	│   │   ├── adminCP_templateAdmin.template
+	│   │   ├── adminCP_testEnv.template
+	│   │   ├── adminCP_themeMgr.template
+	│   │   ├── adminCP_welcome.template
+	│   │   ├── adminCP_widgetAdmin.template
+	│   │   ├── Guestbook_ENTRIES.template
+	│   │   ├── Guestbook.template
+	│   │   └── testModule.template
+	│   └── themes
+	│       ├── JCake
+	│       │   ├── css
+	│       │   │   └── main.css
+	│       │   ├── footer.template
+	│       │   ├── header.template
+	│       │   ├── index.template
+	│       │   └── overall.template
+	│       └── theBasics
+	│           ├── css
+	│           │   └── main.css
+	│           ├── footer.template
+	│           ├── header.template
+	│           ├── index.template
+	│           └── overall.template
+	└── WIDGETS WISHLIST
 
 * Issues Addressed:
     - Issue #1 (enhancement): Finally block not allowed in PHP 5.3
