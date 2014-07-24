@@ -57,7 +57,10 @@ class Guestbook extends SimpleModule
 	{
 		$defaultTbls=array("Guestbook" => array("id" => "int NOT NULL AUTO_INCREMENT PRIMARY KEY", "name" => "varchar(50) NOT NULL", "message" => "varchar(250) NOT NULL"));
 		$this->installReqTbls($defaultTbls,$configs);
-		$defaultFiles=array("Guestbook.template" => "PGZvcm0gYWN0aW9uPSJ7Q09ORklHU19wYXRoX3Jvb3R9P21vZD1HdWVzdGJvb2siIG1ldGhvZD0icG9zdCI+Cgk8bGFiZWwgZm9yPSJuYW1lIj5OYW1lOjwvbGFiZWw+PGlucHV0IHR5cGU9InRleHQiIG5hbWU9Im5hbWUiLz48YnIvPgoJPGxhYmVsIGZvcj0ibWVzc2FnZSI+TWVzc2FnZTogPC9sYWJlbD48aW5wdXQgdHlwZT0idGV4dCIgbmFtZT0ibWVzc2FnZSIvPjxici8+Cgk8aW5wdXQgdHlwZT0ic3VibWl0IiB2YWx1ZT0iUG9zdCIvPgo8L2Zvcm0+PGJyLz4Ke0VOVFJJRVN9");
+		$defaultFiles=array(
+			"Guestbook.template" => "PGZvcm0gYWN0aW9uPSJ7Q09ORklHU19wYXRoX3Jvb3R9P21vZD1HdWVzdGJvb2siIG1ldGhvZD0icG9zdCI+DQoJPGxhYmVsIGZvcj0ibmFtZSI+TmFtZTo8L2xhYmVsPjxpbnB1dCB0eXBlPSJ0ZXh0IiBuYW1lPSJuYW1lIi8+PGJyLz4NCgk8bGFiZWwgZm9yPSJtZXNzYWdlIj5NZXNzYWdlOiA8L2xhYmVsPjxpbnB1dCB0eXBlPSJ0ZXh0IiBuYW1lPSJtZXNzYWdlIi8+PGJyLz4NCgk8aW5wdXQgdHlwZT0ic3VibWl0IiB2YWx1ZT0iUG9zdCIvPg0KPC9mb3JtPjxici8+DQp7RU5UUklFU30=",
+			"Guestbook_ENTRIES.template" => "PHNwYW4+e0RhdGFBcnJfbmFtZX06IHtEYXRhQXJyX21lc3NhZ2V9PC9zcGFuPjxici8+"
+		);
 		$this->installReqFiles($defaultFiles,$configs);
 		return TRUE;
 	}
