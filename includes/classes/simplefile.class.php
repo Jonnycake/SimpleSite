@@ -207,18 +207,23 @@ class SimpleFile
 	}
 
 	// File location functions
-	public function copy($newPath=null)
+	public function copy($newPath=null, $overwrite=false)
 	{
+		// If we're not supposed to overwrite it, the newPath should have a number appended to the end
+		// Check if the newPath.? is there, if it is increment and check again
 		$fullPath=$this->getFullPath();
 		return copy($fullPath, (is_null($newPath)) ? "${fullPath} Copy" : $newPath); // We need some file validation done so we don't overwrite
 	}
-	public function move($newPath)
+	public function move($newPath, $overwrite=false)
 	{
+		// If we're not supposed to overwrite it, the newPath should have a number appended to the end
+		// Check if the newPath.? is there, if it is increment and check again
+		// It should then verify if the file has been moved and if it has update its path
 		return rename($this->getFullPath(), $newPath);// nope clearly not right
 	}
 	public function delete()
 	{
-		unlink($this->getFullPath());
+		return unlink($this->getFullPath());
 	}
 
 	// File content functions
