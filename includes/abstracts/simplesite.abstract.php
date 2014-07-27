@@ -24,9 +24,10 @@ abstract class SimpleSite extends SimpleDisplay
 	abstract function __construct();
 	public function simpleLoader($name)
 	{
-		global $loadDisabled;
+		global $loadDisabled; // We could probably also use something like this instead of the singleton pattern (global $reloadMods or something) - look into performance comparison
 		if(@($_GET['debug'])==1)
 			echo "Dbg: Attempting to autoload $name...";
+		$this->loadModules($this->configs);
 		if((in_array($name,$this->mods)) && !(in_array($name,$this->loaded))) // Disabled modules aren't put into $this->mods
 		{
 			if(file_exists($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php"))
