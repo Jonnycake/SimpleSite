@@ -1,0 +1,180 @@
+v0.1 (Released 12/07/12):
+=========================
+   * SimpleSite Started
+
+v1.0 (Released 03/01/13):
+=========================
+   General:
+   --------
+      * Config file changed (new version number: 1.0).
+      * simplewidget.interface.php deleted (unnecessary).
+
+   Documents:
+   ----------
+      * Changelog
+
+   "Built-In" Modules:
+   -------------------
+      * AdminCP v1.0 - Administrative control panel
+
+   Features:
+   ---------
+      * IP based blocking
+      * Widgets
+
+   Template Constants:
+   -------------------
+      * ISADMIN - Display text if the user is admin ex. {ISADMIN}Hi Admin!{/ISADMIN}
+
+   Template Access Features:
+   -------------------------
+      * Added template includes - {TEMPLATE_/path/to.template}
+      * Added template based session variable access - ex. {SESSION_varname}
+      * Added template based user input (GET/POST) access - ex. {GET_varname} {POST_varname}
+
+v1.1 (Released 4/25/13):
+========================
+   General:
+   --------
+      * $configs passed to isInstalled() and install().
+      * SimpleUtils class changed (new version number: 1.1)
+         - Added function checkReqFiles()
+         - Added function checkReqTbls()
+         - Added function installReqFiles()
+         - Added function installReqTbls()
+      * Config file changed (new version number: 1.1)
+         - Loaded blocked IP's from MySQL database
+      * SimpleDisplay class changed (new version number: 1.1)
+         - Bugfix: Wasn't passing $configs to $mod->install() when replacing {CONTENT}. "(@$obj->isInstalled($configs))?TRUE:@$obj->install()" => "(@$obj->isInstalled($configs))?TRUE:@$obj->install($configs)" 
+
+   Documents:
+   ----------
+      * Changelog moved to docs/
+      * Developer Installation Guide
+      * Module Development Cheatsheet
+      * Template Constants Cheatsheet
+      * Theme Development Guide
+
+   "Built-In" Modules:
+   -------------------
+      * AdminCP Updated (new version number: 1.1)
+         - Bugfix: Used wrong variable for saving templates. "$_GET['func']" => "$_POST['submit']"
+         - Completed install() and isInstalled().
+         - Created IP blocking page.
+         - Backup system.
+         - Added upload form to template admin.
+         - Bugfix: Custom templates wasn't being listed.
+         - Added new template form to template admin.
+
+   Features:
+   ---------
+      * Widgets Updated
+         - Changed from external functions to methods
+
+   Template Access Features:
+   -------------------------
+      * {CONFIG_*} Updated
+         - Bugfix: Couldn't access {CONFIGS_path_mod_templates}. "/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9]*)}/si" => "/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9_]*)}/si"
+
+v1.5 (Released 5/4/14):
+======================
+* Major changes: SimpleDB class added
+* Minor changes: Unknown at this time (disorganized & interrupted development).
+
+v1.7 (Released 7/21/14):
+====================
+* Major changes: Re-organized directory structure - new tree:
+	./
+	├── BACKLOG
+	├── CHANGELOG
+	├── config.inc.php
+	├── CONTRIBUTORS
+	├── docs
+	│   ├── CHANGELOG.txt
+	│   ├── class_tests
+	│   │   ├── simpledb.test.php
+	│   ├── diagrams
+	│   │   ├── Diagram Notes
+	│   │   └── SimpleSite Overall.dia
+	│   ├── guides
+	│   │   ├── DEV INSTALL.txt
+	│   │   └── Module Development Cheatsheet.txt
+	│   └── references
+	│       ├── SimpleSite Function Reference
+	│       ├── Template Constants Guide.txt
+	│       └── Theme Development Cheatsheet.txt
+	├── GENERAL IDEAS
+	├── images
+	│   └── edit.jpg
+	├── include.php
+	├── includes
+	│   ├── abstracts
+	│   │   ├── simplemodule.abstract.php
+	│   │   └── simplesite.abstract.php
+	│   ├── classes
+	│   │   ├── simpledb.class.php
+	│   │   ├── simpledisplay.class.php
+	│   │   └── simpleutils.class.php
+	│   ├── interfaces
+	│   │   ├── simpledisplay.interface.php
+	│   │   └── simplemodule.interface.php
+	│   ├── mods
+	│   │   ├── disabled
+	│   │   │   └── testModule.mod.php
+	│   │   └── enabled
+	│   │       ├── adminCP.mod.php
+	│   │       └── Guestbook.mod.php
+	│   ├── sites
+	│   │   └── DefaultSite.class.php
+	│   └── widgets
+	│       └── simpleWidgetTest.widget.php
+	├── index.php
+	├── js
+	│   └── editable.js
+	├── LICENSE
+	├── MODULE WISHLIST
+	├── README.md
+	├── templates
+	│   ├── mods
+	│   │   ├── adminCP_backup_BACKUPSAVAIL.template
+	│   │   ├── adminCP_backup.template
+	│   │   ├── adminCP_blocked_BLOCKTBL.template
+	│   │   ├── adminCP_blocked.template
+	│   │   ├── adminCP_configAdmin.template
+	│   │   ├── adminCP_dbAdmin_table.template
+	│   │   ├── adminCP_dbAdmin.template
+	│   │   ├── adminCP_login.template
+	│   │   ├── adminCP_modAdmin_modules.template
+	│   │   ├── adminCP_modAdmin.template
+	│   │   ├── adminCP.template
+	│   │   ├── adminCP_templateAdmin.template
+	│   │   ├── adminCP_testEnv.template
+	│   │   ├── adminCP_themeMgr.template
+	│   │   ├── adminCP_welcome.template
+	│   │   ├── adminCP_widgetAdmin.template
+	│   │   ├── Guestbook_ENTRIES.template
+	│   │   ├── Guestbook.template
+	│   │   └── testModule.template
+	│   └── themes
+	│       ├── JCake
+	│       │   ├── css
+	│       │   │   └── main.css
+	│       │   ├── footer.template
+	│       │   ├── header.template
+	│       │   ├── index.template
+	│       │   └── overall.template
+	│       └── theBasics
+	│           ├── css
+	│           │   └── main.css
+	│           ├── footer.template
+	│           ├── header.template
+	│           ├── index.template
+	│           └── overall.template
+	└── WIDGETS WISHLIST
+
+* Issues Addressed:
+    - Issue #1 (enhancement): Finally block not allowed in PHP 5.3
+    - Issue #2 (bugfix): adminCP Returns Blank Page With Invalid DB Credentials
+    - Issue #3 (bugfix): Themes which are uploaded aren't deleted from the temporary directory
+    - Issue #5 (enhancement): adminCP Unusable Without Database 
+    - Issue #6 (bugfix): Mod Admin in adminCP Should Show Info
