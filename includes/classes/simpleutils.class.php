@@ -128,6 +128,7 @@ class SimpleUtils
 	{
 		if(@($_GET['debug'])==1)
 			echo "Dbg: loadModules($enabled)".time()."\n";
+		$this->mods=array();
 		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".(($enabled)?"enabled":"disabled")."/";
 		$dir=opendir($modsdir);
 		while(@($file=readdir($dir)))
