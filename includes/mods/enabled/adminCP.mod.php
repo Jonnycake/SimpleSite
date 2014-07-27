@@ -900,13 +900,13 @@ class adminCP extends SimpleModule
 			$results[]="<ul>Templates directory does not exist.  How are you seeing this?";
 		if(!(is_dir($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/"))) // Check if module directory exists, if not flag it
 			$results[]="<ul>Modules directory does not exist, therefore no mods will be used.";
-		if(!(is_file($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php"))) // Check if config file exists, if not flag it
+		if(!(is_file($configs['path']['configs']))) // Check if config file exists, if not flag it
 			$results[]="<ul>Configuration file does not exist.";
 		if($this->db->sdbGetErrorLevel()) // Database info is correct, if not flag it
 			$results[]="<ul>Database connection information is incorrect.";
 		if(!(class_exists("ZipArchive"))) // Check if ZipArchive is installed, if not flag it
 			$results[]="<ul>ZipArchive is not installed, you will not be able to upload themes or modules.";
-		if(!(is_writable($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php"))) // Check if configuration file is writable, if not flag it
+		if(!(is_writable($configs['path']['configs']))) // Check if configuration file is writable, if not flag it
 			$results[]="<ul>Config file is not writable, you will not be able to edit it from the admin control panel.";
 		if(!(is_writable($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']))) // Check if themes directory is writable, if not flag it
 			$results[]="<ul>Theme directory is not writable, you will not be able to upload new themes.";
