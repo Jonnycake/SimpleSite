@@ -19,6 +19,9 @@
 
 class SimpleFile
 {
+	const SUFFNUM=1; // Numeric suffix (.1, .2, .3, .4, etc.)
+	const SUFFWIN=2; // Windows style suffix (Copy, Copy (1), etc.)
+
 	private $rfd=null;
 	private $wfd=null;
 	private $content=null;
@@ -209,21 +212,55 @@ class SimpleFile
 	// File location functions
 	public function copy($newPath=null, $overwrite=false)
 	{
-		// If we're not supposed to overwrite it, the newPath should have a number appended to the end
-		// Check if the newPath.? is there, if it is increment and check again
 		$fullPath=$this->getFullPath();
-		return copy($fullPath, (is_null($newPath)) ? "${fullPath} Copy" : $newPath); // We need some file validation done so we don't overwrite
+
+		if(is_null($newPath))
+		{
+			$newPath=$fullPath;
+		}
+
+		// If we don't want to overwrite the destination file, we need to add a suffix
+		if(!($newPath!=$fullPath && ($overwrite || !(file_exists("${newPath}")))))
+		{
+			$newPath=$this->addSuffix($newPath);
+		}
+
+		return copy($fullPath, $newPath); // Should add test for write permissions on $newPath
 	}
 	public function move($newPath, $overwrite=false)
 	{
-		// If we're not supposed to overwrite it, the newPath should have a number appended to the end
-		// Check if the newPath.? is there, if it is increment and check again
+		// Protect against overwrites
+		if(file_exists($newPath) && !$overwrite)
+		{
+			$newPath=$this->addSuffix($newPath);
+		}
+
 		// It should then verify if the file has been moved and if it has update its path
+
 		return rename($this->getFullPath(), $newPath);// nope clearly not right
 	}
 	public function delete()
 	{
 		return unlink($this->getFullPath());
+	}
+
+	// File-name functions
+	public function addSuffix($filename)
+	{
+		$suffix=1;
+		while($suffix>0)
+		{
+			if(file_exists("${filename}.${suffix}"))
+			{
+				$suffix++;
+			}
+			else
+			{
+				$filename="${filename}.${suffix}";
+				break;
+			}
+		}
+		return $filename;
 	}
 
 	// File content functions
