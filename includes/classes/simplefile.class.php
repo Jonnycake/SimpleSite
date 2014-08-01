@@ -41,8 +41,8 @@ class SimpleFile
 		else
 		{
 			$this->path=$filepath;
-			$filepath=$this->getFullPath($filepath);
-			$this->getPathParts($delim, $filepath);
+			$this->path=$this->getFullPath($filepath);
+			$this->getPathParts($delim);
 		}
 		$this->debug=$debug;
 	}
@@ -181,6 +181,7 @@ class SimpleFile
 	{
 		if(is_null($filepath))
 		{
+			$filepath=$this->path;
 			$pathArr=explode($delim,$filepath);
 			$this->filename=$pathArr[count($pathArr)-1];
 			unset($pathArr[count($pathArr)-1]);

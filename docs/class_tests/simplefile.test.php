@@ -9,6 +9,7 @@ fclose($stdin);
 
 $file=new SimpleFile($filename, false, "/", true);
 $file->open();
+echo $file->getContent();
 /*echo "Original:\n".$file->getContent()."\n";
 $file->close();
 
