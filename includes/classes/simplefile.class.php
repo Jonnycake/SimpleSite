@@ -40,12 +40,9 @@ class SimpleFile
 		}
 		else
 		{
+			$this->path=$filepath;
 			$filepath=$this->getFullPath($filepath);
-			$pathArr=explode($delim,$filepath);
-			$this->filename=$pathArr[count($pathArr)-1];
-			unset($pathArr[count($pathArr)-1]);
-			$this->directory=implode($delim,$pathArr);
-			$this->delim=$delim;
+			$this->getPathParts($delim, $filepath);
 		}
 		$this->debug=$debug;
 	}
@@ -180,6 +177,17 @@ class SimpleFile
 	{
 		return chgrp($this->getFullPath(),$group);
 	}
+	public function getPathParts($delim="/", $filepath=null)
+	{
+		if(is_null($filepath))
+		{
+			$pathArr=explode($delim,$filepath);
+			$this->filename=$pathArr[count($pathArr)-1];
+			unset($pathArr[count($pathArr)-1]);
+			$this->directory=implode($delim,$pathArr);
+			$this->delim=$delim;
+		}
+	}
 	public function getFullPath($pathname=null)
 	{
 		return ($pathname!=null) ? realpath($pathname) : $this->directory."/".$this->filename;
@@ -236,8 +244,18 @@ class SimpleFile
 		}
 
 		// It should then verify if the file has been moved and if it has update its path
+		if(rename($this->path, $newPath))
+		{
+			$success=true;
+			$this->path=$this->getFullPath($newPath);
+			$this->getPathParts();
+		}
+		else
+		{
+			$success=false;
+		}
 
-		return rename($this->getFullPath(), $newPath);// nope clearly not right
+		return $success;
 	}
 	public function delete()
 	{
