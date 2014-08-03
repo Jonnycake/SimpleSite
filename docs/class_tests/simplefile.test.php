@@ -9,8 +9,7 @@ fclose($stdin);
 
 $file=new SimpleFile($filename, false, "/", true);
 $file->open();
-echo $file->getContent();
-/*echo "Original:\n".$file->getContent()."\n";
+echo "Content:\n".$file->getContent()."\n\n";
 $file->close();
 
 $stdin=fopen("php://stdin","r"); // Hehe, you can actually use SimpleFile for this :P
@@ -18,16 +17,14 @@ echo "\nOriginal Filename: ";
 $filename=trim(fgets($stdin));
 echo "New Filename: ";
 $newfilename=trim(fgets($stdin));
-echo "Second New Filename: ";
+echo "Copied Filename: ";
 $newfilename2=trim(fgets($stdin));
 fclose($stdin);
 
 $file=new SimpleFile($filename, false, "/", true);
 var_dump($file);
-*///$file->copy($newfilename);
-//$file->move($newfilename);
-var_dump($file);
-$file->move("somethingdifferent.txt");
+$file->copy($newfilename2);
+$file->move($newfilename);
 var_dump($file);
 $file->close();
 ?>

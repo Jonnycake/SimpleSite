@@ -96,19 +96,8 @@ class SimpleFile
 		}
 		else
 		{
-			if(preg_match("/^[a-z]*:\/\/([^\/]*).*/si",$this->url,$matches) && $matches)
+			if($this->host=$this->isURL($this->url))
 			{
-				$host=$matches[1];
-				if(!(preg_match("/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/si",$host,$matches2) && $matches2))
-				{
-					$hostip=gethostbyname($host);
-					if($host==$hostip)
-					{
-						if($this->debug)
-							echo "Dbg: Could not resolve hostname...\n";
-						return;
-					}
-				}
 				try
 				{
 					$this->content=file_get_contents($this->url); // I want to avoid connection refused warnings...but apparently gethostbyname() isn't going to fail unless the name's too long -_-
@@ -116,23 +105,52 @@ class SimpleFile
 				catch (Exception $e)
 				{
 					if($this->debug)
-						echo "Dbg: ".$e->getMessage()."\n";
+						echo "Dbg: Exception - ".$e->getMessage()."\n";
 				}
 			}
-			else
+		}
+	}
+	public function isURL($filepath)
+	{
+		if($this->debug)
+			echo "Dbg: Checking if '$filepath' is a URL...";
+		if(preg_match("/^[a-z]*:\/\/([^\/]*).*/si",$filepath,$matches) && $matches) // Should probably limit to certain protocols at some point
+		{
+			if($this->debug)
+				echo "Yes.\n";
+			$host=$matches[1];
+			if(!(preg_match("/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/si",$host,$matches2) && $matches2))
 			{
-				if($this->debug)
-					echo "Dbg: Invalid URL.\n";
+				$hostip=gethostbyname($host);
+				if($host==$hostip)
+				{
+					if($this->debug)
+						echo "Dbg: Could not resolve hostname: '$host'\n";
+				}
 			}
+			return $host;
+		}
+		else
+		{
+			if($this->debug)
+				echo "No.\n";
+			return null;
 		}
 	}
 	public function close()
 	{
 		if($this->debug)
-			echo "Dbg: Closing file descriptor.";
+			echo "Dbg: Closing file descriptor...";
 		if(is_resource($this->rfd))
 		{
+			if($this->debug)
+				echo "Success.\n";
 			fclose($this->rfd);
+		}
+		else
+		{
+			if($this->debug)
+				echo "Not a resource.\n";
 		}
 	}
 	public function reload()
@@ -157,24 +175,34 @@ class SimpleFile
 			$fd=$this->rfd;
 		return is_resource($fd);
 	}
-	public function isWritable()
+	public function isWritable($filepath=null)
 	{
-		return is_writable($this->getFullPath());
+		if($filepath)
+			return is_writable($filepath);
+		else
+			return is_writable($this->getFullPath());
 	}
-	public function getOwner()
+	public function getOwner($filepath=null)
 	{
+		// Should check read access here
+		if($filepath)
+			return fileowner($filepath);
+		else
 		return fileowner($this->getFullPath());
 	}
 	public function setOwner($owner)
 	{
+		// Should check write access
 		return chown($this->getFullPath(),$owner);
 	}
 	public function getGroup()
 	{
+		// Should check read access here
 		return posix_getgrgid(filegroup($this->getFullPath()));
 	}
 	public function setGroup($group)
 	{
+		// Should check write access
 		return chgrp($this->getFullPath(),$group);
 	}
 	public function getPathParts($delim="/", $filepath=null)
@@ -182,12 +210,13 @@ class SimpleFile
 		if(is_null($filepath))
 		{
 			$filepath=$this->path;
-			$pathArr=explode($delim,$filepath);
-			$this->filename=$pathArr[count($pathArr)-1];
-			unset($pathArr[count($pathArr)-1]);
-			$this->directory=implode($delim,$pathArr);
-			$this->delim=$delim;
 		}
+		$filepath=$this->getFullPath($filepath);
+		$pathArr=explode($delim,$filepath);
+		$this->filename=$pathArr[count($pathArr)-1];
+		unset($pathArr[count($pathArr)-1]);
+		$this->directory=implode($delim,$pathArr);
+		$this->delim=$delim;
 	}
 	public function getFullPath($pathname=null)
 	{
@@ -266,6 +295,7 @@ class SimpleFile
 	// File-name functions
 	public function addSuffix($filename)
 	{
+		// Should implement windows style and numeric suffixes
 		$suffix=1;
 		while($suffix>0)
 		{

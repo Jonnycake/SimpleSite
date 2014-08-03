@@ -23,7 +23,7 @@ if(!SIMPLESITE)
 $configs=array();
 if(!isset($_SERVER))
 {
-	$_SERVER=array();
+	$_SERVER=array("REMOTE_ADDR" => "UNDEFINED");
 }
 if(!isset($_GET))
 {
