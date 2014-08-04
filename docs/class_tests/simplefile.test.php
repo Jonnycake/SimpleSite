@@ -22,9 +22,16 @@ $newfilename2=trim(fgets($stdin));
 fclose($stdin);
 
 $file=new SimpleFile($filename, false, "/", true);
-var_dump($file);
-$file->copy($newfilename2);
-$file->move($newfilename);
-var_dump($file);
+$file->move($newfilename); // Move it
+$file->copy($newfilename2);// Copy from the new location
+
+// Edit outside of SimpleSite class
+$f=fopen($newfilename, "w");
+fwrite($f, $file->getContent()." this has been edited.");
+fclose($f);
 $file->close();
+
+// Reload the file and output content
+$file->reload();
+echo $file->getContent();
 ?>

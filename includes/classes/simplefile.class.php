@@ -43,6 +43,7 @@ class SimpleFile
 			$this->path=$filepath;
 			$this->path=$this->getFullPath($filepath);
 			$this->getPathParts($delim);
+			$this->open();
 		}
 		$this->debug=$debug;
 	}
