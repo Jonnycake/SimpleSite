@@ -19,8 +19,9 @@
 
 class SimpleFile
 {
-	const SUFFNUM=1; // Numeric suffix (.1, .2, .3, .4, etc.)
-	const SUFFWIN=2; // Windows style suffix (Copy, Copy (1), etc.)
+	// Suffix Types
+	public const SUFFNUM="numeric"; // Example: filename => filename.1
+	public const SUFFVER="verbose"; // Example: filename => filename OVERWRITE OFF (1)
 
 	private $rfd=null;
 	private $wfd=null;
@@ -31,6 +32,7 @@ class SimpleFile
 	private $delim=null;
 	private $debug=false;
 	private $url=null;
+	private $suftype=SUFFNUM;
 
 	public function __construct($filepath, $toWrite=false, $delim="/", $debug=false)
 	{
@@ -40,7 +42,6 @@ class SimpleFile
 		}
 		else
 		{
-			$this->path=$filepath;
 			$this->path=$this->getFullPath($filepath);
 			$this->getPathParts($delim);
 			$this->open();
@@ -61,20 +62,27 @@ class SimpleFile
 	{
 		$this->debug=$debug;
 	}
+	public function getSuffixType()
+	{
+		return $this->suftype;
+	}
+	public function setSuffixType($suftype)
+	{
+		$this->suftype=$suftype;
+	}
 
 	// File descriptor functions
 	public function open()
 	{
 		if(is_null($this->url))
 		{
-			$fullPath=$this->getFullPath();
 			if($this->debug)
-				echo "Dbg: Attempting to open $fullPath...";
-			if(file_exists($fullPath) && !is_dir($fullPath))
+				echo "Dbg: Attempting to open ".$this->path."...";
+			if(file_exists($this->path) && !is_dir($this->path))
 			{
 				try
 				{
-					$this->rfd=(($f=fopen($fullPath,"r"))?$f:null);
+					$this->rfd=(($f=fopen($this->path,"r"))?$f:null);
 					if(is_resource($this->rfd))
 					{
 						echo "Success.\n";
@@ -111,6 +119,8 @@ class SimpleFile
 			}
 		}
 	}
+
+	// Static
 	public function isURL($filepath)
 	{
 		if($this->debug)
@@ -168,6 +178,13 @@ class SimpleFile
 	}
 
 	// Access information
+	public function exists($filename=null) // Static
+	{
+		if(is_null($filename))
+			return file_exists($this->path);
+		else
+			return file_exists($filename);
+	}
 	public function isOpen()
 	{
 		if($this->wfd)
@@ -176,35 +193,40 @@ class SimpleFile
 			$fd=$this->rfd;
 		return is_resource($fd);
 	}
-	public function isWritable($filepath=null)
+	public function isReadable($filepath=null) // Static
+	{
+		if(is_null($filepath))
+			return is_readable($this->path);
+	}
+	public function isWritable($filepath=null) // Static
 	{
 		if($filepath)
 			return is_writable($filepath);
 		else
-			return is_writable($this->getFullPath());
+			return is_writable($this->path);
 	}
-	public function getOwner($filepath=null)
+	public function getOwner($filepath=null) // Static
 	{
 		// Should check read access here
 		if($filepath)
 			return fileowner($filepath);
 		else
-		return fileowner($this->getFullPath());
+		return fileowner($this->path);
 	}
-	public function setOwner($owner)
+	public function setOwner($owner) // Static
 	{
 		// Should check write access
-		return chown($this->getFullPath(),$owner);
+		return chown($this->path,$owner);
 	}
-	public function getGroup()
+	public function getGroup($filepath)
 	{
 		// Should check read access here
-		return posix_getgrgid(filegroup($this->getFullPath()));
+		return posix_getgrgid(filegroup($this->path));
 	}
 	public function setGroup($group)
 	{
 		// Should check write access
-		return chgrp($this->getFullPath(),$group);
+		return chgrp($this->path,$group);
 	}
 	public function getPathParts($delim="/", $filepath=null)
 	{
@@ -233,15 +255,15 @@ class SimpleFile
 	}
 	public function getFileType()
 	{
-		return filetype($this->getFullPath());
+		return filetype($this->path);
 	}
 	public function getModified()
 	{
-		return filemtime($this->getFullPath());
+		return filemtime($this->path);
 	}
 	public function getCreated()
 	{
-		return filemtime($this->getFullPath());
+		return filemtime($this->path);
 	}
 	public function getSize()
 	{
@@ -251,7 +273,7 @@ class SimpleFile
 	// File location functions
 	public function copy($newPath=null, $overwrite=false)
 	{
-		$fullPath=$this->getFullPath();
+		$fullPath=$this->path;
 
 		if(is_null($newPath))
 		{
@@ -290,24 +312,38 @@ class SimpleFile
 	}
 	public function delete()
 	{
-		return unlink($this->getFullPath());
+		return unlink($this->path);
 	}
 
 	// File-name functions
-	public function addSuffix($filename)
+	public function addSuffix($filename, $style="numeric")
 	{
-		// Should implement windows style and numeric suffixes
 		$suffix=1;
 		while($suffix>0)
 		{
-			if(file_exists("${filename}.${suffix}"))
+			switch($style)
 			{
-				$suffix++;
-			}
-			else
-			{
-				$filename="${filename}.${suffix}";
-				break;
+				case "verbose":
+					if(file_exists("${filename}.${suffix}"))
+					{
+						$suffix++;
+					}
+					else
+					{
+						$filename="${filename}.${suffix}";
+						break;
+					}
+					break;
+				default:
+					if(file_exists("${filename}.${suffix}"))
+					{
+						$suffix++;
+					}
+					else
+					{
+						$filename="${filename}.${suffix}";
+					}
+					break;
 			}
 		}
 		return $filename;
@@ -366,7 +402,7 @@ class SimpleFile
 
 		$this->close();
 
-		$this->wfd=fopen($this->getFullPath(), "w");
+		$this->wfd=fopen($this->path, "w");
 		fwrite($this->wfd, $this->getContent());
 		fclose($this->wfd);
 

@@ -34,4 +34,7 @@ $file->close();
 // Reload the file and output content
 $file->reload();
 echo $file->getContent();
+
+// Add suffix to file
+echo SimpleFile::addSuffix("test overwrite.txt");
 ?>
