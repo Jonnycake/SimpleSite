@@ -21,7 +21,7 @@ class Guestbook extends SimpleModule
 				$GLOBALS['funcsperformed']++;
 				$this->db->openTable("Guestbook");
 				$table=$this->db->sdbGetTable("Guestbook");
-				$values=array("name"=>$_POST['name'],"message"=>$_POST['message']);
+				$values=array("name"=>$this->simpleFilter($_POST['name']),"message"=>$this->simpleFilter($_POST['message']));
 				$table->insert($values);
 			}
 			else if($_GET['debug']==1)
