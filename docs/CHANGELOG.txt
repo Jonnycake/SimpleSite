@@ -184,3 +184,14 @@ v1.7-Rev1 (Released 7/21/14):
 * Issues Addressed:
     - Issue #33 (bugfix): 1.7 Module Administration
     - Issue #34 (bugfix): adminCP - Environment Test Always Fails
+
+v2.0 (Released 9/28/14):
+====================
+    - Issue #4 (enhancement): TheBasics Theme Should Use SimpleCSS
+    - Issue #8 & #29 (enhancement): SimpleFile Error Handling/File Validation & Integration
+    - Issue #9 (enhancement): SimpleDB Update
+    - Issue #12 & #31 (enhancement): SimpleDebug & Integratoin
+    - Issue #14 (enhancement): adminCP: Debug Session Toggle
+    - Issue #15 (enhancement): SimpleSite Installer
+    - Issue #45 (enhancement): adminCP - DBAdmin
+    - Issue #52 (bugfix): Guestbook: XSS
