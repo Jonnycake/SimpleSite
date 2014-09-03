@@ -1,0 +1,21 @@
+				$tree[$file]=$this->createDirTree("$curdir/$file",$maxdepth,$depth+1);
+					$this->recursiveDirDelete("$curdir/$file",$depth+1);
+				$this->recursiveDirCopy("$curdir/$file",$newdir."/$file");
+		$template=$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$feedTemplate,$_GET['mod']);
+						$data[$match[1]]=$this->bbencode($data[$match[1]]); // Protected function in SimpleDisplay
+					$this->mods[]=$matches[1];
+			if(!count($this->db->sdbGetColumns($dbconf['tbl_prefix'].$table))) // We should make a better way to do this in SimpleDB
+			$this->db->rawQry($query);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+					return $this->tempConditional($matches2);
+		return str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars((($db)?$this->db->quote($input):$input))));
