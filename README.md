@@ -7,4 +7,4 @@ That's all I have to say for now, hope you enjoy the framework.
 
 **Note** Currently, as there seems to be little interest in the project, I've been focusing more on the overall design of 1.0.0 and trying to see problems before they're encountered.  As you may have noticed, I've been adding quite a bit of issues.  Considering the design work left, the creation of helper classes, modules, widgets, themes, etc. I don't feel like I will make my original estimate of New Years 2015, but I do think that within the next year I'll finally be able to say that my project is production ready.
 
-I do still plan on doing my 2.0 release within the next month, although it will be incomplete.  I mainly plan on providing the File access class (although this will become a wrapper for SplFileObject to avoid "reinventing the square wheel"), minor fixes for SimpleDB, and the SimpleDebug class.
+I do still plan on doing my 2.0 release within the next month, although it will be incomplete.  I mainly plan on providing the SimpleDebug class among other minor fixes/enhancements.
