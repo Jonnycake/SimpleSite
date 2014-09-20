@@ -17,26 +17,21 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if(SIMPLESITE!=1)
-	die("Can't access this file directly.");
-
 class SimpleDebug
 {
-	// Should be able to use an instance of this class as a property of a SimpleSite
+	// Array of settings to be used to update and create instances
+	public static $settings=array(
+					"mode"        => 0,
+					"errorLevel"  => 0,
+					"format"      => "Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})",
+					"time_format" => null,
+					"file_path"   => "{logdir}"
+				);
+
 	// Should be able to set the file path as well as the file name and any prefix/suffixes
 	// Should be able to change log message format (formatted based on variables)
 
-	// Current debug mode
-	private $mode=0;
-
-	// Keep track of problems so that there's one point of contact for components to know what to do
-	private $errorLevel=0;
-
-	// Log output format
-	private $format="Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})";
-
-	// Time output format
-	private $time_format=null;
+	public static staticLog=array("Info" => array(), "Depends" => array(), "Exception" => array());
 
 	// Configuration Functions
 	public static function setDbgMode($mode)
@@ -56,16 +51,20 @@ class SimpleDebug
 	}
 
 	// Logging Functions
-	public static function logException($e)
+	public static function __callStatic($method, $args)
 	{
-	}
-
-	public static function logInfo($info)
-	{
-	}
-
-	public static function logDepends($dependency)
-	{
+		switch($method)
+		{
+			case "logException":
+				break;
+			case "logInfo":
+				break;
+			case "logDepends":
+				break;
+			default:
+				echo "Error";
+				break;
+		}
 	}
 
 	// Output
@@ -81,5 +80,73 @@ class SimpleDebug
 	{
 	}
 
+
+	/*
+	 * This section should be used for code related to using the class in a non-static
+	 * way so that modules, etc. can create their own logs without affecting other
+	 * componets.
+	 */
+
+	// Array of named-instances created/retrieved/destroyed using the functions below
+	public static $instances=null;
+
+	public static function createInstance($instanceName)
+	{
+		if(self::$instances==null)
+			self::$instances=array();
+
+		if(!array_key_exists($instanceName, self::$instances))
+		{
+			self::$instances[$instanceName]=new self(self::$settings);
+		}
+		return self::$instances[$instanceName];
+	}
+	public static function destroyInstance($instanceName)
+	{
+		unset(self::$instances[$instanceName]);
+	}
+	public static function getInstance($instanceName)
+	{
+		if(isset(self::$instances[$instanceName]))
+			return self::$instances[$instanceName];
+		else
+			return self::createInstance($instanceName);
+	}
+
+	// Instance Configurations
+	// Current debug mode
+	private $mode=0;
+
+	// Keep track of problems so that there's one point of contact for components to know what to do
+	private $errorLevel=0;
+
+
+	// Log output format
+	private $format="Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})";
+
+	// Time output format
+	private $time_format=null;
+
+	public function __construct($settings)
+	{
+	}
+	public function instanceLogInfo($info)
+	{
+	}
+	public function __call($method, $args) // Needs to handle static calls as well in case of pre-5.3.0
+	{
+		switch($method)
+		{
+			case "logException":
+				break;
+			case "logInfo":
+				break;
+			case "logDepends":
+				break;
+			default:
+				echo "Error";
+				break;
+		}
+	}
 }
 ?>

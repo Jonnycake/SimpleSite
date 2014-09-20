@@ -46,6 +46,11 @@ class SimpleUtils
 		return $tree;
 	}
 
+	public function createDbgInstance()
+	{
+		$this->instance=SimpleDebug::createInstance(get_class($this));
+	}
+
 	/* START: Replaced by SimpleDirectory */
 	public function recursiveDirDelete($curdir="/tmp/",$depth=0)
 	{
