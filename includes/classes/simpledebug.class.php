@@ -31,7 +31,7 @@ class SimpleDebug
 	// Should be able to set the file path as well as the file name and any prefix/suffixes
 	// Should be able to change log message format (formatted based on variables)
 
-	public static staticLog=array("Info" => array(), "Depends" => array(), "Exception" => array());
+	public static $log=null;
 
 	// Configuration Functions
 	public static function setDbgMode($mode)
@@ -50,30 +50,35 @@ class SimpleDebug
 	{
 	}
 
-	// Logging Functions
-	public static function __callStatic($method, $args)
+	public static function logException($e)
 	{
-		switch($method)
-		{
-			case "logException":
-				break;
-			case "logInfo":
-				break;
-			case "logDepends":
-				break;
-			default:
-				echo "Error";
-				break;
-		}
+		self::logEvent("Exception", $info);
 	}
+	public static function logInfo($info)
+	{
+		self::logEvent("Info", $info);
+	}
+	public static function logDepends($depends)
+	{
+		self::logEvent("Depends", $depends);
+	}
+	public static function logEvent($type, $info)
+	{
+		if(is_null(self::$log))
+			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
+		self::$log[$type][]=$info;
+	}
+
 
 	// Output
 	public static function printLog() // Output log
 	{
+		print_r(self::$log);
 	}
 
 	public static function stackTrace() // Output stack trace
 	{
+		print_r(stack
 	}
 
 	public static function saveLog() // Save log to log file
@@ -92,12 +97,12 @@ class SimpleDebug
 
 	public static function createInstance($instanceName)
 	{
-		if(self::$instances==null)
+		if(is_null(self::$instances))
 			self::$instances=array();
 
 		if(!array_key_exists($instanceName, self::$instances))
 		{
-			self::$instances[$instanceName]=new self(self::$settings);
+			self::$instances[$instanceName]=new SimpleDebugInstance(self::$settings);
 		}
 		return self::$instances[$instanceName];
 	}
@@ -113,6 +118,10 @@ class SimpleDebug
 			return self::createInstance($instanceName);
 	}
 
+}
+
+class SimpleDebugInstance
+{
 	// Instance Configurations
 	// Current debug mode
 	private $mode=0;
@@ -124,29 +133,29 @@ class SimpleDebug
 	// Log output format
 	private $format="Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})";
 
+	private $log=array("Info" => array(), "Depends" => array(), "Exception" => array());
 	// Time output format
 	private $time_format=null;
 
 	public function __construct($settings)
 	{
 	}
-	public function instanceLogInfo($info)
+	public function printLog()
 	{
+		print_r($this->log);
 	}
-	public function __call($method, $args) // Needs to handle static calls as well in case of pre-5.3.0
+
+	public function logException($e)
 	{
-		switch($method)
-		{
-			case "logException":
-				break;
-			case "logInfo":
-				break;
-			case "logDepends":
-				break;
-			default:
-				echo "Error";
-				break;
-		}
+		$this->log['Exception'][]=$e;
+	}
+	public function logInfo($info)
+	{
+		$this->log['Info'][]=$info;
+	}
+	public function logDepends($depends)
+	{
+		$this->log['Depends'][]=$depends;
 	}
 }
 ?>

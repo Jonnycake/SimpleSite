@@ -11,6 +11,8 @@ class SomeClass extends SimpleUtils
 		$this->createDbgInstance();
 		$this->instance->logInfo("Testing logInfo");
 		$this->instance->printLog();
+		SimpleDebug::logInfo("test logInfo static.");
+		SimpleDebug::printLog();
 	}
 }
 new SomeClass();
