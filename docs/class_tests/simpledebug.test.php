@@ -12,6 +12,8 @@ class SomeClass extends SimpleUtils
 		$this->instance->logInfo("Testing logInfo");
 		$this->instance->printLog();
 		SimpleDebug::logInfo("test logInfo static.");
+		SimpleDebug::logException(new Exception("Exception thingy"));
+		$this->instance->logDepends("A dependency error");
 		SimpleDebug::printLog();
 	}
 }

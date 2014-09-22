@@ -31,6 +31,7 @@ class SimpleDebug
 	// Should be able to set the file path as well as the file name and any prefix/suffixes
 	// Should be able to change log message format (formatted based on variables)
 
+	public static $event_id=0;
 	public static $log=null;
 
 	// Configuration Functions
@@ -52,7 +53,7 @@ class SimpleDebug
 
 	public static function logException($e)
 	{
-		self::logEvent("Exception", $info);
+		self::logEvent("Exception", $e);
 	}
 	public static function logInfo($info)
 	{
@@ -66,19 +67,50 @@ class SimpleDebug
 	{
 		if(is_null(self::$log))
 			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
-		self::$log[$type][]=$info;
+		self::$log[$type][]=array("event_id"=>self::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);
 	}
 
 
 	// Output
-	public static function printLog() // Output log
+	public static function printLog($type="all", $instance=null) // Output log
 	{
-		print_r(self::$log);
+		$combo_log=self::getComboLog();
+	}
+
+	public static function getComboLog()
+	{
+		$combo_log=self::$log;
+
+		// Get all of the logs into one associative array
+		foreach(self::$instances as $instance)
+		{
+			$instanceLog=$instance->getLog();
+			$combo_log["Exception"] = array_merge($combo_log["Exception"], $instanceLog["Exception"]);
+			$combo_log["Info"] = array_merge($combo_log["Info"], $instanceLog["Info"]);
+			$combo_log["Depends"] = array_merge($combo_log["Depends"], $instanceLog["Depends"]);
+		}
+
+		return $combo_log;
+	}
+
+	public static function getFullLog()
+	{
+		$fullLog=array_merge($combo_log["Exception"], $combo_log["Info"]);
+		$fullLog=array_merge($fullLog, $combo_log["Depends"]);
+
+		$sortFunction=function($a, $b) {
+			if($a["event_id"]==$b["event_id"])
+				return 0;
+			return ($a["event_id"]>$b["event_id"])?1:-1;
+		};
+
+		usort($fullLog, $sortFunction);
+
+		return $fullLog;
 	}
 
 	public static function stackTrace() // Output stack trace
 	{
-		print_r(stack
 	}
 
 	public static function saveLog() // Save log to log file
@@ -134,28 +166,51 @@ class SimpleDebugInstance
 	private $format="Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})";
 
 	private $log=array("Info" => array(), "Depends" => array(), "Exception" => array());
+
 	// Time output format
-	private $time_format=null;
+	private $time_format="";
+
+	// Path to log file
+	private $file_path="";
 
 	public function __construct($settings)
 	{
-	}
-	public function printLog()
-	{
-		print_r($this->log);
+		$this->changeSettings($settings);
 	}
 
+	public function changeSettings($settings)
+	{
+		foreach($settings as $conf=>$val)
+			$this->$conf=$val;
+	}
+
+	// Retrieving $this->log
+	public function printLog()
+	{
+	}
+	public function getLog()
+	{
+		return $this->log;
+	}
+
+	// Log functions for different types
 	public function logException($e)
 	{
-		$this->log['Exception'][]=$e;
+		$this->logEvent("Exception", $e);
 	}
 	public function logInfo($info)
 	{
-		$this->log['Info'][]=$info;
+		$this->logEvent("Info", $info);
 	}
 	public function logDepends($depends)
 	{
-		$this->log['Depends'][]=$depends;
+		$this->logEvent("Depends", $depends);
+	}
+
+	// Function for all log functions to go through when interacting with $this->log
+	public function logEvent($type, $info)
+	{
+		$this->log[$type][]=array("event_id"=>SimpleDebug::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);
 	}
 }
 ?>
