@@ -26,7 +26,7 @@
 	background-color:inherit;
 	margin: 0;
 	padding: 0;
-	border: 0;
+	/* border: 0; /* Problem affecting IE, not sure which version, but doing this takes away borders from input as well so another solution should be found */
 	font-size: 100%;
 	font: inherit;
 	vertical-align: baseline;
