@@ -1,9 +1,11 @@
-			</div>
-			<div id="footer">
+			<div id="footer" class="one-of-one centered">
 				{FOOTERTEXT}
 			</div>
 		</div>
-		{ISADMIN}<script type="text/javascript">editArray='{EDITARRAY}';</script>{/ISADMIN}
+		<script type="text/javascript">
+                {ISADMIN}editArray='{EDITARRAY}';{/ISADMIN}
+ 		class2tag("a", "bluetext");
+		</script>
 	</body>
 </html>
 

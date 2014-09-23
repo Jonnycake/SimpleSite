@@ -1,24 +1,4 @@
 /* Basic HTML Tags */
-*
-{
-	word-wrap:break-word;
-}
-body
-{
-	min-height:100%;
-	width:100%;
-	min-width:850px;
-}
-html
-{
-	margin-left:2%;
-	min-height:95%;
-	width:95%;
-}
-img
-{
-	border-style:none;
-}
 input, textarea
 {
 	width:50%;
@@ -32,52 +12,4 @@ td
 	max-width:50px;
 	border-bottom-width:1px;
 	border-bottom-style:solid;
-}
-
-/* Vertically Organized Divs */
-#center
-{
-	padding-left:4px;
-	width:97%;
-	margin-left:1%;
-	margin-right:1%;
-	min-height:50%;
-}
-#container
-{
-	min-height:100%;
-	width:97%;
-}
-#footer
-{
-	padding-left:4px;
-	width:97%;
-	margin-left:1%;
-	margin-right:1%;
-	margin-top:1%;
-	text-align: center;
-}
-#top
-{
-	width:100%;
-	border-bottom-style:solid;
-	border-bottom-width:1px;
-	margin-bottom:1%;
-	text-align:center;
-}
-
-/* Horizontally Organized Divs */
-#middle
-{
-	width:100%;
-	float:left;
-	padding-right:10px;
-}
-
-/* Basic Classes */
-.bright
-{
-	border-right-width:1px;
-	border-right-style:solid;
-	width:25%;
 }
