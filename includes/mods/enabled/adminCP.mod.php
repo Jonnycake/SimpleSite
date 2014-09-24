@@ -60,6 +60,12 @@ class adminCP extends SimpleModule
 				case "widgetAdmin":
 					$content=$this->widgetAdmin($content,$configs);
 					break;
+				case "toggleDbg":
+					global $funcsperformed;
+					if(!$funcsperformed)
+						$_SESSION['debug']=($_SESSION['debug'])?0:1;
+					$funcsperformed++;
+					break;
 			}
 		}
 		else
