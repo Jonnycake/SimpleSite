@@ -41,8 +41,12 @@
 	{
 		$_GET['debug']=0;
 	}
+	else if(isset($_SESSION['debug']))
+		$_GET['debug']=1;
+
 	if(@($_GET['debug'])==1)
 		echo "Dbg: Start".time()."\n";
+
 	define('SIMPLESITE',1);
 	include("include.php");
 	$ssite=new $configs['default_controller']($configs);
