@@ -20,71 +20,170 @@
 class SimpleDebug
 {
 	// Array of settings to be used to update and create instances
-	public static $settings=array(
-					"mode"        => 0,
-					"errorLevel"  => 0,
-					"format"      => "Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})",
-					"time_format" => null,
-					"file_path"   => "{logdir}"
-				);
-
-	// Should be able to set the file path as well as the file name and any prefix/suffixes
-	// Should be able to change log message format (formatted based on variables)
 
 	public static $event_id=0;
 	public static $log=null;
+	private static $settings=null;
 
 	// Configuration Functions
-	public static function setDbgMode($mode)
+	public static function formatLog($logs, $instance=null)
 	{
-	}
-
-	public static function getDbgMode()
-	{
-	}
-
-	public static function addDepends($depends_name, $dependCheck, $side_effects, $feature_type="core", $feature_name=null)
-	{
-	}
-
-	public static function checkDepends()
-	{
+		self::initSettings();
+		$formattedLog="";
+		if(!is_null($instance) && is_string($instance))
+		{
+			$format=self::$instances[$instance]->format;
+		}
+		else
+			$format=self::$settings['format'];
+		foreach($logs as $log)
+		{
+			$formattedLog.=$format."\n";
+			$formattedLog=str_replace("{ID}", $log['event_id'], $formattedLog);
+			$formattedLog=str_replace("{TIME}", date(self::$settings['time_format'], $log['time']), $formattedLog);
+			$formattedLog=str_replace("{MESSAGE}", $log['message'], $formattedLog);
+			$formattedLog=str_replace("{TYPE}", $log['type'], $formattedLog);
+		}
+		return $formattedLog;
 	}
 
 	public static function logException($e)
 	{
-		self::logEvent("Exception", $e);
+		self::initSettings();
+		self::$settings['errorLevel']++;
+		$line_number=$e->getLine();
+		$file=$e->getFile();
+		$message=$e->getMessage();
+		$info=self::$settings['exception_fmt'];
+		$info=str_replace("{FILE}", $file, $info);
+		$info=str_replace("{LINE}", $line_number, $info);
+		$info=str_replace("{MESSAGE}", $message, $info);
+		self::logEvent("Exception", $info);
+		self::printLog();
 	}
+
 	public static function logInfo($info)
 	{
 		self::logEvent("Info", $info);
 	}
+
 	public static function logDepends($depends)
 	{
 		self::logEvent("Depends", $depends);
 	}
+
 	public static function logEvent($type, $info)
+	{
+		self::initLog();
+		self::$log[$type][]=array("event_id"=>self::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);
+	}
+	public static function getLog($instance=null)
+	{
+		if(is_null($instance))
+			return self::$log;
+		else
+		{
+			return self::getInstanceLog($instance);
+		}
+	}
+
+	// Initialization functions
+	public static function initLog()
 	{
 		if(is_null(self::$log))
 			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
-		self::$log[$type][]=array("event_id"=>self::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);
 	}
-
+	public static function initSettings()
+	{
+		if(is_null(self::$settings))
+			self::$settings=array(
+						"errorLevel"    => 0,
+						"format"        => "Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}",
+						"exception_fmt" => "{MESSAGE} in {FILE} on line {LINE}",
+						"time_format"   => "m/d/Y H:i:s",
+						"file_path"     => "{logdir}"
+					);
+	}
 
 	// Output
-	public static function printLog($type="all", $instance=null) // Output log
+	public static function printLog($instance=null, $type="all") // Output log
 	{
-		$combo_log=self::getComboLog();
+		$full_log=array();
+		if(is_null($instance))
+		{
+			if($type=="all")
+			{
+				$full_log=self::getFullLog();
+			}
+			else
+			{
+				$combo_log=self::getComboLog();
+				if(isset($combo_log[$type]))
+				{
+					foreach($combo_log[$type] as $log)
+					{
+						$full_log[]=$log;
+					}
+				}
+			}
+		}
+		else
+		{
+			$full_log=self::getInstanceLog($instance);
+		}
+
+		echo self::formatLog($full_log);
+	}
+	public static function printInstanceLog($instance, $type="all")
+	{
+
 	}
 
-	public static function getComboLog()
+	public static function getInstanceLog($instance=null)
 	{
+		$instanceLog=array();
+		if(is_null($instance))
+		{
+			foreach(self::$instances as $instanceName=>$instance)
+			{
+				// This needs to be switched to a separate function
+				$instanceLog[$instanceName]=$instance->getLog();
+			}
+		}
+		else if(is_array($instance))
+		{
+			foreach($instance as $instanceName)
+			{
+				$instanceLog[$instanceName]=self::$instances[$instanceName]->getLog();
+			}
+		}
+		else if(isset(self::$instances[$instance]))
+		{
+			$instanceLog=array(self::$instances[$instance]->getLog());
+		}
+		else
+			return null;
+
+		return $instanceLog;
+	}
+
+	public static function getComboLog($instances=null, $instanceLogs=null)
+	{
+		self::initLog();
 		$combo_log=self::$log;
 
 		// Get all of the logs into one associative array
-		foreach(self::$instances as $instance)
+		if(is_null($instanceLogs))
 		{
-			$instanceLog=$instance->getLog();
+			$instanceLogs=self::getInstanceLog($instances);
+			if(is_null($instanceLogs))
+				$instanceLogs=array();
+		}
+
+		foreach($instanceLogs as $instanceLog)
+		{
+			// This needs to be switched to a separate function
+			//$instanceLog=$instance->getLog();
 			$combo_log["Exception"] = array_merge($combo_log["Exception"], $instanceLog["Exception"]);
 			$combo_log["Info"] = array_merge($combo_log["Info"], $instanceLog["Info"]);
 			$combo_log["Depends"] = array_merge($combo_log["Depends"], $instanceLog["Depends"]);
@@ -93,8 +192,10 @@ class SimpleDebug
 		return $combo_log;
 	}
 
-	public static function getFullLog()
+	public static function getFullLog($instances=null)
 	{
+		$combo_log=self::getComboLog($instances);
+
 		$fullLog=array_merge($combo_log["Exception"], $combo_log["Info"]);
 		$fullLog=array_merge($fullLog, $combo_log["Depends"]);
 
@@ -125,10 +226,11 @@ class SimpleDebug
 	 */
 
 	// Array of named-instances created/retrieved/destroyed using the functions below
-	public static $instances=null;
+	private static $instances=null;
 
 	public static function createInstance($instanceName)
 	{
+		self::initSettings();
 		if(is_null(self::$instances))
 			self::$instances=array();
 
