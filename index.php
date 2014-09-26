@@ -37,19 +37,19 @@
  */
 	error_reporting(E_ALL);
 	session_start();
+	define('SIMPLESITE',1);
+	include("include.php");
 	if(@($_SESSION['is_admin']!=1))
 	{
 		$_GET['debug']=0;
 	}
 	else if(isset($_SESSION['debug']))
-		$_GET['debug']=1;
+		$_GET['debug']=$_SESSION['debug'];
 
-	if(@($_GET['debug'])==1)
-		echo "Dbg: Start".time()."\n";
+	register_shutdown_function("SimpleDebug::shutdownFunction");
+	SimpleDebug::setSetting("loud", $_GET['debug']);
+	SimpleDebug::logInfo("Start");
 
-	define('SIMPLESITE',1);
-	include("include.php");
 	$ssite=new $configs['default_controller']($configs);
-	if(@($_GET['debug'])==1)
-		echo "Dbg: End".time()."\n";
+	SimpleDebug::logInfo("End");
 ?>

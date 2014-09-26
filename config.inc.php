@@ -19,26 +19,34 @@
 if(!SIMPLESITE)
 	die("Can't access this file directly.");
 
+set_exception_handler("SimpleDebug::exceptionHandler");
 // Initialize config array and super-global arrays
 $configs=array();
 if(!isset($_SERVER))
 {
+	global $_SERVER;
 	$_SERVER=array();
+	$_SERVER['DOCUMENT_ROOT']=__DIR__;
+	$_SERVER['REMOTE_ADDR']="0.0.0.0";
 }
 if(!isset($_GET))
 {
+	global $_GET;
 	$_GET=array();
 }
 if(!isset($_POST))
 {
+	global$_POST;
 	$_POST=array();
 }
 if(!isset($_REQUEST))
 {
+	global $_REQUEST;
 	$_REQUEST=array();
 }
 if(!isset($_SESSION))
 {
+	global $_SESSION;
 	$_SESSION=array();
 }
 
@@ -103,14 +111,13 @@ $configs["default_controller"]="DefaultSite";
  *                                           1 - Debug only when $_GET['debug'] is set to 1        *
  *                                           2 - Always output debug messages                      *
  ***************************************************************************************************/
-$configs["path"]["root"]="/SimpleSite/";
+$configs["path"]["root"]="/";
 $configs["path"]["themes"]="templates/themes";
 $configs["path"]["mod_templates"]="templates/mods";
 $configs["path"]["custom_templates"]="templates/custom";
 
 // Database Configurations
-if(@($_GET['debug']==1))
-	echo "Dbg: Database Configs\n";
+SimpleDebug::logInfo("Setting database configs.");
 $configs["database"]=array();
 $configs["database"]["type"]="mysql";
 $configs["database"]["host"]="127.0.0.1";
@@ -154,8 +161,7 @@ if(!isset($_SERVER['DOCUMENT_ROOT']))
 	}
 
 	$_SERVER['DOCUMENT_ROOT']=implode($configs['path']['root'],$dirArr);
-	if($_GET['debug']==1)
-		echo "Dbg: Setting DOCUMENT_ROOT to ${SERVER['DOCUMENT_ROOT']}.\n";
+	SimpleDebug::logInfo("Setting DOCUMENT_ROOT to ${SERVER['DOCUMENT_ROOT']}.");
 }
 
 $configs["path"]["includes"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/";

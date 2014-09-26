@@ -89,12 +89,14 @@ class SimpleDebug
 
 		self::logException($e);
 
-		if(self::$settings['loud']>0)
+		//if(self::$settings['loud']>0)
 			self::printLog();
 	}
 
 	public static function shutdownFunction()
 	{
+		if(self::$settings['loud']>0)
+			self::printLog();
 		self::saveLog();
 	}
 
@@ -158,6 +160,11 @@ class SimpleDebug
 						"file_path"     => "{logdir}"
 					);
 	}
+	public static function initInstances()
+	{
+		if(is_null(self::$instances))
+			self::$instances=array();
+	}
 
 	// Output
 	public static function printLog($instance=null, $type="all") // Output log
@@ -191,6 +198,7 @@ class SimpleDebug
 
 	public static function getInstanceLog($instance=null)
 	{
+		self::initInstances();
 		$instanceLog=array();
 		if(is_null($instance))
 		{

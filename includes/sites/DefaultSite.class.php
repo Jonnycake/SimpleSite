@@ -21,10 +21,9 @@ if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
 class DefaultSite extends SimpleSite
 {
-	function __construct($configs=array())
+	public function __construct($configs=array())
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: SimpleSite->__construct()\n";
+		SimpleDebug::logInfo("SimpleSite->__construct()");
 		spl_autoload_register('SimpleSite::simpleLoader');
 
 		// Configs
@@ -35,26 +34,33 @@ class DefaultSite extends SimpleSite
 				include("config.inc.php");
 			}
 			$this->configs=$configs;
-			$this->db=new SimpleDB($this->configs['database'], $_GET['debug']);
-			if($this->db->connected())
+			try
 			{
-				// Constants
-				$constantsTbl=$this->db->openTable('constants');
-				$constantsTbl->select(array('name','value'));
-				$constants=$constantsTbl->sdbGetRows();
-				if($constants!=false)
-					foreach($constants as $row)
-					{
-						define($row->getName(),$row->getValue());
-					}
+				$this->db=new SimpleDB($this->configs['database'], $_GET['debug']);
+				if($this->db->connected())
+				{
+					// Constants
+					$constantsTbl=$this->db->openTable('constants');
+					$constantsTbl->select(array('name','value'));
+					$constants=$constantsTbl->sdbGetRows();
+					if($constants!=false)
+						foreach($constants as $row)
+						{
+							define($row->getName(),$row->getValue());
+						}
 
-				// Block List
-				$blockedTbl=$this->db->openTable('blocked');
-				$blockedTbl->select(array('remote_addr'));
-				$blocked=$blockedTbl->sdbGetRows();
-				if($blocked!=false)
-					foreach($blocked as $row)
-						$this->configs['blocked'][]=$row->getRemote_addr();
+					// Block List
+					$blockedTbl=$this->db->openTable('blocked');
+					$blockedTbl->select(array('remote_addr'));
+					$blocked=$blockedTbl->sdbGetRows();
+					if($blocked!=false)
+						foreach($blocked as $row)
+							$this->configs['blocked'][]=$row->getRemote_addr();
+				}
+			}
+			catch(Exception $e)
+			{
+				SimpleDebug::logException($e);
 			}
 		}
 

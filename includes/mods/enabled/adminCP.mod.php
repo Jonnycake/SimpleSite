@@ -623,8 +623,7 @@ class adminCP extends SimpleModule
 		}
 		else if($funcsperformed>=1)
 		{
-			if(@$_GET['debug']==1)
-				echo "Dbg: Functions already performed...\n";
+			SimpleDebug::logInfo("Functions already performed...");
 		}
 
 		$table="";
