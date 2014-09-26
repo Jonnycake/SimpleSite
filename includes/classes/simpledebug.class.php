@@ -21,21 +21,57 @@ class SimpleDebug
 {
 	// Array of settings to be used to update and create instances
 
+	public static $loud=1;
 	public static $event_id=0;
 	public static $log=null;
 	private static $settings=null;
 
 	// Configuration Functions
-	public static function formatLog($logs, $instance=null)
+	public static function getSettings()
 	{
 		self::initSettings();
+		return self::$settings;
+	}
+	public static function setSettings($settings, $propogate=false)
+	{
+		self::initSettings();
+		foreach($settings as $setting=>$value)
+		{
+			self::$settings[$setting]=$value;
+		}
+	}
+	public static function getSetting($setting)
+	{
+		self::initSettings();
+		return self::$settings[$setting];
+	}
+	public static function setSetting($setting, $value, $propogate=false)
+	{
+		self::initSettings();
+		self::$settings[$setting]=$value;
+	}
+
+	public static function formatLog($logs, $instance=null, $format=null)
+	{
+		self::initSettings();
+
+		// Sort logs by event_id (order they happened in)
+		$sortFunction=function($a, $b) {
+			if($a["event_id"]==$b["event_id"])
+				return 0;
+			return ($a["event_id"]>$b["event_id"])?1:-1;
+		};
+
+		usort($logs, $sortFunction);
+
 		$formattedLog="";
 		if(!is_null($instance) && is_string($instance))
 		{
 			$format=self::$instances[$instance]->format;
 		}
-		else
+		else if(is_null($format))
 			$format=self::$settings['format'];
+
 		foreach($logs as $log)
 		{
 			$formattedLog.=$format."\n";
@@ -47,6 +83,21 @@ class SimpleDebug
 		return $formattedLog;
 	}
 
+	public static function exceptionHandler($e)
+	{
+		self::initSettings();
+
+		self::logException($e);
+
+		if(self::$settings['loud']>0)
+			self::printLog();
+	}
+
+	public static function shutdownFunction()
+	{
+		self::saveLog();
+	}
+
 	public static function logException($e)
 	{
 		self::initSettings();
@@ -54,12 +105,13 @@ class SimpleDebug
 		$line_number=$e->getLine();
 		$file=$e->getFile();
 		$message=$e->getMessage();
+		$backtrace=json_encode(debug_backtrace());
 		$info=self::$settings['exception_fmt'];
 		$info=str_replace("{FILE}", $file, $info);
 		$info=str_replace("{LINE}", $line_number, $info);
 		$info=str_replace("{MESSAGE}", $message, $info);
+		$info=str_replace("{BACKTRACE}", $backtrace, $info);
 		self::logEvent("Exception", $info);
-		self::printLog();
 	}
 
 	public static function logInfo($info)
@@ -97,9 +149,11 @@ class SimpleDebug
 	{
 		if(is_null(self::$settings))
 			self::$settings=array(
+						"loud"          => 0,
+						"logfile"       => "SimpleDebug.log",
 						"errorLevel"    => 0,
 						"format"        => "Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}",
-						"exception_fmt" => "{MESSAGE} in {FILE} on line {LINE}",
+						"exception_fmt" => "{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}",
 						"time_format"   => "m/d/Y H:i:s",
 						"file_path"     => "{logdir}"
 					);
@@ -133,10 +187,6 @@ class SimpleDebug
 		}
 
 		echo self::formatLog($full_log);
-	}
-	public static function printInstanceLog($instance, $type="all")
-	{
-
 	}
 
 	public static function getInstanceLog($instance=null)
@@ -192,30 +242,21 @@ class SimpleDebug
 		return $combo_log;
 	}
 
-	public static function getFullLog($instances=null)
+	public static function getFullLog($instances=null, $combo_log=null)
 	{
-		$combo_log=self::getComboLog($instances);
+		if(is_null($combo_log))
+			$combo_log=self::getComboLog($instances);
 
 		$fullLog=array_merge($combo_log["Exception"], $combo_log["Info"]);
 		$fullLog=array_merge($fullLog, $combo_log["Depends"]);
 
-		$sortFunction=function($a, $b) {
-			if($a["event_id"]==$b["event_id"])
-				return 0;
-			return ($a["event_id"]>$b["event_id"])?1:-1;
-		};
-
-		usort($fullLog, $sortFunction);
-
 		return $fullLog;
-	}
-
-	public static function stackTrace() // Output stack trace
-	{
 	}
 
 	public static function saveLog() // Save log to log file
 	{
+		self::initSettings();
+		file_put_contents(self::$settings['logfile'], self::formatLog(self::getFullLog())."\n", FILE_APPEND);
 	}
 
 
@@ -289,7 +330,9 @@ class SimpleDebugInstance
 	// Retrieving $this->log
 	public function printLog()
 	{
+		echo SimpleDebug::formatLog(SimpleDebug::getFullLog(null, $this->log));
 	}
+
 	public function getLog()
 	{
 		return $this->log;

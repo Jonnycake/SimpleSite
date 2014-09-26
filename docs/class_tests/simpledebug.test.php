@@ -4,7 +4,9 @@ define("SIMPLESITE", 1);
 include("../../includes/classes/simpleutils.class.php");
 include("../../includes/classes/simpledebug.class.php");
 
-set_exception_handler("SimpleDebug::logException");
+register_shutdown_function("SimpleDebug::shutdownFunction");
+set_exception_handler("SimpleDebug::exceptionHandler");
+SimpleDebug::setSetting("loud", 1);
 
 class SomeFirstclass extends SimpleUtils
 {
@@ -22,7 +24,7 @@ class SomeClass extends SimpleUtils
 		$this->instance->logInfo("Testing logInfo");
 		$this->instance->printLog();
 		SimpleDebug::logInfo("test logInfo static.");
-		sleep(1);
+		sleep(rand(1,5));
 		$this->instance->logDepends("A dependency error");
 		if(rand(1, 10)>=8)
 			$this->messUp();
@@ -35,5 +37,4 @@ class SomeClass extends SimpleUtils
 
 new SomeFirstclass();
 new SomeClass();
-//print_r(SimpleDebug::getFullLog(array("SomeFirstclass", "SomeClass")));
-SimpleDebug::printLog(null, "Info");
+SimpleDebug::printLog();
