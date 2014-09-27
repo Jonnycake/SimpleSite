@@ -45,8 +45,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 	// Parse bbcodes -- should move this to a separate widget
 	protected function bbencode($post,$getcodes=0,$codetop=null,$codeformat=null,$codebottom=null)
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: bbencode(\$post,$getcodes)".time()."\n";
+		SimpleDebug::logInfo("bbencode(\$post,$getcodes)");
 
 		if(is_null($codetop))
 		{
@@ -96,8 +95,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 	// Template display
 	public function readTemplate($template, $mod)
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: readtemplate(\"".str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)."\",\"$mod\")".time()."\n";
+		SimpleDebug::logInfo("readtemplate(\"".str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)."\",\"$mod\")");
 
 		// This will be replaced by SimpleFile
 		$f=fopen($template,"r");
@@ -118,14 +116,12 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 	// This entire function will probably be cleaned up with SimpleFile
 	public function parseTemplate($content, $mod, $templateName="")
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: parsetemplate(\$content,\"$mod\")".time()."\n";
+		SimpleDebug::logInfo("parsetemplate(\$content,\"$mod\")");
 
 		// Should replace with a util function loadConfigs()
 		if(!isset($this->configs))
 		{
-			if(@($_GET['debug'])==1)
-				echo "Dbg: Loading module's configurations from config file...".time()."\n";
+			SimpleDebug::logInfo("Loading module's configurations from config file...");
 			include("config.inc.php");
 			$this->configs=$configs;
 		}
@@ -134,10 +130,17 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 		$funcconsts=array();
 		if($mod!="")
 		{
-			$obj=new $mod($this->configs,$this->db);
-			if(@$obj->isInstalled($this->configs))
+			try
 			{
-				$content=$obj->sideparse($content,$this->configs); // I wish we could move this toward the end so we could take advantage of tail recursion
+				$obj=new $mod($this->configs,$this->db);
+				if(@$obj->isInstalled($this->configs))
+				{
+					$content=$obj->sideparse($content,$this->configs); // I wish we could move this toward the end so we could take advantage of tail recursion
+				}
+			}
+			catch(Exception $e)
+			{
+				SimpleDebug::logException($e);
 			}
 		}
 
@@ -151,21 +154,39 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 		{
 			if(isset($obj))
 			{
-				while((preg_match("/{CONTENT}/si",$content,$match)))
-					if((@$obj->isInstalled($this->configs))?TRUE:@$obj->install($this->configs))
-					{
-						if(@($_GET['debug'])==1)
-							echo "Dbg: \$obj->getContent(\$this->configs)".time()."\n";
-						$content=@str_replace("{CONTENT}",(!is_null($replacement=$obj->getContent($this->configs))?$replacement:($content="")),$content);
-					}
+				try
+				{
+					while((preg_match("/{CONTENT}/si",$content,$match)))
+						if((@$obj->isInstalled($this->configs))?TRUE:@$obj->install($this->configs))
+						{
+							SimpleDebug::logInfo("\$obj->getContent(\$this->configs)");
+							try
+							{
+								$content_replacement=$obj->getContent($this->configs);
+								if(!is_null($content_replacement))
+									$content=str_replace("{CONTENT}", $content_replacement, $content);
+								else
+									$content="";
+							}
+							catch(Exception $e)
+							{
+								$content=str_replace("{CONTENT}", "&#123;CONTENT&#125;", $content);
+								SimpleDebug::logException($e);
+							}
+							$content=@str_replace("{CONTENT}",(!is_null($replacement=$obj->getContent($this->configs))?$replacement:($content="")),$content);
+						}
+				}
+				catch(Exception $e)
+				{
+					SimpleDebug::logException($e);
+				}
 			}
 			else
 				$content=$content=str_replace($match[0],$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/index.template",$mod),$content);
 		}
 		if((preg_match("/{FOOTER}/si",$content,$match)))
 		{
-			if(@$_GET['debug']==1)
-				echo "Dbg: Replacing {FOOTER}".time()."\n";
+			SimpleDebug::logInfo("Replacing {FOOTER}".time());
 			while((preg_match("/{FOOTER}/si",$content,$match)))
 				$content=@str_replace("{FOOTER}",$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/footer.template",$mod),$content);
 		}
@@ -203,8 +224,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 				$content=str_replace($match[0],$this->$funcconsts[$match[1]](),$content);
 			else
 			{
-				if(@$_GET['debug']==1)
-					echo "Dbg: Replacing &#123;${match[1]}&#125;".time()."\n";
+				SimpleDebug::logInfo("Replacing &#123;${match[1]}&#125;");
 				$content=str_replace($match[0],"&#123;".$match[1]."&#125;",$content);
 			}
 
@@ -231,13 +251,21 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 		// Widgets
 		while((preg_match("/{WIDGET_([([A-Za-z0-9]*)}/si",$content,$match)) && $match)
 		{
-			$widget=$match[1];
-			if(is_file($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php"))
+			try
 			{
-				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php");
-				$content=str_replace($match[0],((@($widgetTemp=$this->$widget($this->configs))!="")?$widgetTemp:"Widget Failed: $widget"),$content);
+				$widget=$match[1];
+				if(is_file($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php"))
+				{
+					include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php");
+					$content=str_replace($match[0],((@($widgetTemp=$this->$widget($this->configs))!="")?$widgetTemp:"Widget Failed: $widget"),$content);
+				}
+				$content=str_replace($match[0],"",$content);
 			}
-			$content=str_replace($match[0],"",$content);
+			catch(Exception $e)
+			{
+				SimpleDebug::logException($e);
+				$content=str_replace($match[0], "", $content);
+			}
 		}
 
 		// Module info variables
@@ -289,93 +317,103 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 	}
 	public function showSite($mod)
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: showsite(\"$mod\")".time()."\n";
-		if($mod!="")
-			$obj=new $mod($this->configs,$this->db);
-		if(@($_GET['debug'])==1)
-			echo "Dbg: \$obj->choosePage(\$this->configs)".time()."\n";
-		if(@($_POST['ajax']!=1))
+		try
 		{
-			$chosenPage=(isset($obj)) ? $obj->choosePage($this->configs) : "";
-			if(is_string($chosenPage))
+			SimpleDebug::logInfo("showsite(\"$mod\")");
+
+			// We need a multiton type pattern to use here so we don't eat up so much memory creating duplicate objects
+			if($mod!="")
 			{
-				$path=$this->configs["path"]["templates"]."/".$chosenPage;
-			}
-			else if(is_array($chosenPage) && count($chosenPage)>=2) // Can't remember what I was doing here
-			{
-				$path="";
-				switch($chosenPage[0])
+				try
 				{
-					case "mod":
-						break;
-					case "theme":
-						break;
-					case "custom":
-						break;
-					case "widget":
-						break;
+					$obj=new $mod($this->configs,$this->db);
+				}
+				catch(Exception $e)
+				{
+					SimpleDebug::logException($e);
 				}
 			}
 
-			// This should probably be cleaned up...
-			echo @$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs["path"]["root"].$this->configs["path"]["templates"]."/".
-(
-	(isset($obj))
-	?
-		(
-			(
-				($page=$obj->choosePage($this->configs))
-			)
-			? (
-				($page==-1)
-				?""
-				:$page
-			)
-			:"overall"
-		)
-	:
-		"overall"
-).".template",$mod);
-		}
-		else // This will get cleaned up by SimpleFile
-		{
-			switch($_POST['ajaxFunc'])
-			{
-				case "liveEdit":
-					if($_SESSION['is_admin']!=1)
-						die("You don't have privileges for this.");
-					$oldContent="";
-					$editArray=json_decode(base64_decode($_POST['editArray']));
-					$editableInfo=$editArray[$_POST['eid']-1];
-					$f=@fopen($_SERVER['DOCUMENT_ROOT'].$editableInfo->template,"r");
-					while(@($line=fgets($f)))
-						$oldContent.=$line;
-					@fclose($f);
-					$f=@fopen($_SERVER['DOCUMENT_ROOT'].$editableInfo->template,"w");
-					$newContent=@substr_replace($oldContent,"{EDITABLE}".$_POST['updateContent']."{/EDITABLE}",$editableInfo->start,$editableInfo->length);
-					fwrite($f,$newContent);
-					fclose($f);
+			SimpleDebug::logInfo("\$obj->choosePage(\$this->configs)");
 
-					// Update editArray
-					$x=$_POST['eid'];
-					$editArray[$x-1]->length+=strlen($newContent)-strlen($oldContent);
-					$arrCount=0;
-					foreach($editArray as $editable)
-						$arrCount++;
-					while($x++<$arrCount)
-						if($editArray[$x-1]->template==$editableInfo->template)
-							$editArray[$x-1]->start+=strlen($newContent)-strlen($oldContent);
-					echo base64_encode(json_encode($editArray));
-					break;
-				case "parseText":
-					if($_SESSION['is_admin']==1)
-						echo $this->parseTemplate($_POST['content'],$mod);
-					break;
-				default:
-					echo "something went wrong o.O";
-					break;
+			if(@($_POST['ajax']!=1))
+			{
+				try
+				{
+					$chosenPage=(isset($obj)) ? $obj->choosePage($this->configs) : "";
+				}
+				catch(Exception $e)
+				{
+					$chosenPage="";
+					SimpleDebug::logException($e);
+				}
+
+				if(is_string($chosenPage))
+				{
+					$path=$this->configs["path"]["templates"]."/".$chosenPage;
+				}
+				else if(is_array($chosenPage) && count($chosenPage)>=2) // Can't remember what I was doing here - something to do with commponents customizing their display I know that much
+				{
+					$path="";
+					switch($chosenPage[0])
+					{
+						case "mod":
+							break;
+						case "theme":
+							break;
+						case "custom":
+							break;
+						case "widget":
+							break;
+					}
+				}
+
+				// This should probably be cleaned up...
+				echo $this->readTemplate($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root'].$this->configs['path']['templates']."/".(($chosenPage=="")?"overall":$chosenPage).".template", $mod);
 			}
+			else // This will get cleaned up by SimpleFile
+			{
+				switch($_POST['ajaxFunc'])
+				{
+					case "liveEdit":
+						if($_SESSION['is_admin']!=1)
+							die("You don't have privileges for this.");
+						$oldContent="";
+						$editArray=json_decode(base64_decode($_POST['editArray']));
+						$editableInfo=$editArray[$_POST['eid']-1];
+						$f=@fopen($_SERVER['DOCUMENT_ROOT'].$editableInfo->template,"r");
+						while(@($line=fgets($f)))
+							$oldContent.=$line;
+						@fclose($f);
+						$f=@fopen($_SERVER['DOCUMENT_ROOT'].$editableInfo->template,"w");
+						$newContent=@substr_replace($oldContent,"{EDITABLE}".$_POST['updateContent']."{/EDITABLE}",$editableInfo->start,$editableInfo->length);
+						fwrite($f,$newContent);
+						fclose($f);
+
+						// Update editArray
+						$x=$_POST['eid'];
+							$editArray[$x-1]->length+=strlen($newContent)-strlen($oldContent);
+							$arrCount=0;
+							foreach($editArray as $editable)
+								$arrCount++;
+							while($x++<$arrCount)
+								if($editArray[$x-1]->template==$editableInfo->template)
+									$editArray[$x-1]->start+=strlen($newContent)-strlen($oldContent);
+							echo base64_encode(json_encode($editArray));
+							break;
+					case "parseText":
+						if($_SESSION['is_admin']==1)
+							echo $this->parseTemplate($_POST['content'],$mod);
+						break;
+					default:
+						echo "something went wrong o.O";
+						break;
+				}
+			}
+		}
+		catch (Exception $e)
+		{
+			SimpleDebug::logException($e);
 		}
 	}
 }

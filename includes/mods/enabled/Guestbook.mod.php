@@ -21,11 +21,11 @@ class Guestbook extends SimpleModule
 				$GLOBALS['funcsperformed']++;
 				$this->db->openTable("Guestbook");
 				$table=$this->db->sdbGetTable("Guestbook");
-				$values=array("name"=>$this->simpleFilter($_POST['name']),"message"=>$this->simpleFilter($_POST['message']));
+				$values=array("name"=>$this->simpleFilter($_POST['name'], false),"message"=>$this->simpleFilter($_POST['message'], false));
 				$table->insert($values);
 			}
-			else if($_GET['debug']==1)
-				echo "Dbg: Already performed function...skipping.\n";
+			else
+				SimpleDebug::logInfo("Already performed function...skipping.");
 		}
 		if((preg_match("/{ENTRIES}/si",$content,$match)))
 		{
