@@ -251,13 +251,21 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 		// Widgets
 		while((preg_match("/{WIDGET_([([A-Za-z0-9]*)}/si",$content,$match)) && $match)
 		{
-			$widget=$match[1];
-			if(is_file($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php"))
+			try
 			{
-				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php");
-				$content=str_replace($match[0],((@($widgetTemp=$this->$widget($this->configs))!="")?$widgetTemp:"Widget Failed: $widget"),$content);
+				$widget=$match[1];
+				if(is_file($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php"))
+				{
+					include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php");
+					$content=str_replace($match[0],((@($widgetTemp=$this->$widget($this->configs))!="")?$widgetTemp:"Widget Failed: $widget"),$content);
+				}
+				$content=str_replace($match[0],"",$content);
 			}
-			$content=str_replace($match[0],"",$content);
+			catch(Exception $e)
+			{
+				SimpleDebug::logException($e);
+				$content=str_replace($match[0], "", $content);
+			}
 		}
 
 		// Module info variables
