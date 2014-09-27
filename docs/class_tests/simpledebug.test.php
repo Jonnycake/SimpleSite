@@ -13,7 +13,10 @@ class SomeFirstclass extends SimpleUtils
 	public function __construct()
 	{
 		$this->createDbgInstance();
-		$this->instance->logInfo("Test loginfo on SomeFirstClass");
+		$this->debug->logInfo("Test loginfo on SomeFirstClass");
+
+		$st=SimpleDebug::stackTrace();
+		print_r($st);
 	}
 }
 class SomeClass extends SimpleUtils
@@ -21,11 +24,11 @@ class SomeClass extends SimpleUtils
 	public function __construct()
 	{
 		$this->createDbgInstance();
-		$this->instance->logInfo("Testing logInfo");
-		$this->instance->printLog();
+		$this->debug->logInfo("Testing logInfo");
+		$this->debug->printLog();
 		SimpleDebug::logInfo("test logInfo static.");
 		sleep(rand(1,5));
-		$this->instance->logDepends("A dependency error");
+		$this->debug->logDepends("A dependency error");
 		if(rand(1, 10)>=8)
 			$this->messUp();
 	}

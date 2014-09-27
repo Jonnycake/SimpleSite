@@ -19,10 +19,10 @@
 
 class SimpleDebug
 {
-	// Array of settings to be used to update and create instances
-
-	public static $loud=1;
+	// Literals
 	public static $event_id=0;
+
+	// Arrays
 	public static $log=null;
 	private static $settings=null;
 
@@ -63,45 +63,14 @@ class SimpleDebug
 		}
 	}
 
-	public static function formatLog($logs, $instance=null, $format=null)
-	{
-		self::initSettings();
-
-		// Sort logs by event_id (order they happened in)
-		$sortFunction=function($a, $b) {
-			if($a["event_id"]==$b["event_id"])
-				return 0;
-			return ($a["event_id"]>$b["event_id"])?1:-1;
-		};
-
-		usort($logs, $sortFunction);
-
-		$formattedLog="";
-		if(!is_null($instance) && is_string($instance))
-		{
-			$format=self::$instances[$instance]->format;
-		}
-		else if(is_null($format))
-			$format=self::$settings['format'];
-
-		foreach($logs as $log)
-		{
-			$formattedLog.=$format."\n";
-			$formattedLog=str_replace("{ID}", $log['event_id'], $formattedLog);
-			$formattedLog=str_replace("{TIME}", date(self::$settings['time_format'], $log['time']), $formattedLog);
-			$formattedLog=str_replace("{MESSAGE}", $log['message'], $formattedLog);
-			$formattedLog=str_replace("{TYPE}", $log['type'], $formattedLog);
-		}
-		return $formattedLog;
-	}
-
+	// Log functions
 	public static function exceptionHandler($e)
 	{
 		self::initSettings();
 
 		self::logException($e);
 
-		//if(self::$settings['loud']>0)
+		if(self::$settings['loud']>0)
 			self::printLog();
 	}
 
@@ -155,62 +124,6 @@ class SimpleDebug
 			return self::getInstanceLog($instance);
 		}
 	}
-
-	// Initialization functions
-	public static function initLog()
-	{
-		if(is_null(self::$log))
-			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
-	}
-	public static function initSettings()
-	{
-		if(is_null(self::$settings))
-			self::$settings=array(
-						"loud"          => 0,
-						"logfile"       => "SimpleDebug.log",
-						"errorLevel"    => 0,
-						"format"        => "Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}",
-						"exception_fmt" => "{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}",
-						"time_format"   => "m/d/Y H:i:s",
-						"file_path"     => "{logdir}"
-					);
-	}
-	public static function initInstances()
-	{
-		if(is_null(self::$instances))
-			self::$instances=array();
-	}
-
-	// Output
-	public static function printLog($instance=null, $type="all") // Output log
-	{
-		$full_log=array();
-		if(is_null($instance))
-		{
-			if($type=="all")
-			{
-				$full_log=self::getFullLog();
-			}
-			else
-			{
-				$combo_log=self::getComboLog();
-				if(isset($combo_log[$type]))
-				{
-					foreach($combo_log[$type] as $log)
-					{
-						$full_log[]=$log;
-					}
-				}
-			}
-		}
-		else
-		{
-			$full_log=self::getInstanceLog($instance);
-		}
-
-		echo self::formatLog($full_log);
-	}
-
 	public static function getInstanceLog($instance=null)
 	{
 		self::initInstances();
@@ -238,7 +151,6 @@ class SimpleDebug
 
 		return $instanceLog;
 	}
-
 	public static function getComboLog($instances=null, $instanceLogs=null)
 	{
 		self::initLog();
@@ -261,7 +173,6 @@ class SimpleDebug
 
 		return $combo_log;
 	}
-
 	public static function getFullLog($instances=null, $combo_log=null)
 	{
 		if(is_null($combo_log))
@@ -272,11 +183,102 @@ class SimpleDebug
 
 		return $fullLog;
 	}
-
 	public static function saveLog() // Save log to log file
 	{
 		self::initSettings();
 		file_put_contents(self::$settings['logfile'], self::formatLog(self::getFullLog())."\n", FILE_APPEND);
+	}
+
+	// Initialization functions
+	public static function initLog()
+	{
+		if(is_null(self::$log))
+			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
+	}
+	public static function initSettings()
+	{
+		if(is_null(self::$settings))
+			self::$settings=array(
+						"loud"          => 0,
+						"logfile"       => "SimpleDebug.log",
+						"errorLevel"    => 0,
+						"format"        => "Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}",
+						"exception_fmt" => "{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}",
+						"time_format"   => "m/d/Y H:i:s",
+						"file_path"     => "{logdir}"
+					);
+	}
+	public static function initInstances()
+	{
+		if(is_null(self::$instances))
+			self::$instances=array();
+	}
+
+	// Output/Misc.
+	public static function formatLog($logs, $instance=null, $format=null)
+	{
+		self::initSettings();
+
+		// Sort logs by event_id (order they happened in)
+		$sortFunction=function($a, $b) {
+			if($a["event_id"]==$b["event_id"])
+				return 0;
+			return ($a["event_id"]>$b["event_id"])?1:-1;
+		};
+
+		usort($logs, $sortFunction);
+
+		$formattedLog="";
+		if(!is_null($instance) && is_string($instance))
+		{
+			$format=self::$instances[$instance]->format;
+		}
+		else if(is_null($format))
+			$format=self::$settings['format'];
+
+		foreach($logs as $log)
+		{
+			$formattedLog.=$format."\n";
+			$formattedLog=str_replace("{ID}", $log['event_id'], $formattedLog);
+			$formattedLog=str_replace("{TIME}", date(self::$settings['time_format'], $log['time']), $formattedLog);
+			$formattedLog=str_replace("{MESSAGE}", $log['message'], $formattedLog);
+			$formattedLog=str_replace("{TYPE}", $log['type'], $formattedLog);
+		}
+		return $formattedLog;
+	}
+	public static function printLog($instance=null, $type="all")
+	{
+		$full_log=array();
+		if(is_null($instance))
+		{
+			if($type=="all")
+			{
+				$full_log=self::getFullLog();
+			}
+			else
+			{
+				$combo_log=self::getComboLog();
+				if(isset($combo_log[$type]))
+				{
+					foreach($combo_log[$type] as $log)
+					{
+						$full_log[]=$log;
+					}
+				}
+			}
+		}
+		else
+		{
+			$full_log=self::getInstanceLog($instance);
+		}
+
+		echo self::formatLog($full_log);
+	}
+	public static function stacktrace()
+	{
+		$backtrace=debug_backtrace();
+		array_shift($backtrace);
+		return $backtrace;
 	}
 
 

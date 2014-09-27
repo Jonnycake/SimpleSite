@@ -45,6 +45,10 @@ class SimpleUtils
 		ksort($tree,SORT_STRING);
 		return $tree;
 	}
+	public function createDbgInstance()
+	{
+		$this->debug=SimpleDebug::createInstance(get_class($this));
+	}
 
 	/* START: Replaced by SimpleDirectory */
 	public function recursiveDirDelete($curdir="/tmp/",$depth=0)
