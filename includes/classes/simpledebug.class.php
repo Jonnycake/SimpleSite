@@ -39,6 +39,8 @@ class SimpleDebug
 		{
 			self::$settings[$setting]=$value;
 		}
+		if($propogate)
+			self::propogateSettings();
 	}
 	public static function getSetting($setting)
 	{
@@ -49,6 +51,16 @@ class SimpleDebug
 	{
 		self::initSettings();
 		self::$settings[$setting]=$value;
+		if($propogate)
+			self::propogateSettings();
+	}
+	public static function propogateSettings()
+	{
+		self::initSettings();
+		foreach(self::$instances as $instance)
+		{
+			$instance->changeSettings(self::$settings);
+		}
 	}
 
 	public static function formatLog($logs, $instance=null, $format=null)
@@ -95,9 +107,12 @@ class SimpleDebug
 
 	public static function shutdownFunction()
 	{
+		self::initSettings();
+		self::initLog();
+		self::saveLog();
+
 		if(self::$settings['loud']>0)
 			self::printLog();
-		self::saveLog();
 	}
 
 	public static function logException($e)
@@ -204,7 +219,6 @@ class SimpleDebug
 		{
 			foreach(self::$instances as $instanceName=>$instance)
 			{
-				// This needs to be switched to a separate function
 				$instanceLog[$instanceName]=$instance->getLog();
 			}
 		}
@@ -240,8 +254,6 @@ class SimpleDebug
 
 		foreach($instanceLogs as $instanceLog)
 		{
-			// This needs to be switched to a separate function
-			//$instanceLog=$instance->getLog();
 			$combo_log["Exception"] = array_merge($combo_log["Exception"], $instanceLog["Exception"]);
 			$combo_log["Info"] = array_merge($combo_log["Info"], $instanceLog["Info"]);
 			$combo_log["Depends"] = array_merge($combo_log["Depends"], $instanceLog["Depends"]);
