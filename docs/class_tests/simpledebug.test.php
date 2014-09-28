@@ -6,7 +6,7 @@ include("../../includes/classes/simpledebug.class.php");
 
 register_shutdown_function("SimpleDebug::shutdownFunction");
 set_exception_handler("SimpleDebug::exceptionHandler");
-SimpleDebug::setSetting("loud", 1);
+SimpleDebug::setSettings(array("loud"=>1, "savelog"=>true));
 
 class SomeFirstclass extends SimpleUtils
 {
