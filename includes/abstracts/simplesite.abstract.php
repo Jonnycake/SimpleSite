@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Main Class v2.0: Main program logic.
+ *    SimpleSite Main Class v2.1: Main program logic.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify

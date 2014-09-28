@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Utils Class v2.0: Basic back-end utilities.
+ *    SimpleSite Utils Class v2.1: Basic back-end utilities.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify

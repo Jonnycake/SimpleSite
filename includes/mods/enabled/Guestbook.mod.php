@@ -5,8 +5,8 @@ class Guestbook extends SimpleModule
 {
 	public static $info=array(  "author"  => "Jon Stockton",
 				    "name"=> "Guestbook",
-				    "version" => "0.1",
-				    "date"=> "??? ??, 2014"
+				    "version" => "0.2",
+				    "date"=> "September 28, 2014"
 	);
 	public function choosePage()
 	{

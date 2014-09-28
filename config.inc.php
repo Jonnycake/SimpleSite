@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Configuration File v2.0: Define necessary variables.
+ *    SimpleSite Configuration File v2.1: Define necessary variables.
  *    Copyright (C) 2014 Jon Stockton
  *
  *    This program is free software: you can redistribute it and/or modify

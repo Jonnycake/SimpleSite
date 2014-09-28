@@ -24,7 +24,7 @@ class adminCP extends SimpleModule
 	public static $info=array( "author"  => "Jon Stockton",
 						"name"    => "SimpleAdmin",
 						"version" => "2.0",
-						"date"    => "November ??, 2014"
+						"date"    => "September 28, 2014"
 					 );
 	public function sideparse($content,$configs=array())
 	{

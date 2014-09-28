@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite v1.0: Create an extendable website.
+ *    SimpleSite Index File v1.1: Create an extendable website.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify

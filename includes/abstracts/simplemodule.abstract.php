@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleModule v0.1: Module's default properties and methods.
+ *    SimpleModule v1.0: Module's default properties and methods.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify

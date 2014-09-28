@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Display Class v2.0: Create a user interface from templates.
+ *    SimpleSite Display Class v2.1: Create a user interface from templates.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
