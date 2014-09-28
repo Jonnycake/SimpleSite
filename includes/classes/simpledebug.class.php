@@ -186,7 +186,10 @@ class SimpleDebug
 	public static function saveLog() // Save log to log file
 	{
 		self::initSettings();
-		file_put_contents(self::$settings['logfile'], self::formatLog(self::getFullLog())."\n", FILE_APPEND);
+		if(self::$settings['savelog'])
+		{
+			file_put_contents(self::$settings['logfile'], self::formatLog(self::getFullLog())."\n", FILE_APPEND);
+		}
 	}
 
 	// Initialization functions
@@ -200,12 +203,12 @@ class SimpleDebug
 		if(is_null(self::$settings))
 			self::$settings=array(
 						"loud"          => 0,
+						"savelog"       => false,
 						"logfile"       => "SimpleDebug.log",
 						"errorLevel"    => 0,
 						"format"        => "Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}",
 						"exception_fmt" => "{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}",
 						"time_format"   => "m/d/Y H:i:s",
-						"file_path"     => "{logdir}"
 					);
 	}
 	public static function initInstances()
@@ -321,7 +324,7 @@ class SimpleDebugInstance
 {
 	// Instance Configurations
 	// Current debug mode
-	private $mode=0;
+	private $loud=0;
 
 	// Keep track of problems so that there's one point of contact for components to know what to do
 	private $errorLevel=0;
@@ -330,13 +333,20 @@ class SimpleDebugInstance
 	// Log output format
 	private $format="Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})";
 
+	// Format for logged exceptions
+	private $exception_fmt="{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}";
+
+	// Log for instance logs only
 	private $log=array("Info" => array(), "Depends" => array(), "Exception" => array());
 
 	// Time output format
 	private $time_format="";
 
 	// Path to log file
-	private $file_path="";
+	private $logfile="";
+
+	// Whether or not to write to log file
+	private $savelog=false;
 
 	public function __construct($settings)
 	{
