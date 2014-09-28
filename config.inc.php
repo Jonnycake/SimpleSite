@@ -169,6 +169,8 @@ $configs["path"]["tmpdir"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."/
 $configs["path"]["templates"]=$configs["path"]["themes"]."/".(@($_SESSION['selected_theme']=="")?$configs['default_theme']:$_SESSION['selected_theme']);
 $configs["path"]["configs"]=__FILE__;
 
+// Set up SimpleDebug configurations
+SimpleDebug::setSettings(array("logfile"=>$configs["path"]["tmpdir"]."SimpleDebug.log", "savelog"=>true), true);
 
 $loadDisabled=false; // Whether the autoloader should look at disabled modules or not
 ?>
