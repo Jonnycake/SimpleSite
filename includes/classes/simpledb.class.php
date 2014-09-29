@@ -48,7 +48,14 @@ class SimpleDB
 		$this->debug=$debug;
 
 		// Create a connection
-		$this->connect();
+		try
+		{
+			$this->connect();
+		}
+		catch(Exception $e)
+		{
+			SimpleDebug::logException($e);
+		}
 	}
 	public function __destruct()
 	{
@@ -69,40 +76,26 @@ class SimpleDB
 
 		if(!$this->connected())
 		{
-			if(@($this->debug==1))
-			{
-				echo "Dbg: Attempting database connection...";
-			}
 			$dsn=$this->configs['type'].':host='.$this->configs['host'].';dbname='.$this->configs['database'];// Construct connection string from $this->configs
 
 			// Attempt to create a PDO database connection
 			try
 			{
 				$this->connection=new PDO($dsn,$this->configs['username'],$this->configs['password'], array(PDO::ATTR_PERSISTENT => true));
-				if(@($this->debug==1))
-				{
-					echo "Success!\n";
-				}
 			}
 			catch(Exception $e)
 			{
+				$this->sdbSetErrorLevel($this->errorLevel+1);
 				if(@($this->debug==1))
 				{
-					echo "Error: ".$e->getMessage()."\n";
-					print_r($this->configs);
+					throw new Exception("Database Connection Error: ".$e->getMessage());
 				}
 			}
-			if($this->connection==null)
-				$this->sdbSetErrorLevel($this->errorLevel+1);
+			//if($this->connection==null)
 		}
 	}
 	public function disconnect()
 	{
-		if(@($this->debug==1))
-		{
-			echo "Dbg: Disconnecting from database.\n";
-		}
-
 		// Close $this->connection
 		if(!$this->connected())
 			return true;
@@ -111,11 +104,6 @@ class SimpleDB
 	}
 	public function openTable($name, $primaryKey="")
 	{
-		if(@($this->debug==1))
-		{
-			echo "Dbg: Opening table $name.\n";
-		}
-
 		// Create a new table object in the current DBO
 		if(!(isset($this->tables[$name])))
 			$this->tables[$name]=new SDBTable($this->connection,$name,$this->configs,$primaryKey);
