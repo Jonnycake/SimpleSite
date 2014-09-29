@@ -19,11 +19,13 @@
 if(!SIMPLESITE)
 	die("Can't access this file directly.");
 
-set_exception_handler("SimpleDebug::exceptionHandler");
+set_exception_handler("SimpleDebug::exceptionHandler"); // Allow logging of uncaught exceptions
+
 // Initialize config array and super-global arrays
-$configs=array();
+SimpleDebug::logInfo("Checking super-globals...");
 if(!isset($_SERVER))
 {
+	SimpleDebug::logInfo("Initializing \$_SERVER.");
 	global $_SERVER;
 	$_SERVER=array();
 	$_SERVER['DOCUMENT_ROOT']=__DIR__;
@@ -31,24 +33,28 @@ if(!isset($_SERVER))
 }
 if(!isset($_GET))
 {
+	SimpleDebug::logInfo("Initializing \$_GET.");
 	global $_GET;
 	$_GET=array();
 }
 if(!isset($_POST))
 {
+	SimpleDebug::logInfo("Initializing \$_POST.");
 	global$_POST;
 	$_POST=array();
 }
 if(!isset($_REQUEST))
 {
+	SimpleDebug::logInfo("Initializing \$_REQUEST.");
 	global $_REQUEST;
-	$_REQUEST=array();
+	$_REQUEST=array_merge($_GET, $_POST);
 }
 if(!isset($_SESSION))
 {
-	global $_SESSION;
-	$_SESSION=array();
+	SimpleDebug::logInfo("Initializing \$_SESSION.");
+	$GLOBALS["_SESSION"]=array();
 }
+$configs=array();
 
 
 /*********************************
@@ -56,6 +62,7 @@ if(!isset($_SESSION))
  *    ----------------------     *
  * SHOULD NOT BE MANUALLY EDITED *
  *********************************/
+SimpleDebug::logInfo("Setting display configurations.");
 $configs["default_theme"]="JCake";
 $configs["default_mod"]="";
 $configs["default_controller"]="DefaultSite";
@@ -86,56 +93,15 @@ $configs["default_controller"]="DefaultSite";
  * $configs["path"]["templates"]        - Don't edit unless you know what you're doing, previous   *
  *                                        configurations generate this value                       *
  *                                                                                                 *
-- * $configs["database"]["type"]         - This is the type of database you plan to use, may be:    *
- *                                                 MySQL                                           *
- *                                                 MSSQL                                           *
- *                                                 Oracle                                          *
- *                                                                                                 *
- * $configs["database"]["username"]     - The username you use to log into the database - if no DB *
- *                                        is being used, this will be your login for the adminCP   *
- *                                                                                                 *
- * $configs["database"]["password"]     - The password you use to log into the database - if no DB *
- *                                        is being used, this will be your password for the adminCP*
- *                                                                                                 *
- * $configs["database"]["database"]     - This is the database you want to use after connecting to *
- *                                        the SQL server                                           *
- *                                                                                                 *
- * $configs["database"]["tbl_prefix"]   - The prefix to use in front of all default tables         *
- *                                                                                                 *
- * $configs["debug"]["type"]            - The debugging mode to use:                               *
- *                                           site            - Debug for the entire site           *
- *                                           module_modName  - Only debug for "modName"            *
- *                                                                                                 *
- * $configs["debug"]["level"]           - The level of debugging to be used:                       *
- *                                           0 - No debugging                                      *
- *                                           1 - Debug only when $_GET['debug'] is set to 1        *
- *                                           2 - Always output debug messages                      *
  ***************************************************************************************************/
+SimpleDebug::logInfo("Setting path configurations.");
 $configs["path"]["root"]="/";
 $configs["path"]["themes"]="templates/themes";
 $configs["path"]["mod_templates"]="templates/mods";
 $configs["path"]["custom_templates"]="templates/custom";
 
-// Database Configurations
-SimpleDebug::logInfo("Setting database configs.");
-$configs["database"]=array();
-$configs["database"]["type"]="mysql";
-$configs["database"]["host"]="127.0.0.1";
-$configs["database"]["username"]="root";
-$configs["database"]["password"]="";
-$configs["database"]["database"]="simplesite";
-$configs["database"]["tbl_prefix"]="SS_";
-
-// Blocking 
-$configs["blocked"]=array();
-
-// Debugging
-$configs["debug"]["type"]="site";
-$configs["debug"]["level"]=0;
-
-
+SimpleDebug::logInfo("Setting dynamically generated path configurations.");
 // The following configurations should not be changed unless you know what you are doing as they are dynamically set
-
 // Set up super-globals in case they aren't already defined
 // Note, in the case of this being called through a symlink,
 // the path it points to is what is defined here
@@ -163,14 +129,78 @@ if(!isset($_SERVER['DOCUMENT_ROOT']))
 	$_SERVER['DOCUMENT_ROOT']=implode($configs['path']['root'],$dirArr);
 	SimpleDebug::logInfo("Setting DOCUMENT_ROOT to ${SERVER['DOCUMENT_ROOT']}.");
 }
-
 $configs["path"]["includes"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/";
 $configs["path"]["tmpdir"]=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."/tmp/";
 $configs["path"]["templates"]=$configs["path"]["themes"]."/".(@($_SESSION['selected_theme']=="")?$configs['default_theme']:$_SESSION['selected_theme']);
 $configs["path"]["configs"]=__FILE__;
 
-// Set up SimpleDebug configurations
-SimpleDebug::setSettings(array("logfile"=>$configs["path"]["tmpdir"]."SimpleDebug.log", "savelog"=>true), true);
+
+
+/****************************************************************************************************
+ *                                      Database Configurations                                     *
+ *                                      -----------------------                                     *
+ * $configs["database"]["type"]         - This is the type of database you plan to use, may be:     *
+ *                                                 MySQL                                            *
+ *                                                 MSSQL                                            *
+ *                                                 Oracle                                           *
+ *                                                                                                  *
+ * $configs["database"]["username"]     - The username you use to log into the database - if no DB  *
+ *                                        is being used, this will be your login for the adminCP    *
+ *                                                                                                  *
+ * $configs["database"]["password"]     - The password you use to log into the database - if no DB  *
+ *                                        is being used, this will be your password for the adminCP *
+ *                                                                                                  *
+ * $configs["database"]["database"]     - This is the database you want to use after connecting to  *
+ *                                        the SQL server                                            *
+ *                                                                                                  *
+ * $configs["database"]["tbl_prefix"]   - The prefix to use in front of all default tables          *
+ *                                                                                                  *
+ ****************************************************************************************************/
+SimpleDebug::logInfo("Setting database configs.");
+$configs["database"]=array();
+$configs["database"]["type"]="mysql";
+$configs["database"]["host"]="127.0.0.1";
+$configs["database"]["username"]="root";
+$configs["database"]["password"]="";
+$configs["database"]["database"]="simplesite";
+$configs["database"]["tbl_prefix"]="SS_";
+
+// Array of IP addresses blocked
+$configs["blocked"]=array();
+SimpleDebug::logInfo("Blocking ".count($configs['blocked'])." remote hosts.");
+
+/*****************************************************************************************************
+ *                                       Debugging Configurations                                    *
+ *                                       ------------------------                                    *
+ * $configs["debugging"]["loud"]              - This is the setting for SimpleDebug to automatically *
+ *                                              start at.  You should leave it at 0 so that it can   *
+ *                                              be filtered based on the user.                       *
+ *                                                                                                   *
+ * $configs["debugging"]["savelog"]           - Boolean value of whether to save the log at the end  *
+ *                                              of execution.                                        *
+ *                                                                                                   *
+ * $configs["debugging"]["logfile"]           - Should not need to be changed, put into tmp dir (in  *
+ *                                              path configs) under name SimpleDebug.log.            *
+ *                                                                                                   *
+ * $configs["debugging"]["errorLevel"]        - Current error level of the system, should be left at *
+ *                                              0.                                                   *
+ *                                                                                                   *
+ * $configs["debugging"]["format"]            - Format that the debug output should be in.           *
+ *                                                                                                   *
+ * $configs["debugging"]["exception_fmt"]     - Format the message for exceptions should be in.      *
+ *                                                                                                   *
+ * $configs["debugging"]["time_format"]       - Format that the date/time output should be in.       *
+ *****************************************************************************************************/
+SimpleDebug::logInfo("Setting debugging configs.");
+$configs["debugging"]["loud"]=0;
+$configs["debugging"]["savelog"]=true;
+$configs["debugging"]["logfile"]=$configs["path"]["tmpdir"]."SimpleDebug.log";
+$configs["debugging"]["errorLevel"]=0;
+$configs["debugging"]["format"]="Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}";
+$configs["debugging"]["exception_fmt"]="{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}";
+$configs["debugging"]["time_format"]="m/d/Y H:i:s";
+SimpleDebug::setSettings($configs['debugging'], true); // Put these settings and propogate to any existing instances
+
 
 $loadDisabled=false; // Whether the autoloader should look at disabled modules or not
 ?>
