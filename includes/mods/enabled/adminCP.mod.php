@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite AdminCP Module v1.5: Admin page for a SimpleSite-based website.
+ *    SimpleSite AdminCP Module v2.0: Admin page for a SimpleSite-based website.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
