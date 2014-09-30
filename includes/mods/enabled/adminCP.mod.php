@@ -874,8 +874,11 @@ class adminCP extends SimpleModule
 			{
 				$zip->extractTo($extractDir);
 				$zip->close();
-				if(is_dir("$extractDir/$themename"))
-					$this->recursiveDirCopy($extractDir,$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']);
+				if(is_dir("${extractDir}/templates"))
+				{
+					mkdir($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']."/${themename}");
+					$this->recursiveDirCopy("${extractDir}/templates",$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']."/${themename}");
+				}
 			}
 			$this->recursiveDirDelete($extractDir);
 		}
