@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Utils Class v2.0: Basic back-end utilities.
+ *    SimpleSite Utils Class v2.1: Basic back-end utilities.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -44,6 +44,10 @@ class SimpleUtils
 					$tree[$file]=$file;
 		ksort($tree,SORT_STRING);
 		return $tree;
+	}
+	public function createDbgInstance()
+	{
+		$this->debug=SimpleDebug::createInstance(get_class($this));
 	}
 
 	/* START: Replaced by SimpleDirectory */
@@ -126,8 +130,7 @@ class SimpleUtils
 	// Modules
 	public function loadModules($configs=array(),$enabled=true)
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: loadModules($enabled)".time()."\n";
+		SimpleDebug::logInfo("loadModules($enabled)");
 		$this->mods=array();
 		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".(($enabled)?"enabled":"disabled")."/";
 		$dir=opendir($modsdir);
@@ -145,8 +148,7 @@ class SimpleUtils
 	public function installReqFiles($defaultFiles,$configs=array())
 	{
 		// Maybe we should make a SimpleInstaller class....hmmmm
-		if(@($_GET['debug'])==1)
-			echo "Dbg: Installing required files...".time();
+		SimpleDebug::logInfo("Installing required files...");
 		foreach($defaultFiles as $name => $value)
 		{
 			if(!(file_exists($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['mod_templates']."/$name")))
@@ -159,14 +161,13 @@ class SimpleUtils
 				}
 				catch(Exception $e)
 				{
-					if(@($_GET['debug'])==1)
-						echo "\nError on ${name}.".time();
+					SimpleDebug::logInfo("Error on installing file: ${name}.");
+					SimpleDebug::logException($e);
 					return false;
 				}
 			}
 		}
-		if(@($_GET['debug'])==1)
-			echo "installed.".time()."\n";
+		SimpleDebug::logInfo("Installed.");
 		return true;
 	}
 	public function checkReqTbls($reqTbls,$configs=array())
@@ -184,8 +185,7 @@ class SimpleUtils
 	public function installReqTbls($defaultTbls,$configs=array())
 	{
 		// We need to add a table creator to SimpleDB....
-		if(@($_GET['debug'])==1)
-			echo "Dbg: Installing required tables...".time();
+		SimpleDebug::logInfo("Installing required tables...");
 		$dbconf=$configs["database"];
 		foreach($defaultTbls as $name => $columns)
 		{
@@ -197,10 +197,10 @@ class SimpleUtils
 				$query.="`$column` $properties".(($x<count($columns))?",":"");
 			}
 			$query.=");";
+			SimpleDebug::logInfo("Query: $query");
 			$this->db->rawQry($query);
 		}
-		if(@($_GET['debug'])==1)
-			echo "installed.".time()."\n";
+		SimpleDebug::logInfo("Installed.");
 	}
 
 	// Template Conditional Handler
@@ -291,8 +291,7 @@ class SimpleUtils
 	// User input utils
 	public function simpleFilter($input,$db=true)
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: simplefilter".time()."\n";
+		SimpleDebug::logInfo("simplefilter");
 		return str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars((($db)?$this->db->quote($input):$input))));
 	}
  }

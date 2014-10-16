@@ -75,3 +75,122 @@ v1.1 (Released 4/25/13):
    -------------------------
       * {CONFIG_*} Updated
          - Bugfix: Couldn't access {CONFIGS_path_mod_templates}. "/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9]*)}/si" => "/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9_]*)}/si"
+
+v1.5 (Released 5/4/14):
+======================
+* Major changes: SimpleDB class added
+* Minor changes: Unknown at this time (disorganized & interrupted development).
+
+v1.7 (Released 7/21/14):
+====================
+* Major changes: Re-organized directory structure - new tree:
+	./
+	├── BACKLOG
+	├── CHANGELOG
+	├── config.inc.php
+	├── CONTRIBUTORS
+	├── docs
+	│   ├── CHANGELOG.txt
+	│   ├── class_tests
+	│   │   ├── simpledb.test.php
+	│   ├── diagrams
+	│   │   ├── Diagram Notes
+	│   │   └── SimpleSite Overall.dia
+	│   ├── guides
+	│   │   ├── DEV INSTALL.txt
+	│   │   └── Module Development Cheatsheet.txt
+	│   └── references
+	│       ├── SimpleSite Function Reference
+	│       ├── Template Constants Guide.txt
+	│       └── Theme Development Cheatsheet.txt
+	├── GENERAL IDEAS
+	├── images
+	│   └── edit.jpg
+	├── include.php
+	├── includes
+	│   ├── abstracts
+	│   │   ├── simplemodule.abstract.php
+	│   │   └── simplesite.abstract.php
+	│   ├── classes
+	│   │   ├── simpledb.class.php
+	│   │   ├── simpledisplay.class.php
+	│   │   └── simpleutils.class.php
+	│   ├── interfaces
+	│   │   ├── simpledisplay.interface.php
+	│   │   └── simplemodule.interface.php
+	│   ├── mods
+	│   │   ├── disabled
+	│   │   │   └── testModule.mod.php
+	│   │   └── enabled
+	│   │       ├── adminCP.mod.php
+	│   │       └── Guestbook.mod.php
+	│   ├── sites
+	│   │   └── DefaultSite.class.php
+	│   └── widgets
+	│       └── simpleWidgetTest.widget.php
+	├── index.php
+	├── js
+	│   └── editable.js
+	├── LICENSE
+	├── MODULE WISHLIST
+	├── README.md
+	├── templates
+	│   ├── mods
+	│   │   ├── adminCP_backup_BACKUPSAVAIL.template
+	│   │   ├── adminCP_backup.template
+	│   │   ├── adminCP_blocked_BLOCKTBL.template
+	│   │   ├── adminCP_blocked.template
+	│   │   ├── adminCP_configAdmin.template
+	│   │   ├── adminCP_dbAdmin_table.template
+	│   │   ├── adminCP_dbAdmin.template
+	│   │   ├── adminCP_login.template
+	│   │   ├── adminCP_modAdmin_modules.template
+	│   │   ├── adminCP_modAdmin.template
+	│   │   ├── adminCP.template
+	│   │   ├── adminCP_templateAdmin.template
+	│   │   ├── adminCP_testEnv.template
+	│   │   ├── adminCP_themeMgr.template
+	│   │   ├── adminCP_welcome.template
+	│   │   ├── adminCP_widgetAdmin.template
+	│   │   ├── Guestbook_ENTRIES.template
+	│   │   ├── Guestbook.template
+	│   │   └── testModule.template
+	│   └── themes
+	│       ├── JCake
+	│       │   ├── css
+	│       │   │   └── main.css
+	│       │   ├── footer.template
+	│       │   ├── header.template
+	│       │   ├── index.template
+	│       │   └── overall.template
+	│       └── theBasics
+	│           ├── css
+	│           │   └── main.css
+	│           ├── footer.template
+	│           ├── header.template
+	│           ├── index.template
+	│           └── overall.template
+	└── WIDGETS WISHLIST
+
+* Issues Addressed:
+    - Issue #1 (enhancement): Finally block not allowed in PHP 5.3
+    - Issue #2 (bugfix): adminCP Returns Blank Page With Invalid DB Credentials
+    - Issue #3 (bugfix): Themes which are uploaded aren't deleted from the temporary directory
+    - Issue #5 (enhancement): adminCP Unusable Without Database 
+    - Issue #6 (bugfix): Mod Admin in adminCP Should Show Info
+
+v1.7-Rev1 (Released 7/21/14):
+====================
+* Issues Addressed:
+    - Issue #33 (bugfix): 1.7 Module Administration
+    - Issue #34 (bugfix): adminCP - Environment Test Always Fails
+
+v2.0 (Released 9/28/14):
+====================
+    - Issue #33 (bugfix): 1.7 Module Administration
+    - Issue #52 (bugfix): Guestbook: XSS
+    - Issue #63 (bugfix): adminCP: Theme Manager Won't Switch Themes
+    - Issue #4 (enhancement): TheBasics Theme Should Use SimpleCSS
+    - Issue #12 & #31 (enhancement): SimpleDebug & Integration
+    - Issue #14 (enhancement): adminCP: Debug Session Toggle
+    - Issue #15 (enhancement): SimpleSite Installer

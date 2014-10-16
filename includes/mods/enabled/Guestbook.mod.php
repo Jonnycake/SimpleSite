@@ -1,12 +1,29 @@
 <?php
+/*
+ *    SimpleSite Guestbook Module v0.2: Guestbook page for a SimpleSite-based website.
+ *    Copyright (C) 2014 Jon Stockton
+ * 
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
 class Guestbook extends SimpleModule
 {
 	public static $info=array(  "author"  => "Jon Stockton",
 				    "name"=> "Guestbook",
-				    "version" => "0.1",
-				    "date"=> "??? ??, 2014"
+				    "version" => "0.2",
+				    "date"=> "September 28, 2014"
 	);
 	public function choosePage()
 	{
@@ -21,11 +38,11 @@ class Guestbook extends SimpleModule
 				$GLOBALS['funcsperformed']++;
 				$this->db->openTable("Guestbook");
 				$table=$this->db->sdbGetTable("Guestbook");
-				$values=array("name"=>$_POST['name'],"message"=>$_POST['message']);
+				$values=array("name"=>$this->simpleFilter($_POST['name'], false),"message"=>$this->simpleFilter($_POST['message'], false));
 				$table->insert($values);
 			}
-			else if($_GET['debug']==1)
-				echo "Dbg: Already performed function...skipping.\n";
+			else
+				SimpleDebug::logInfo("Already performed function...skipping.");
 		}
 		if((preg_match("/{ENTRIES}/si",$content,$match)))
 		{

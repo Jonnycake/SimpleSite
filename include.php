@@ -19,6 +19,8 @@
  */
 define('SIMPLESITE',1);
 
+include("includes/classes/simpledebug.class.php");
+SimpleDebug::printLog();
 include("config.inc.php");                                                  // SimpleSite Configuration File
 include("includes/classes/simpledb.class.php");                             // SimpleDB DBO class
 include("includes/classes/simpleutils.class.php");                          // Generic utility functions

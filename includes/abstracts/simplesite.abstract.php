@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite Main Class v2.0: Main program logic.
+ *    SimpleSite Main Class v2.1: Main program logic.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -25,8 +25,7 @@ abstract class SimpleSite extends SimpleDisplay
 	public function simpleLoader($name)
 	{
 		global $loadDisabled; // We could probably also use something like this instead of the singleton pattern (global $reloadMods or something) - look into performance comparison
-		if(@($_GET['debug'])==1)
-			echo "Dbg: Attempting to autoload $name...";
+		SimpleDebug::logInfo("Attempting to autoload $name...");
 		$this->loadModules($this->configs);
 		if((in_array($name,$this->mods)) && !(in_array($name,$this->loaded))) // Disabled modules aren't put into $this->mods
 		{
@@ -35,17 +34,17 @@ abstract class SimpleSite extends SimpleDisplay
 				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php");
 				if(!(class_exists($name)))
 				{
-					if(@($_GET['debug']==1)) echo "Error!";
+					SimpleDebug::logInfo("Error!");
 				}
 				else
 				{
 					$this->loaded[]=$name;
-					if(@($_GET['debug'])==1) echo "Good.\n";
+					SimpleDebug::logInfo("Good.");
 				}
 			}
 			else
 			{
-				if(@($_GET['debug']==1)) echo "Error!";
+				SimpleDebug::logInfo("Error!");
 			}
 		}
 		else if($loadDisabled && !(in_array($name, $this->loaded)))
@@ -55,32 +54,31 @@ abstract class SimpleSite extends SimpleDisplay
 				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/disabled/${name}.mod.php");
 				if(!(class_exists($name)))
 				{
-					if(@($_GET['debug']==1)) echo "Error!";
+					SimpleDebug::logInfo("Error!");
 				}
 				else
 				{
 					$this->loaded[]=$name;
-					if(@($_GET['debug']==1)) echo "Good.\n";
+					SimpleDebug::logInfo("Good.");
 				}
 			}
 			else
 			{
-				if(@($_GET['debug']==1)) echo "Could not find disabled module...creating false class.";
+				SimpleDebug::logInfo("Could not find disabled module...creating false class.");
 				eval("class $name { public static \$info=array(\"name\" => \"$name (Unknown Module)\", \"author\" => \"Unknown Module\", \"date\" => \"Unknown Module\"); }");
 			}
 		}
 	}
 	public function __call($method, $args)
 	{
-		if(@($_GET['debug'])==1)
-			echo "Dbg: SimpleSite->__call($method,\$args)\n";
+		SimpleDebug::logInfo("SimpleSite->__call($method,\$args)");
 		if(@(isset($this->$method) && is_callable($this->$method)))
 		{
 			$func = $this->$method;
 			return $func($args);
 		}
 		else
-			die("Invalid method: $method");
+			throw new Exception("Bad function name.");
 	}
 
 	function __destruct()

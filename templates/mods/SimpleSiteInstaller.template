@@ -1,0 +1,12 @@
+<b><u>Configuration Settings:</u></b>
+<form action="./?mod=SimpleSiteInstaller" method="post">
+	<input type="hidden" name="dirty" value="true"/>
+	Site URL: http://www.example.com/<input type="text" name="uri_path" value="{POST_uri_path}"></input><br/><br/>
+	Database Type: <input type="text" name="dbtype" value="{IF "{POST_dirty}" eq "true"}{POST_dbtype}{ELSE}mysql{/IF}"></input><br/>
+	Database Host: <input type="text" name="dbhost" value="{IF "{POST_dirty}" eq "true"}{POST_dbhost}{ELSE}127.0.0.1{/IF}"></input><br/>
+	Database Username: <input type="text" name="dbuser" value="{IF "{POST_dirty}" eq "true"}{POST_dbuser}{ELSE}root{/IF}"></input><br/>
+	Database Password: <input type="password" name="dbpass" value="{POST_dbpass}"></input><br/>
+	Database Database: <input type="text" name="dbdb" value="{POST_dbdb}"></input><br/>
+	Table Prefix: <input type="text" name="dbtblprefix" value="{IF "{POST_dirty}" eq "true"}{POST_dbtblprefix}{ELSE}SS_{/IF}"></input>
+	<input type="submit" name="submit" value="Submit Configurations"/>
+</form>

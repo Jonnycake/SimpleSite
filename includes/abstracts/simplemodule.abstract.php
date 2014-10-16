@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleModule v0.1: Module's default properties and methods.
+ *    SimpleModule v1.0: Module's default properties and methods.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -51,42 +51,36 @@ abstract class SimpleModule extends SimpleDisplay implements simpleModuleI
 	// Magic Methods
 	public function __construct($configs=array(), $db=null, $debug=false)
 	{
-			// Initialize some properties
-			$this->debug=$debug;
-			$this->configs=$configs;
-			$this->db=$db;
+		// Initialize some properties
+		$this->debug=$debug;
+		$this->configs=$configs;
+		$this->db=$db;
 
-			if(@($_GET['debug'])==1)
-				echo "Dbg: \$obj->isInstalled()...";
+		SimpleDebug::logInfo("\$obj->isInstalled()...");
 
-			if(!$this->isInstalled($this->configs))
+		if(!$this->isInstalled($this->configs))
+		{
+			SimpleDebug::logInfo("Not installed...attempting install...");
+			if($this->install($this->configs))
 			{
-				if(@($_GET['debug'])==1)
-					echo "Not installed.\nDbg: Attempting install...";
-				if($this->install($this->configs))
+				if($this->isInstalled($this->configs))
 				{
-					if($this->isInstalled($this->configs))
-					{
-						if(@($_GET['debug'])==1)
-							echo "Installed.\n";
-					}
-					else
-					{
-						if(@($_GET['debug'])==1)
-							echo "Failed install.\n";
-					}
+					SimpleDebug::logInfo("Installed.");
 				}
 				else
 				{
-					if(@($_GET['debug'])==1)
-						echo "Dbg: Can not automatically install this module.\n";
+					SimpleDebug::logInfo("Failed install.");
 				}
 			}
 			else
 			{
-				if(@($_GET['debug'])==1)
-					echo "Installed.\n";
+				SimpleDebug::logInfo("Can not automatically install this module.");
 			}
+		}
+		else
+		{
+			SimpleDebug::logInfo("Installed.");
+		}
 	}
 }
 ?>

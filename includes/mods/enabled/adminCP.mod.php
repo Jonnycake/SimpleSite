@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleSite AdminCP Module v1.5: Admin page for a SimpleSite-based website.
+ *    SimpleSite AdminCP Module v2.0: Admin page for a SimpleSite-based website.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ class adminCP extends SimpleModule
 	public static $info=array( "author"  => "Jon Stockton",
 						"name"    => "SimpleAdmin",
 						"version" => "2.0",
-						"date"    => "November ??, 2014"
+						"date"    => "September 28, 2014"
 					 );
 	public function sideparse($content,$configs=array())
 	{
@@ -59,6 +59,12 @@ class adminCP extends SimpleModule
 					break;
 				case "widgetAdmin":
 					$content=$this->widgetAdmin($content,$configs);
+					break;
+				case "toggleDbg":
+					global $funcsperformed;
+					if(!$funcsperformed)
+						$_SESSION['debug']=($_SESSION['debug'])?0:1;
+					$funcsperformed++;
 					break;
 			}
 		}
@@ -251,7 +257,7 @@ class adminCP extends SimpleModule
 			foreach($tree as $k=>$v)
 				if(is_dir("$curdir/$k") and !(is_link("$curdir/$k")))
 				{
-					include("includes/config.inc.php");
+					include($configs['path']['configs']);
 					$output.=str_replace("{TYPE}","${type}_",str_replace("{PREVDIRS}",$prevdirs,str_replace("{SELECTED}",(@($configs['filename']=="${type}_${prevdirs}${k}")?" selected=\"selected\"":(($type==2 && $k==$configs['default_theme'])?" selected=\"selected\"":"")),str_replace("{DEPTH}",str_repeat($depthdelim,$depth),str_replace("{FILE}",$dirdisplay.$this->simpleFilter($k,false),$template)).$this->genDirTreeOut($tree[$k],"$curdir/$k",$depthdelim,$template,$dirdisplay,$type,$prevdirs."${k}/",$depth+1))));
 				}
 				else
@@ -551,7 +557,7 @@ class adminCP extends SimpleModule
 		{
 			$basedir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'];
 			$zip->addEmptyDir("includes");
-			$files=array("index.php","include.php","includes/config.inc.php","includes/simpledisplay.class.php","includes/simplemodule.interface.php","includes/simplesite.class.php","includes/simpleutils.class.php");
+			$files=array("index.php","include.php",$configs['path']['configs'],"includes/simpledisplay.class.php","includes/simplemodule.interface.php","includes/simplesite.class.php","includes/simpleutils.class.php");
 			foreach($files as $file)
 				$zip->addFile($basedir.$file,$file);
 			$zip->close();
@@ -617,8 +623,7 @@ class adminCP extends SimpleModule
 		}
 		else if($funcsperformed>=1)
 		{
-			if(@$_GET['debug']==1)
-				echo "Dbg: Functions already performed...\n";
+			SimpleDebug::logInfo("Functions already performed...");
 		}
 
 		$table="";
@@ -869,8 +874,11 @@ class adminCP extends SimpleModule
 			{
 				$zip->extractTo($extractDir);
 				$zip->close();
-				if(is_dir("$extractDir/$themename"))
-					$this->recursiveDirCopy($extractDir,$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']);
+				if(is_dir("${extractDir}/templates"))
+				{
+					mkdir($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']."/${themename}");
+					$this->recursiveDirCopy("${extractDir}/templates",$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['themes']."/${themename}");
+				}
 			}
 			$this->recursiveDirDelete($extractDir);
 		}
@@ -878,11 +886,11 @@ class adminCP extends SimpleModule
 		{
 			if($_POST['submit']=="Set Theme")
 			{
-				$origconfig=file_get_contents($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php");
-				$f=@fopen($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/config.inc.php","w");
+				$origconfig=file_get_contents($configs['path']['configs']);
+				$f=@fopen($configs['path']['configs'],"w");
 				@fwrite($f,str_replace("\$configs[\"default_theme\"]=\"${configs['default_theme']}\";","\$configs[\"default_theme\"]=\"${_POST['filename']}\";",$origconfig));
 				@fclose($f);
-				include("includes/config.inc.php");
+				include($configs['path']['configs']);
 				$_POST=array();
 				$content=$this->readTemplate($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['templates']."/overall.template","adminCP");
 			}
