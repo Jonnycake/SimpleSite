@@ -1,21 +1,23 @@
 * Admin control panel which provides the following utilities:
-	- Backups
+	- Backups *
 		- Create backups
 			- All Code/Data
 			- Back-End code only
 			- Database Only
 			- Modules only
 			- Templates Only
+			- Combination
 		- Delete backups
 			- All Backups
 			- Individually Selected Backups
 		- Install from backup
-	- Configurations
+	- Configurations *
 		- Alter PHP-based configuration file directly
+		- Ini files
 		- Graphical Configuration Settings
 			- Text boxes/Drop boxes
 		- Test Configuration Settings
-	- Database Admin
+	- Database Admin *
 		- Basic CRUD operations
 		- Add/Remove fields to tables
 		- Add/Remove tables from databases
@@ -23,10 +25,16 @@
 	- IP Blocking
 		- Add IPs/hostnames to block list
 		- Remove IPs/hostnames from block list
-	- Module Admin
+	- Module Admin *
 		- Upload modules
 		- Enable/Disable modules
 		- Delete modules
+		- Install/Uninstall modules
+		- Archive modules
+	- Plugin Admin *
+		- Generate/edit "feed widgets"
+		- Upload plugins
+		- Delete plugins
 	- Template Admin
 		- Upload custom, theme, and module templates
 		- Create/Edit templates through the web browser
@@ -34,18 +42,19 @@
 		- Switch default theme
 		- Delete themes
 		- Upload themes
-	- Test Environment
+	- Test Environment *
 		- Check for (and report) dependency/file permission errors
-	- Widget Admin
+		- Check for security errors
+	- Widget Admin *
 		- Upload widgets
 		- Generate static widgets
-		- Generate "feed widgets"
 		- Edit widgets
 		- Delete widgets
 * Allow for templates to be created, uploaded, and edited to enable dynamic content to be replaced on the fly
 * Allow for themes to be installed to enable quickly changing the look and feel of the entire website
+	- Differentiate layouts and themes
 * Allow for installable modules to enable new applications/sites to be developed quickly and easily
-	- Modules should be syntax checked before including to mitigate blank pages
+	- Modules should be handled so that blank pages do not occur (even in syntax errors)
 	- They should also only be allow to be included once and only initialized once per page load
 		- Including multiple times causes PHP error due to class already being defined
 		- There's no reason to have multiple instances of the same module on the same page - plugins/widgets can be used for that purpose
@@ -81,13 +90,9 @@
 * Create as small of a footprint as possible
 * Only install files/database tables if needed
 	- This is the idea behind isInstalled() and install() in SimpleModuleI
-* Allow for performance optimizations to be done by converting to "production mode"
-	- Limit auto-loading
-	- Limit file includes
-	- Store templates with constants already replaced
 * Allow a responsive front-end design
 	- Built-in support of jQuery is preferred as it's become commonly used and stable
-	- Data should be transferrable via multiple data formats
+	- API should be created with the followning formats
 		- JSON
 		- Serialized
 		- Array
@@ -114,12 +119,7 @@
 	- Different database systems
 	- Support CLI applications
 * Provide an interface for autoloaders to implement
-* Git integration
-* Implement a mechanism for state machine style modules
-	- Should have a state, transition functions, and messages
-	- Integrate into the module loading & template parsing processes
-	- Allow for codes to be returned from transitions to indicate to SS that it should quit parsing and output the content
-		- This allows for the ability for modules to completely divert the execution flow
 * Security alert for lower PHP versions with a way to mitigate the risk in case of the decision not to upgrade
 * Allow for modules to use an MVC pattern
 * Allow for modules to provide an admin page to be used in adminCP
+* Error pages should be configurable

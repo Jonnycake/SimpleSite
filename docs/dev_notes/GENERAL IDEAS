@@ -80,3 +80,4 @@
 	- Separate module?
 * Plugins for additional features (such as bbencoding)...?
 	- Can basically use the widget code, then widgets can be switched over to archives like mods and themes
+* State machine style modules
