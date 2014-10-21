@@ -1,0 +1,131 @@
+General:
+	* Allow for templates to be created, uploaded, and edited to enable dynamic content to be replaced on the fly
+	* Allow for themes to be installed to enable quickly changing the look and feel of the entire website
+		- Differentiate layouts and themes
+	* Allow for installable modules to enable new applications/sites to be developed quickly and easily
+		- Modules should be handled so that blank pages do not occur (even in syntax errors)
+		- They should also only be allow to be included once and only initialized once per page load
+			- Including multiple times causes PHP error due to class already being defined
+			- There's no reason to have multiple instances of the same module on the same page - plugins/widgets can be used for that purpose
+		- Plugins should be checked to ensure they implement a common interface
+	* Allow for installable widgets to enable the web designer to re-use UI components in different pages/themes
+	* Allow for plugins so that back-end functionality may be extended upon.
+		- First check in the plugins directory for a plugin by the name of the widget
+			- If it exists load it and return
+		- If no plugin was found the widget contains only static content, look in the templates directory
+			- If it exists load it
+		- If neither were found do nothing, no error, no content added
+	* Built-in linklist widget
+	* Enforce naming conventions where applicable to standardize code allowing for easier collaberation between developers and a simpler framework core
+	* Respond as quickly as possible
+		- Obviously there are operations which will be more time consuming, but the goal is to add as little overhead as possible
+		- Cache data which takes a while to retrieve and will likely be the same throughout runtime
+			- Possibly only cache certain things decided by configurations (runtime and in config file)
+	* Allow for admin-editable text areas within the website
+	* Create as small of a footprint as possible
+	* Only install files/database tables if needed
+		- This is the idea behind isInstalled() and install() in SimpleModuleI
+	* Allow a responsive front-end design
+		- Built-in support of jQuery as it's become commonly used and stable
+			- Use for progressive loading
+		- API should be created with the followning formats
+			- JSON
+			- Serialized
+			- Array
+			- Base64 Encoded (or in combination with one of the previous formats)
+	* Allow for automatic installation (with configuration options) and updating
+		- Easily set up all configurations
+			- Use ini files where applicable
+				- They should be able to be put into a generated config.inc.php file
+		- Create base files
+		- Create base database
+	* Allow debug mode to be toggled via a session variable, a configuration setting, or a get variable
+		- Restrict access to administrator
+		- Have multiple debug levels for a varied amount of information
+		- Provide root cause analysis and automatic recovery if possible
+	* Allow for user roles and privileges to be easily configured
+	* Allow for HTML forms to be easily generated through PHP
+	* Allow for "feeds" to be easily generated based on templates
+	* Allow for support of a variety of environments
+		- Different web servers
+		- Older PHP versions
+		- Different database systems
+		- Support CLI applications
+	* Provide an interface for autoloaders to implement
+	* Security alert for lower PHP versions with a way to mitigate the risk in case of the decision not to upgrade
+	* Allow for modules to use an MVC pattern
+	* Error pages should be configurable
+	* Conditionals should be able to be nested
+	* Have a separate assets directory for js/css
+
+Helper Classes:
+	* Provide helper classes for common web development tasks (such as converting dates, opening files, etc.)
+		- SimpleDate - static
+		- SimpleFile - instance/static
+		- SimpleDirectory - instance/static
+		- SimpleDB - instance
+		- SimpleDebug - static
+		- SimpleValidation - static
+		- SimpleInput - static
+		- SimpleArchive - instance/static
+		- SimpleHTML - static
+		- SimpleRole - static
+		- SimpleUser - instance/static
+		- SimpleInput - static
+adminCP:
+	* Allow for configuration settings to be changed/tested during runtime to prevent the site administrator from being locked out from a mistake in configurations
+		- Passed in an encrypted JSON string
+		- Store as a separate test configuration file and allow for switching between them within a session
+	* Allow for modules to provide an admin page to be used in adminCP
+	* Admin control panel which provides the following utilities:
+		- Backups
+			- Create backups
+				- All Code/Data
+				- Back-End code only
+				- Database Only
+				- Modules only
+				- Templates Only
+				- Combination
+			- Delete backups
+				- All Backups
+				- Individually Selected Backups
+			- Install from backup
+		- Configurations
+			- Alter PHP-based configuration file directly
+			- Ini files
+			- Graphical Configuration Settings
+				- Text boxes/Drop boxes
+			- Test Configuration Settings
+		- Database Admin
+			- Basic CRUD operations
+			- Add/Remove fields to tables
+			- Add/Remove tables from databases
+			- Add/Remove databases
+		- IP Blocking
+			- Add IPs/hostnames to block list
+			- Remove IPs/hostnames from block list
+		- Module Admin
+			- Upload modules
+			- Enable/Disable modules
+			- Delete modules
+			- Install/Uninstall modules
+			- Archive modules
+		- Plugin Admin
+			- Generate/edit "feed widgets"
+			- Upload plugins
+			- Delete plugins
+		- Template Admin
+			- Upload custom, theme, and module templates
+			- Create/Edit templates through the web browser
+		- Theme Manager
+			- Switch default theme
+			- Delete themes
+			- Upload themes
+		- Test Environment
+			- Check for (and report) dependency/file permission errors
+			- Check for security errors
+		- Widget Admin
+			- Upload widgets
+			- Generate static widgets
+			- Edit widgets
+			- Delete widgets
