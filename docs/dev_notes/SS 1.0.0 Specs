@@ -78,7 +78,7 @@ adminCP:
 		- Store as a separate test configuration file and allow for switching between them within a session
 	* Allow for modules to provide an admin page to be used in adminCP
 	* Admin control panel which provides the following utilities:
-		- Backups *
+		- Backups
 			- Create backups
 				- All Code/Data
 				- Back-End code only
@@ -90,13 +90,13 @@ adminCP:
 				- All Backups
 				- Individually Selected Backups
 			- Install from backup
-		- Configurations *
+		- Configurations
 			- Alter PHP-based configuration file directly
 			- Ini files
 			- Graphical Configuration Settings
 				- Text boxes/Drop boxes
 			- Test Configuration Settings
-		- Database Admin *
+		- Database Admin
 			- Basic CRUD operations
 			- Add/Remove fields to tables
 			- Add/Remove tables from databases
@@ -104,13 +104,13 @@ adminCP:
 		- IP Blocking
 			- Add IPs/hostnames to block list
 			- Remove IPs/hostnames from block list
-		- Module Admin *
+		- Module Admin
 			- Upload modules
 			- Enable/Disable modules
 			- Delete modules
 			- Install/Uninstall modules
 			- Archive modules
-		- Plugin Admin *
+		- Plugin Admin
 			- Generate/edit "feed widgets"
 			- Upload plugins
 			- Delete plugins
@@ -121,10 +121,10 @@ adminCP:
 			- Switch default theme
 			- Delete themes
 			- Upload themes
-		- Test Environment *
+		- Test Environment
 			- Check for (and report) dependency/file permission errors
 			- Check for security errors
-		- Widget Admin *
+		- Widget Admin
 			- Upload widgets
 			- Generate static widgets
 			- Edit widgets
