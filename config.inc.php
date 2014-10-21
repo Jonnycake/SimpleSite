@@ -16,6 +16,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Set up all of the configurations
+ *
+ * @package SimpleSite Core
+ * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
+
+/**
+ * File can not be accessed directly.
+ */
 if(!SIMPLESITE)
 	die("Can't access this file directly.");
 

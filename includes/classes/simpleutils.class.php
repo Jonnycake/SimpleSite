@@ -17,14 +17,46 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * SimpleUtils class all globally needed methods should be placed here.
+ *
+ * @package SimpleSite Core
+ * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
+
+/**
+ * This file can not be accessed directly.
+ */
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
+
+/**
+ * SimpleUtils class - basically the parent/grandparent of all core classes.
+ *
+ * @package SimpleSite Core
+ */
 class SimpleUtils
 {
+	/**
+	 * Array of enabled modules
+	 *
+	 * @var array
+	 */
 	protected $mods=array();
+
+	/**
+	 * Array of loaded modules
+	 *
+	 * @var array
+	 */
 	protected $loaded=array();
 
-	// Administrative Utils
+	/**
+	 * Check if the current user is blocked
+	 *
+	 * @param array $configs The configuration array set up in config.inc.php
+	 * @return bool
+	 */
 	public function checkBlocked($configs=array())
 	{
 		if(!isset($configs['blocked'])) $configs['blocked']=array();
@@ -32,6 +64,15 @@ class SimpleUtils
 			return TRUE;
 		return FALSE;
 	}
+
+	/**
+	 * Create a directory tree
+	 *
+	 * @param string $curdir The directory to start in.
+	 * @param int $maxdepth The maximum depth to recurse to (-1 means infinite)
+	 * @param int $depth The current depth in the structure (incremented on recursion)
+	 * @return array The directory tree
+	 */
 	public function createDirTree($curdir="./",$maxdepth=-1,$depth=0)
 	{
 		$tree=array();
@@ -45,12 +86,22 @@ class SimpleUtils
 		ksort($tree,SORT_STRING);
 		return $tree;
 	}
+
+	/**
+	 * Create a debugging instance
+	 */
 	public function createDbgInstance()
 	{
 		$this->debug=SimpleDebug::createInstance(get_class($this));
 	}
 
-	/* START: Replaced by SimpleDirectory */
+	/**
+	 * Recursively delete an entire directory
+	 *
+	 * @param string $curdir The directory to delete
+	 * @param int $depth The current depth
+	 * @todo SimpleDirectory class
+	 */
 	public function recursiveDirDelete($curdir="/tmp/",$depth=0)
 	{
 		// This can probably be re-designed to be more efficient - createDirTree, go from top down
@@ -71,6 +122,14 @@ class SimpleUtils
 		}
 		@rmdir($curdir);
 	}
+
+	/**
+	 * Recursively copy an entire directory
+	 *
+	 * @param string $curdir The original directory to copy
+	 * @param string $newdir The new directory path to copy to
+	 * @todo SimpleDirectory class
+	 */
 	public function recursiveDirCopy($curdir="/tmp/",$newdir="./")
 	{
 		if(!(is_dir($newdir)))
@@ -92,9 +151,16 @@ class SimpleUtils
 			}
 		}
 	}
-	/* END: Replaced By SimpleDirectory */
 
-	// Output Utils
+	/**
+	 * Create a feed based on templates and a data array
+	 *
+	 * @param string $feedTemplate The path to the template which defines the output of the feed.
+	 * @param array $dataArr The array of associative arrays containing information to be used in the feed.
+	 * @param array $configs Associative array of configurations set in config.inc.php
+	 * @param bool $bbencode Whether or not to bbencode the information
+	 * @return string A feed
+	 */
 	public function arr2Feed($feedTemplate,$dataArr=array(),$configs=array(),$bbencode=false)
 	{
 		// This will get cleaned up by SimpleFile
@@ -118,6 +184,13 @@ class SimpleUtils
 		}
 		return $content;
 	}
+
+	/**
+	 * Run an external application and save the output
+	 *
+	 * @param string $path The path to the application you wish to run
+	 * @return string The output of the application.
+	 */
 	public function runApp($path)
 	{
 		ob_start();
@@ -127,7 +200,13 @@ class SimpleUtils
 		return $output;
 	}
 
-	// Modules
+	/**
+	 * Load the list of modules that are enabled/disabled
+	 *
+	 * @param array $configs Associative array of configurations set by config.inc.php
+	 * @param bool $enabled Whether to check the enabled or disabled modules.
+	 * @return void
+	 */
 	public function loadModules($configs=array(),$enabled=true)
 	{
 		SimpleDebug::logInfo("loadModules($enabled)");
@@ -138,6 +217,14 @@ class SimpleUtils
 			if(preg_match("/(.*)\.mod\.php/si",$file,$matches) && (@$matches))
 					$this->mods[]=$matches[1];
 	}
+
+	/**
+	 * Check if the files exist.
+	 *
+	 * @param array $reqFiles An array of files to check
+	 * @param $configs The associative array of configurations set by config.inc.php
+	 * @return bool Whether or not all of the files exist.
+	 */
 	public function checkReqFiles($reqFiles,$configs=array())
 	{
 		foreach($reqFiles as $file)
@@ -145,6 +232,14 @@ class SimpleUtils
 				return FALSE; // Also should probably add some debug output here
 		return TRUE;
 	}
+
+	/**
+	 * Install required files
+	 *
+	 * @param array $defaultFiles An associative array of files to install with their base64 equivilents as the values.
+	 * @param $configs The associative array of configurations set by config.inc.php
+	 * @return bool Whether or not the files can be installed.
+	 */
 	public function installReqFiles($defaultFiles,$configs=array())
 	{
 		// Maybe we should make a SimpleInstaller class....hmmmm
@@ -170,6 +265,14 @@ class SimpleUtils
 		SimpleDebug::logInfo("Installed.");
 		return true;
 	}
+
+	/**
+	 * Check if the database tables exist.
+	 *
+	 * @param array $reqFiles An array of tables to check
+	 * @param $configs The associative array of configurations set by config.inc.php
+	 * @return bool Whether or not all of the tables exist.
+	 */
 	public function checkReqTbls($reqTbls,$configs=array())
 	{
 		$dbconf=$configs['database'];
@@ -182,6 +285,14 @@ class SimpleUtils
 		}
 		return true;
 	}
+
+	/**
+	 * Install the required database tables.
+	 *
+	 * @param array $reqFiles An 3d associative array of tables to install; example: array("table" => array("column"=>"properties"))
+	 * @param $configs The associative array of configurations set by config.inc.php
+	 * @return void
+	 */
 	public function installReqTbls($defaultTbls,$configs=array())
 	{
 		// We need to add a table creator to SimpleDB....
@@ -203,7 +314,12 @@ class SimpleUtils
 		SimpleDebug::logInfo("Installed.");
 	}
 
-	// Template Conditional Handler
+	/**
+	 * Parse a conditional statement
+	 *
+	 * @param array $match The match by preg_match
+	 * @return string What to replace the conditional with.
+	 */
 	public function tempConditional($match=array())
 	{
 		// This is really ugly, should probably be split up or have some sort of implementation in SimpleFile
@@ -288,7 +404,12 @@ class SimpleUtils
 		return "";
 	}
 
-	// User input utils
+	/**
+	 * Filter user input
+	 *
+	 * @param string $input The input that should be sanitized
+	 * @param bool $db Whether or not to filter for the database
+	 */
 	public function simpleFilter($input,$db=true)
 	{
 		SimpleDebug::logInfo("simplefilter");

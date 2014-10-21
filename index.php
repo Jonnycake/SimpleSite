@@ -35,10 +35,38 @@
  * Dbg: readtemplate("/var/www/templates/default/footer.template","")
  * Dbg: parsetemplate($content,"")
  */
+
+/**
+ * SimpleSite index page.
+ *
+ * Entry point for SimpleSite.
+ *
+ * @package     SimpleSite Core
+ * @author      Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
+
+
+	/**
+	 * Set error_reporting to E_ALL and start the session
+	 */
 	error_reporting(E_ALL);
 	session_start();
+
+	/**
+	 * Define SIMPLESITE constants as some includes can't be opened directly.
+	 */
 	define('SIMPLESITE',1);
+
+	/**
+	 * Include the include file
+	 *
+	 * @include include.php
+	 */
 	include("include.php");
+
+	/**
+	 * Set up the debugging
+	 */
 	if(@($_SESSION['is_admin']!=1))
 	{
 		$_GET['debug']=0;
@@ -50,6 +78,9 @@
 	SimpleDebug::setSetting("loud", $_GET['debug']);
 	SimpleDebug::logInfo("Start");
 
+	/**
+	 * Start the site with the default controller.
+	 */
 	$ssite=new $configs['default_controller']($configs);
 	SimpleDebug::logInfo("End");
 ?>
