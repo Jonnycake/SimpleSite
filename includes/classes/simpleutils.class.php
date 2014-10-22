@@ -89,6 +89,8 @@ class SimpleUtils
 
 	/**
 	 * Create a debugging instance
+	 *
+	 * @return void
 	 */
 	public function createDbgInstance()
 	{
@@ -100,6 +102,8 @@ class SimpleUtils
 	 *
 	 * @param string $curdir The directory to delete
 	 * @param int $depth The current depth
+	 * @return void
+	 *
 	 * @todo SimpleDirectory class
 	 */
 	public function recursiveDirDelete($curdir="/tmp/",$depth=0)
@@ -128,6 +132,8 @@ class SimpleUtils
 	 *
 	 * @param string $curdir The original directory to copy
 	 * @param string $newdir The new directory path to copy to
+	 * @return void
+	 *
 	 * @todo SimpleDirectory class
 	 */
 	public function recursiveDirCopy($curdir="/tmp/",$newdir="./")
@@ -319,6 +325,8 @@ class SimpleUtils
 	 *
 	 * @param array $match The match by preg_match
 	 * @return string What to replace the conditional with.
+	 *
+	 * @todo Conditional helper class
 	 */
 	public function tempConditional($match=array())
 	{
@@ -409,6 +417,9 @@ class SimpleUtils
 	 *
 	 * @param string $input The input that should be sanitized
 	 * @param bool $db Whether or not to filter for the database
+	 * @return string The sanitized version of $input
+	 *
+	 * @todo SimpleInput
 	 */
 	public function simpleFilter($input,$db=true)
 	{

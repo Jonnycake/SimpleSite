@@ -20,6 +20,7 @@
 /**
  * Default template parser for SimpleSite.
  *
+ * @package SimpleSite Core
  * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
  */
 

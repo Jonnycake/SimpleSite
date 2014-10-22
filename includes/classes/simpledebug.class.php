@@ -17,21 +17,60 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Helper class for debugging
+ *
+ * @package SimpleDebug
+ * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
+
+/**
+ * SimpleDebug class
+ */
 class SimpleDebug
 {
 	// Literals
+	/**
+	 * Number of events that have been recorded so far
+	 *
+	 * @var int $event_id
+	 */
 	public static $event_id=0;
 
 	// Arrays
+	/**
+	 * Array of events
+	 *
+	 * @var array $log
+	 */
 	public static $log=null;
+
+	/**
+	 * Array of configuration settings
+	 *
+	 * @var array $settings
+	 */
 	private static $settings=null;
 
 	// Configuration Functions
+	/**
+	 * Get the array of configuration settings
+	 *
+	 * @return array The array of configuration settings
+	 */
 	public static function getSettings()
 	{
 		self::initSettings();
 		return self::$settings;
 	}
+
+	/**
+	 * Change multiple configuration settings
+	 *
+	 * @param array $settings The array of settings to replace, example: array("loud" => 0)
+	 * @param bool $propogate Whether or not to propogate the changes to debug instances
+	 * @return void
+	 */
 	public static function setSettings($settings, $propogate=false)
 	{
 		self::initSettings();
@@ -42,11 +81,27 @@ class SimpleDebug
 		if($propogate)
 			self::propogateSettings();
 	}
+
+	/**
+	 * Retrieve a single setting
+	 *
+	 * @param string $setting The name of the setting you wish to retrieve
+	 * @return mixed The configuration value for $setting
+	 */
 	public static function getSetting($setting)
 	{
 		self::initSettings();
 		return self::$settings[$setting];
 	}
+
+	/**
+	 * Set a single setting
+	 *
+	 * @param string $setting The name of the setting you want to change
+	 * @param mixed $value The value you want to change the setting to
+	 * @param bool $propogate Whether or not to propogate the change to debug instances
+	 * @return void
+	 */
 	public static function setSetting($setting, $value, $propogate=false)
 	{
 		self::initSettings();
@@ -54,6 +109,12 @@ class SimpleDebug
 		if($propogate)
 			self::propogateSettings();
 	}
+
+	/**
+	 * Propogate the settings to debug instances
+	 *
+	 * @return void
+	 */
 	public static function propogateSettings()
 	{
 		self::initSettings();
@@ -64,6 +125,12 @@ class SimpleDebug
 	}
 
 	// Log functions
+	/**
+	 * Executed when an exception is not handled.
+	 *
+	 * @param Exception $e The exception to be handled.
+	 * @return void
+	 */
 	public static function exceptionHandler($e)
 	{
 		self::initSettings();
@@ -74,6 +141,13 @@ class SimpleDebug
 			self::printLog();
 	}
 
+	/**
+	 * Executed at the end of the run
+	 *
+	 * Saves and outputs log
+	 *
+	 * @return void
+	 */
 	public static function shutdownFunction()
 	{
 		self::initSettings();
@@ -84,6 +158,12 @@ class SimpleDebug
 			self::printLog();
 	}
 
+	/**
+	 * Log a handled exception
+	 *
+	 * @param Exception $e The exception that was handled.
+	 * @return void
+	 */
 	public static function logException($e)
 	{
 		self::initSettings();
@@ -100,21 +180,48 @@ class SimpleDebug
 		self::logEvent("Exception", $info);
 	}
 
+	/**
+	 * Log an info only message
+	 *
+	 * @param string $info The text to be logged
+	 * @return void
+	 */
 	public static function logInfo($info)
 	{
 		self::logEvent("Info", $info);
 	}
 
+	/**
+	 * Log a missing dependency error
+	 *
+	 * @param string $depends The name of the dependency that is missing.
+	 * @return void
+	 */
 	public static function logDepends($depends)
 	{
 		self::logEvent("Depends", $depends);
 	}
 
+	/**
+	 * Log an event
+	 *
+	 * Used by all other logging functions.
+	 *
+	 * @param string $type The type of event to log (Info, Exception, or Depends)
+	 * @param string $info The text to use to log the event
+	 */
 	public static function logEvent($type, $info)
 	{
 		self::initLog();
 		self::$log[$type][]=array("event_id"=>self::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);
 	}
+
+	/**
+	 * Retrieve the log
+	 *
+	 * @param string $instance The instance to retrieve the log from.
+	 * @return array The log from the instance or the overall SimpleDebug class
+	 */
 	public static function getLog($instance=null)
 	{
 		if(is_null($instance))
@@ -124,6 +231,13 @@ class SimpleDebug
 			return self::getInstanceLog($instance);
 		}
 	}
+
+	/**
+	 * Retrieve the log from an instance
+	 *
+	 * @param mixed $instance The name of the instance to retrieve the log from (null means all, can be array or a string)
+	 * @return array The array of logs
+	 */
 	public static function getInstanceLog($instance=null)
 	{
 		self::initInstances();
@@ -151,6 +265,16 @@ class SimpleDebug
 
 		return $instanceLog;
 	}
+
+	/**
+	 * Get the combo log
+	 *
+	 * Retrieves the array of logs of one or more instances combined with the log from SimpleDebug itself
+	 *
+	 * @param mixed $instances The instances to retrieve logs from
+	 * @param array $instanceLogs Array of logs to add into the logs.
+	 * @return array Log containing all the $instances logs, $instancelogs, and SimpleDebug's logs
+	 */
 	public static function getComboLog($instances=null, $instanceLogs=null)
 	{
 		self::initLog();
@@ -173,6 +297,12 @@ class SimpleDebug
 
 		return $combo_log;
 	}
+
+	/**
+	 * Get the full (unseparated by type) array of logs
+	 *
+	 * @param mixed $instances 
+	 */
 	public static function getFullLog($instances=null, $combo_log=null)
 	{
 		if(is_null($combo_log))
