@@ -209,6 +209,7 @@ class SimpleDebug
 	 *
 	 * @param string $type The type of event to log (Info, Exception, or Depends)
 	 * @param string $info The text to use to log the event
+	 * @return void
 	 */
 	public static function logEvent($type, $info)
 	{
@@ -301,7 +302,9 @@ class SimpleDebug
 	/**
 	 * Get the full (unseparated by type) array of logs
 	 *
-	 * @param mixed $instances 
+	 * @param mixed $instances The instances to include in the logs (null means all)
+	 * @param array $combo_log A combo log that should be included in the log
+	 * @return array The full log
 	 */
 	public static function getFullLog($instances=null, $combo_log=null)
 	{
@@ -313,6 +316,12 @@ class SimpleDebug
 
 		return $fullLog;
 	}
+
+	/**
+	 * Save the log to the output file
+	 *
+	 * @return void
+	 */
 	public static function saveLog() // Save log to log file
 	{
 		self::initSettings();
@@ -323,11 +332,22 @@ class SimpleDebug
 	}
 
 	// Initialization functions
+	/**
+	 * Initialize the log array
+	 *
+	 * @return void
+	 */
 	public static function initLog()
 	{
 		if(is_null(self::$log))
 			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
 	}
+
+	/**
+	 * Initialize the settings array
+	 *
+	 * @return void
+	 */
 	public static function initSettings()
 	{
 		if(is_null(self::$settings))
@@ -341,6 +361,12 @@ class SimpleDebug
 						"time_format"   => "m/d/Y H:i:s",
 					);
 	}
+
+	/**
+	 * Initialize the instances array
+	 *
+	 * @return void
+	 */
 	public static function initInstances()
 	{
 		if(is_null(self::$instances))
@@ -348,6 +374,14 @@ class SimpleDebug
 	}
 
 	// Output/Misc.
+	/**
+	 * Put the logs into the proper format
+	 *
+	 * @param array $logs The array of logs (from getFulllog)
+	 * @param mixed $instance The instances to use for formatting
+	 * @param string $format The format to use for logs
+	 * @return string The formatted version of the logs
+	 */
 	public static function formatLog($logs, $instance=null, $format=null)
 	{
 		self::initSettings();
@@ -379,6 +413,14 @@ class SimpleDebug
 		}
 		return $formattedLog;
 	}
+
+	/**
+	 * Print the logs in the proper format
+	 *
+	 * @param string $instance The name of the instance to use the logs/format from
+	 * @param string $type The type of events to output the log of
+	 * @return void
+	 */
 	public static function printLog($instance=null, $type="all")
 	{
 		$full_log=array();
@@ -407,6 +449,12 @@ class SimpleDebug
 
 		echo self::formatLog($full_log);
 	}
+
+	/**
+	 * Generate a stack trace
+	 *
+	 * @return array The backtrace array
+	 */
 	public static function stacktrace()
 	{
 		$backtrace=debug_backtrace();
@@ -422,8 +470,19 @@ class SimpleDebug
 	 */
 
 	// Array of named-instances created/retrieved/destroyed using the functions below
+	/**
+	 * Array of named-instances
+	 *
+	 * @var array $instances
+	 */
 	private static $instances=null;
 
+	/**
+	 * Create a new instance (if name is unique)
+	 *
+	 * @param string $instanceName What to name the instance
+	 * @return SimpleDebugInstance Instance that was just created
+	 */
 	public static function createInstance($instanceName)
 	{
 		self::initSettings();
@@ -436,10 +495,24 @@ class SimpleDebug
 		}
 		return self::$instances[$instanceName];
 	}
+
+	/**
+	 * Destroy an instance
+	 *
+	 * @param string $instanceName The name of the instance
+	 * @return void
+	 */
 	public static function destroyInstance($instanceName)
 	{
 		unset(self::$instances[$instanceName]);
 	}
+
+	/**
+	 * Retrieve an instance or create it if it doesn't exist
+	 *
+	 * @param string $instanceName The name of the instance to be retrieved
+	 * @return SimpleDebugInstance Instance that was requested
+	 */
 	public static function getInstance($instanceName)
 	{
 		if(isset(self::$instances[$instanceName]))

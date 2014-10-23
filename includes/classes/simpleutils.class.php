@@ -275,7 +275,7 @@ class SimpleUtils
 	/**
 	 * Check if the database tables exist.
 	 *
-	 * @param array $reqFiles An array of tables to check
+	 * @param array $reqTbls An array of tables to check
 	 * @param $configs The associative array of configurations set by config.inc.php
 	 * @return bool Whether or not all of the tables exist.
 	 */
@@ -295,7 +295,7 @@ class SimpleUtils
 	/**
 	 * Install the required database tables.
 	 *
-	 * @param array $reqFiles An 3d associative array of tables to install; example: array("table" => array("column"=>"properties"))
+	 * @param array $defaultTbls An 3d associative array of tables to install; example: array("table" => array("column"=>"properties"))
 	 * @param $configs The associative array of configurations set by config.inc.php
 	 * @return void
 	 */
