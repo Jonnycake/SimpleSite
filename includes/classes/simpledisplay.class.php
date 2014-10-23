@@ -17,33 +17,107 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Default template parser for SimpleSite.
+ *
+ * @package SimpleSite Core
+ * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
+
+/**
+ * File can not be accessed directly.
+ */
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
 
+/**
+ * Number of functions performed so far
+ *
+ * @var int
+ */
 $funcsperformed=0;
+
+/**
+ * SimpleDisplay Class
+ *
+ * The SimpleDisplay class is the default template parser that is used
+ * when running SimpleSite.
+ */
 class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 {
+	/**
+	 * Array of template lengths (for use in editables)
+	 *
+	 * @var array
+	 */
 	public $templateLengths=array();
+
+	/**
+	 * Number of editables found in the content.
+	 *
+	 * @var int
+	 */
 	public $editables=0;
+
+	/**
+	 * Array of editables and their content
+	 *
+	 * @var array
+	 */
 	public $editArray=array();
+
+	/**
+	 * The database connection.
+	 *
+	 * @var resource
+	 */
 	protected $db=NULL;
 
-	// Install/Uninstall functions
+	/**
+	 * Should check that the display has all of the dependencies required
+	 *
+	 * @return bool
+	 */
 	public function displayIsInstalled()
 	{
 		return true;
 	}
+
+	/**
+	 * Should attempt to install all of the dependencies required.
+	 *
+	 * @return bool
+	 */
 	public function displayInstall()
 	{
 		return true;
 	}
+
+	/**
+	 * Should uninstall any database tables or extra files.
+	 *
+	 * @return bool
+	 */
 	public function displayUninstall()
 	{
 		return true;
 	}
 
-	// Parse bbcodes -- should move this to a separate widget
-	protected function bbencode($post,$getcodes=0,$codetop=null,$codeformat=null,$codebottom=null)
+	/**
+	 * Parse BBCodes
+	 *
+	 * Parses bbcodes based on a built-in set as well as a database table
+	 *
+	 * @param string $post The content which needs to be parsed.
+	 * @param bool $getcodes Whether or not a table listing coulds should be displayed.
+	 * @param string $codetop Template for the top of the BBCode table
+	 * @param string $codeformat Template for the BBCodes to come out in in the table
+	 * @param string $codebottom Template for the bottom of the BBCode table
+	 * @return string The bbencoded version of the output.
+	 *
+	 * @todo Move to separate plugin.
+	 */
+	protected function bbencode($post,$getcodes=false,$codetop=null,$codeformat=null,$codebottom=null)
 	{
 		SimpleDebug::logInfo("bbencode(\$post,$getcodes)");
 
@@ -92,7 +166,13 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
         	return preg_replace($search,$replace,$post);
 	}
 
-	// Template display
+	/**
+	 * Read the template.
+	 *
+	 * @param string $template The path to the template to read.
+	 * @param string $mod The name of the module to use to parse the template.
+	 * @return string The parsed version of the template
+	 */
 	public function readTemplate($template, $mod)
 	{
 		SimpleDebug::logInfo("readtemplate(\"".str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)."\",\"$mod\")");
@@ -114,6 +194,14 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 	}
 
 	// This entire function will probably be cleaned up with SimpleFile
+	/**
+	 * Parse the template content.
+	 *
+	 * @param string $content The content to parse.
+	 * @param string $mod The module to use to parse the template
+	 * @param string $templateName The name to use for keeping track of editables (pretty much unused).
+	 * @return string The parsed version of $content.
+	 */
 	public function parseTemplate($content, $mod, $templateName="")
 	{
 		SimpleDebug::logInfo("parsetemplate(\$content,\"$mod\")");
@@ -315,6 +403,13 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 		}
 		return $content;
 	}
+
+	/**
+	 * Show the website.
+	 *
+	 * @param string $mod The name of the module to use.
+	 * @return void
+	 */
 	public function showSite($mod)
 	{
 		try
