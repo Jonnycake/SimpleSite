@@ -16,11 +16,32 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
+/**
+ * The default controller for the website
+ *
+ * @package SimpleSite Core
+ * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
+
+/**
+ * Can't be accessed directly
+ */
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
+
+/**
+ * DefaultSite class
+ */
 class DefaultSite extends SimpleSite
 {
+	/**
+	 * Constructor for DefaultSite
+	 *
+	 * Registers the default autoloader, defines constants, and then shows the website
+	 *
+	 * @param array $configs The array of configurations set in config.inc.php
+	 */
 	public function __construct($configs=array())
 	{
 		SimpleDebug::logInfo("SimpleSite->__construct()");
@@ -46,6 +67,9 @@ class DefaultSite extends SimpleSite
 					if($constants!=false)
 						foreach($constants as $row)
 						{
+							/**
+							 * Dynamically defined constants from database
+							 */
 							define($row->getName(),$row->getValue());
 						}
 

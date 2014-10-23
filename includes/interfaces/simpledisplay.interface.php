@@ -17,16 +17,65 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Defines the interface for controllers to implement
+ *
+ * @package SimpleSite Core
+ * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
 if(SIMPLESITE!=1)
 	die("Can't access this file directly.");
 
+/**
+ * Interface for controllers to implement
+ */
 interface simpleDisplayI
 {
+	/**
+	 * Read a template
+	 *
+	 * @param string $template The full path to the template
+	 * @param string $mod The module to use to do side-parsing
+	 * @return string The parsed content of the $template file
+	 */
 	public function readTemplate($template, $mod);
+
+	/**
+	 * Parse the template content
+	 *
+	 * @param string $content The content of the template
+	 * @param string $mod The module to use for side-parsing
+	 * @return string The parsed template content
+	 */
 	public function parseTemplate($content, $mod);
+
+	/**
+	 * Show the website
+	 *
+	 * @param string $mod The module to use for side-parsing
+	 * @return void
+	 */
 	public function showSite($mod);
+
+	/**
+	 * Check if the display is installed properly
+	 *
+	 * @return bool Whether or not it is installed properly.
+	 */
 	public function displayIsInstalled();
+
+	/**
+	 * Install the display
+	 *
+	 * @return bool Whether or not the display could be installed
+	 */
 	public function displayInstall();
+
+	/**
+	 * Un-Install the display
+	 *
+	 * @return bool Whether or not the display could be uninstalled
+	 */
 	public function displayUninstall();
 }
 ?>
