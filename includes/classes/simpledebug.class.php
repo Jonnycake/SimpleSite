@@ -24,6 +24,32 @@
  * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
  */
 
+// Debug Mode Constants
+/**
+ * No output
+ */
+define('SDBG_QUIET',0);
+
+/**
+ * Only informational messages
+ */
+define('SDBG_INFO',1);
+
+/**
+ * Only dependency errors
+ */
+define('SDBG_DEPEND',2);
+
+/**
+ * Only exceptions
+ */
+define('SDBG_EXCEPT',4);
+
+/**
+ * All debug output
+ */
+define('SDBG_ALL',7);
+
 /**
  * SimpleDebug class
  */
@@ -118,6 +144,7 @@ class SimpleDebug
 	public static function propogateSettings()
 	{
 		self::initSettings();
+		self::initInstances();
 		foreach(self::$instances as $instance)
 		{
 			$instance->changeSettings(self::$settings);
@@ -138,7 +165,9 @@ class SimpleDebug
 		self::logException($e);
 
 		if(self::$settings['loud']>0)
+		{
 			self::printLog();
+		}
 	}
 
 	/**
@@ -151,7 +180,6 @@ class SimpleDebug
 	public static function shutdownFunction()
 	{
 		self::initSettings();
-		self::initLog();
 		self::saveLog();
 
 		if(self::$settings['loud']>0)
@@ -171,7 +199,8 @@ class SimpleDebug
 		$line_number=$e->getLine();
 		$file=$e->getFile();
 		$message=$e->getMessage();
-		$backtrace=json_encode(debug_backtrace());
+		$backtrace=self::trace();
+		$backtrace=json_encode($backtrace);
 		$info=self::$settings['exception_fmt'];
 		$info=str_replace("{FILE}", $file, $info);
 		$info=str_replace("{LINE}", $line_number, $info);
@@ -311,8 +340,18 @@ class SimpleDebug
 		if(is_null($combo_log))
 			$combo_log=self::getComboLog($instances);
 
+		$fullLog=array();
+		foreach($combo_log as $logType=>$logs)
+		{
+			$fullLog=array_merge($fullLog, $logs);
+		}
+		/*if(isset($combo_log["Exception"]))
+		{
+			$fullLog=$combo_log["Exception"];
+		}
+		
 		$fullLog=array_merge($combo_log["Exception"], $combo_log["Info"]);
-		$fullLog=array_merge($fullLog, $combo_log["Depends"]);
+		$fullLog=array_merge($fullLog, $combo_log["Depends"]);*/
 
 		return $fullLog;
 	}
@@ -324,6 +363,7 @@ class SimpleDebug
 	 */
 	public static function saveLog() // Save log to log file
 	{
+		self::initLog();
 		self::initSettings();
 		if(self::$settings['savelog'])
 		{
@@ -385,6 +425,7 @@ class SimpleDebug
 	public static function formatLog($logs, $instance=null, $format=null)
 	{
 		self::initSettings();
+		self::initInstances();
 
 		// Sort logs by event_id (order they happened in)
 		$sortFunction=function($a, $b) {
@@ -421,25 +462,26 @@ class SimpleDebug
 	 * @param string $type The type of events to output the log of
 	 * @return void
 	 */
-	public static function printLog($instance=null, $type="all")
+	public static function printLog($instance=null, $filtered=false)
 	{
 		$full_log=array();
 		if(is_null($instance))
 		{
-			if($type=="all")
+			if(!$filtered)
 			{
 				$full_log=self::getFullLog();
 			}
 			else
 			{
-				$combo_log=self::getComboLog();
-				if(isset($combo_log[$type]))
+				$combo_log=self::filterLog(self::getComboLog());
+				$full_log=self::getFullLog(null, $combo_log);
+				/*if(isset($combo_log[$type]))
 				{
 					foreach($combo_log[$type] as $log)
 					{
 						$full_log[]=$log;
 					}
-				}
+				}*/
 			}
 		}
 		else
@@ -451,11 +493,56 @@ class SimpleDebug
 	}
 
 	/**
+	 * Filter log array based on loud level
+	 *
+	 * @param array $comboLog The array of logs
+	 * @return array The filtered array of logs
+	 */
+	public static function filterLog($comboLog, $mode=null)
+	{
+		self::initSettings();
+
+		if(is_null($mode))
+		{
+			$mode=self::$settings['loud'];
+		}
+
+		switch(self::$settings['loud'])
+		{
+			case SDBG_QUIET:
+				return array();
+			case SDBG_INFO:
+				unset($comboLog["Depends"]);
+				unset($comboLog["Exception"]);
+				break;
+			case SDBG_DEPEND:
+				unset($comboLog["Info"]);
+				unset($comboLog["Exception"]);
+				break;
+			case (SDBG_INFO | SDBG_DEPEND):
+				unset($comboLog["Exception"]);
+				break;
+			case (SDBG_EXCEPT | SDBG_INFO):
+				unset($comboLog["Depends"]);
+				break;
+			case (SDBG_EXCEPT | SDBG_DEPEND):
+				unset($comboLog["Info"]);
+				break;
+			case SDBG_EXCEPT:
+				unset($comboLog["Depends"]);
+				unset($comboLog["Info"]);
+				break;
+			case SDBG_ALL:
+				break;
+		}
+		return $comboLog;
+	}
+	/**
 	 * Generate a stack trace
 	 *
 	 * @return array The backtrace array
 	 */
-	public static function stacktrace()
+	public static function trace()
 	{
 		$backtrace=debug_backtrace();
 		array_shift($backtrace);
@@ -486,8 +573,7 @@ class SimpleDebug
 	public static function createInstance($instanceName)
 	{
 		self::initSettings();
-		if(is_null(self::$instances))
-			self::$instances=array();
+		self::initInstances();
 
 		if(!array_key_exists($instanceName, self::$instances))
 		{
@@ -504,6 +590,7 @@ class SimpleDebug
 	 */
 	public static function destroyInstance($instanceName)
 	{
+		self::initInstances();
 		unset(self::$instances[$instanceName]);
 	}
 
@@ -515,6 +602,7 @@ class SimpleDebug
 	 */
 	public static function getInstance($instanceName)
 	{
+		self::initInstances();
 		if(isset(self::$instances[$instanceName]))
 			return self::$instances[$instanceName];
 		else
@@ -523,71 +611,149 @@ class SimpleDebug
 
 }
 
+/**
+ * Class for debug instances to use
+ */
 class SimpleDebugInstance
 {
-	// Instance Configurations
-	// Current debug mode
+	/**
+	 * Current debug mode
+	 *
+	 * @var int $loud
+	 */
 	private $loud=0;
 
-	// Keep track of problems so that there's one point of contact for components to know what to do
+	/**
+	 * Error level
+	 *
+	 * @var int $errorLevel
+	 */
 	private $errorLevel=0;
 
-
-	// Log output format
+	/**
+	 * Log output format
+	 *
+	 * @var string $format
+	 */
 	private $format="Dbg (Module: {MOD}): {LINENUM} {MESSAGE} (Error Level: {ERRLVL})";
 
-	// Format for logged exceptions
+	/**
+	 * Format for logged exceptions
+	 *
+	 * @var string $exception_fmt
+	 */
 	private $exception_fmt="{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}";
 
-	// Log for instance logs only
+	/**
+	 * Log for instance logs only
+	 *
+	 * @var array $log
+	 */
 	private $log=array("Info" => array(), "Depends" => array(), "Exception" => array());
 
-	// Time output format
+	/**
+	 * Time output format
+	 *
+	 * @var string $time_format
+	 */
 	private $time_format="";
 
-	// Path to log file
+	/**
+	 * Path to log file
+	 *
+	 * @var string $logfile
+	 */
 	private $logfile="";
 
-	// Whether or not to write to log file
+	/**
+	 * Whether or not to write to log file
+	 *
+	 * @var bool $savelog
+	 */
 	private $savelog=false;
 
+	/**
+	 * Just sets up the configurations based on $settings
+	 *
+	 * @param array $settings The configuration array from SimpleDebug
+	 * @return void
+	 */
 	public function __construct($settings)
 	{
 		$this->changeSettings($settings);
 	}
 
+	/**
+	 * Change the settings
+	 *
+	 * @param array $settings The configuration array from SimpleDebug
+	 * @return void
+	 */
 	public function changeSettings($settings)
 	{
 		foreach($settings as $conf=>$val)
 			$this->$conf=$val;
 	}
 
-	// Retrieving $this->log
+	/**
+	 * Print only this instance's log
+	 * @return void
+	 */
 	public function printLog()
 	{
 		echo SimpleDebug::formatLog(SimpleDebug::getFullLog(null, $this->log));
 	}
 
+	/**
+	 * Retrieve this instance's log
+	 *
+	 * @return array The log array
+	 */
 	public function getLog()
 	{
 		return $this->log;
 	}
 
-	// Log functions for different types
+	/**
+	 * Log an exception
+	 *
+	 * @param Exception $e The exception to be logged
+	 * @return void
+	 */
 	public function logException($e)
 	{
 		$this->logEvent("Exception", $e);
 	}
+
+	/**
+	 * Log an informational message
+	 *
+	 * @param string $info The message to be logged
+	 * @return void
+	 */
 	public function logInfo($info)
 	{
 		$this->logEvent("Info", $info);
 	}
+
+	/**
+	 * Log a dependency error
+	 *
+	 * @param string $depends The name of the dependency that is missing
+	 * @return void
+	 */
 	public function logDepends($depends)
 	{
 		$this->logEvent("Depends", $depends);
 	}
 
-	// Function for all log functions to go through when interacting with $this->log
+	/**
+	 * Function for all log functions to go through when interacting with $this->log
+	 *
+	 * @param string $type The type of event to be logged
+	 * @param string $info The message to use in the log
+	 * @return void
+	 */
 	public function logEvent($type, $info)
 	{
 		$this->log[$type][]=array("event_id"=>SimpleDebug::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);

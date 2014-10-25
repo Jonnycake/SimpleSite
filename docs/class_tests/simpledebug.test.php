@@ -6,7 +6,7 @@ include("../../includes/classes/simpledebug.class.php");
 
 register_shutdown_function("SimpleDebug::shutdownFunction");
 set_exception_handler("SimpleDebug::exceptionHandler");
-SimpleDebug::setSettings(array("loud"=>1, "savelog"=>true));
+SimpleDebug::setSettings(array("loud"=>SDBG_EXCEPT | SDBG_DEPEND, "savelog"=>true));
 
 class SomeFirstclass extends SimpleUtils
 {
@@ -15,8 +15,8 @@ class SomeFirstclass extends SimpleUtils
 		$this->createDbgInstance();
 		$this->debug->logInfo("Test loginfo on SomeFirstClass");
 
-		$st=SimpleDebug::stackTrace();
-		print_r($st);
+		$st=SimpleDebug::trace();
+		//print_r($st);
 	}
 }
 class SomeClass extends SimpleUtils
@@ -40,4 +40,5 @@ class SomeClass extends SimpleUtils
 
 new SomeFirstclass();
 new SomeClass();
-SimpleDebug::printLog();
+SimpleDebug::printLog(null, true);
+echo "End of filtered print";

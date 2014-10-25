@@ -53,11 +53,6 @@
 	session_start();
 
 	/**
-	 * Define SIMPLESITE constants as some includes can't be opened directly.
-	 */
-	define('SIMPLESITE',1);
-
-	/**
 	 * Include the include file
 	 *
 	 * @include include.php

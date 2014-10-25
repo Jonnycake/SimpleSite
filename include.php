@@ -28,7 +28,7 @@
  */
 
 /**
- * SIMPLESITE Constant - Included files can't be accessed directly.
+ * Define SIMPLESITE constant as some files can't be accessed directly
  */
 define('SIMPLESITE',1);
 

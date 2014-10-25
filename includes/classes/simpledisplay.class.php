@@ -42,6 +42,8 @@ $funcsperformed=0;
  *
  * The SimpleDisplay class is the default template parser that is used
  * when running SimpleSite.
+ *
+ * @todo Make adding constants a little bit easier
  */
 class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 {
