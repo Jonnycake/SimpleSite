@@ -1,6 +1,6 @@
 <?php
 /*
- *    SimpleDebug 0.1: Basic debugging/logging functions.
+ *    SimpleDebug 1.0: Basic debugging/logging functions.
  *    Copyright (C) 2014 Jon Stockton
  * 
  *    This program is free software: you can redistribute it and/or modify
@@ -52,6 +52,10 @@ define('SDBG_ALL',7);
 
 /**
  * SimpleDebug class
+ *
+ * @version 1.0
+ * @todo Handle dependencies
+ * @todo Root-Cause Analysis
  */
 class SimpleDebug
 {
@@ -77,6 +81,20 @@ class SimpleDebug
 	 * @var array $settings
 	 */
 	private static $settings=null;
+
+	/**
+	 * Array of dependencies
+	 *
+	 * @var array $depends
+	 */
+	private static $depends=null;
+
+	/**
+	 * Array of dependency relationships
+	 *
+	 * @var array $dependRel
+	 */
+	private static $dependRel=null;
 
 	// Configuration Functions
 	/**
@@ -228,7 +246,14 @@ class SimpleDebug
 	 */
 	public static function logDepends($depends)
 	{
-		self::logEvent("Depends", $depends);
+		if(is_array($depends))
+			self::logEvent("Depends", "Missing ${depends['name']}: ${depends['description']}");
+		else if(is_string($depends))
+			self::logEvent("Depends", $depends);
+		else
+		{
+			self::logException(new Exception("Bad depends passed to logDepends."));
+		}
 	}
 
 	/**
@@ -345,13 +370,6 @@ class SimpleDebug
 		{
 			$fullLog=array_merge($fullLog, $logs);
 		}
-		/*if(isset($combo_log["Exception"]))
-		{
-			$fullLog=$combo_log["Exception"];
-		}
-		
-		$fullLog=array_merge($combo_log["Exception"], $combo_log["Info"]);
-		$fullLog=array_merge($fullLog, $combo_log["Depends"]);*/
 
 		return $fullLog;
 	}
@@ -381,6 +399,19 @@ class SimpleDebug
 	{
 		if(is_null(self::$log))
 			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
+	}
+
+	/**
+	 * Iniitalize the depends array
+	 *
+	 * @return void
+	 */
+	public static function initDepends()
+	{
+		if(is_null(self::$depends))
+			self::$depends=array( "hard" => array(), "soft" => array() );
+		if(is_null(self::$dependRel))
+			self::$dependRel=array();
 	}
 
 	/**
@@ -475,13 +506,6 @@ class SimpleDebug
 			{
 				$combo_log=self::filterLog(self::getComboLog());
 				$full_log=self::getFullLog(null, $combo_log);
-				/*if(isset($combo_log[$type]))
-				{
-					foreach($combo_log[$type] as $log)
-					{
-						$full_log[]=$log;
-					}
-				}*/
 			}
 		}
 		else
@@ -534,9 +558,13 @@ class SimpleDebug
 				break;
 			case SDBG_ALL:
 				break;
+			default:
+				self::logException(new Exception("Invalid debug setting detected...returning nothing."));
+				return array();
 		}
 		return $comboLog;
 	}
+
 	/**
 	 * Generate a stack trace
 	 *
@@ -609,6 +637,92 @@ class SimpleDebug
 			return self::createInstance($instanceName);
 	}
 
+	/**
+	 * Register Dependencies
+	 *
+	 * @param array $dependency Associative array containing basic information about the dependency.
+	 * @param callable|null $checkFunc Function to check if the dependency exists, otherwise it is assumed to use a constant
+	 * @param string|null $origDependency The name of the dependency that depends on this one (if applicable)
+	 * @param bool $hard Whether or not it's a "hard" dependency or not
+	 * @return void
+	 *
+	 * @todo implement $checkFunc
+	 */
+	public static function regDepend($dependency, $checkFunc=null, $origDependency=null, $hard=true)
+	{
+		self::initDepends();
+		self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(create_function("", $checkFunc), $dependency);
+	}
+
+	/**
+	 * Check dependencies
+	 *
+	 * @param string|null
+	 */
+	public static function checkDepend($dependency=null)
+	{
+		self::initDepends();
+
+		$errors=array();
+
+		if(is_null($dependency))
+		{
+		}
+		else if(is_string($dependency))
+		{
+			if(array_key_exists($dependency, self::$depends['hard']))
+			{
+				$depend=self::$depends['hard'][$dependency];
+				$hard=true;
+			}
+			else if(array_key_exists($dependency, self::$depends['soft']))
+			{
+				$depend=self::$depends['soft'][$dependency];
+				$hard=false;
+			}
+			else
+			{
+				$depend=array( null, array( "name"=>$dependency, "description"=>"Assumed constant...", "fix"=>null ));
+				$hard=false;
+			}
+
+			if(!is_null($depend[0]))
+			{
+				if(!($depend[0]()))
+				{
+					$errors[]=$depend[1];
+				}
+			}
+			else
+			{
+				if(!isset($depend[1]['name']))
+				{
+					self::logException(new Exception("Depend array isn't correctly formed."));
+					$errors[]=$depend[1];
+				}
+			}
+		}
+		else
+		{
+			self::logException(new Exception("Bad dependency name"));
+		}
+
+		$isError=false;
+		foreach($errors as $error)
+		{
+			$isError=true;
+			self::logDepends($error);
+		}
+
+		return $isError;
+	}
+
+	/**
+	 * Find the root cause of an error
+	 */
+	public static function rootCauseFinder()
+	{
+	}
 }
 
 /**

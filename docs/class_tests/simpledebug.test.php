@@ -41,4 +41,8 @@ class SomeClass extends SimpleUtils
 new SomeFirstclass();
 new SomeClass();
 SimpleDebug::printLog(null, true);
-echo "End of filtered print";
+SimpleDebug::regDepend( array( "name"=>"SIMPLESITE", "description"=>"Can not be loaded on it's own." ), "return defined(\"SIMPLESITE\");" );
+SimpleDebug::checkDepend("SIMPLESITE");
+SimpleDebug::regDepend( array( "name"=>"SOMETHINGNOTDEFINED", "description"=>"Can not be loaded on it's own." ) );
+SimpleDebug::checkDepend("SOMETHINGNOTDEFINED");
+echo "End of filtered print\n\n";
