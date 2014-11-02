@@ -51,17 +51,40 @@ define('SDBG_EXCEPT',4);
 define('SDBG_ALL',7);
 
 /**
+ * Output dumps throughout runtime
+ */
+define('SDBG_TRACERUN', 8);
+
+/**
+ * Output backtraces throughout runtime
+ */
+define('SDBG_DUMPRUN', 16);
+
+/**
+ * Output both stack traces and selfDumps throughout runtime
+ */
+define('SDBG_LOUDRUN', 24);
+
+/**
+ * Combine SDBG_LOUDRUN with SDBG_ALL
+ */
+define('SDBG_SUPERLOUD', 31);
+
+
+/**
  * SimpleDebug class
  *
  * @version 1.0
  * @todo Handle dependencies
  * @todo Root-Cause Analysis
+ * @todo Assertions
+ * @todo error_get_last() compatability
  */
 class SimpleDebug
 {
 	// Literals
 	/**
-	 * Number of events that have been recorded so far
+	 * Number of eventsw that have been recorded so far
 	 *
 	 * @var int $event_id
 	 */
@@ -95,6 +118,27 @@ class SimpleDebug
 	 * @var array $dependRel
 	 */
 	private static $dependRel=null;
+
+	/**
+	 * Array of missing dependencies
+	 *
+	 * @var array $missingDepends
+	 */
+	private static $missingDepends=null;
+
+	/**
+	 * Array of exceptions
+	 *
+	 * @var array $exceptionErrors
+	 */
+	private static $exceptionErrors=null;
+
+	/**
+	 * Array of dependency levels
+	 *
+	 * @var array $dependLevels
+	 */
+	private static $dependLevels=null;
 
 	// Configuration Functions
 	/**
@@ -182,10 +226,7 @@ class SimpleDebug
 
 		self::logException($e);
 
-		if(self::$settings['loud']>0)
-		{
-			self::printLog();
-		}
+		self::printLog();
 	}
 
 	/**
@@ -198,10 +239,53 @@ class SimpleDebug
 	public static function shutdownFunction()
 	{
 		self::initSettings();
+
+		$error=error_get_last();
+		$wasFatal=false;
+		$handlerCalled=false;
+		$handler=self::$settings['fatalHandler'];
+		switch($error['type'])
+		{
+			case E_ERROR:
+				self::logException(new Exception("Fatal Error: ".json_encode($error)));
+				if(is_string($handler))
+				{
+					self::logInfo("Attempting to handle with ".self::$settings['fatalHandler']);
+					self::saveLog();
+					$handlerCalled=true;
+					$handleEID=self::$event_id-1;
+					self::printLog();
+					$handler();
+				}
+				$wasFatal=true;
+				break;
+			case E_PARSE:
+				self::logException(new Exception("Parse Error: ".json_encode($error)));
+				unset($_GET['mod']);
+				if(is_string($handler))
+				{
+					self::logInfo("Attempting to handle with ".self::$settings['fatalHandler']);
+					self::saveLog();
+					$handlerCalled=true;
+					$handleEID=self::$event_id-1;
+					self::printLog(); // Print in case $handler errors out
+					$handler();
+				}
+				$wasFatal=true;
+				break;
+			default:
+				break;
+
+		}
+
+		if($handlerCalled)
+		{
+			self::logInfo("Lines #0 through #${handleEID} are repeated from a previous log.");
+		}
 		self::saveLog();
 
-		if(self::$settings['loud']>0)
-			self::printLog();
+
+		self::printLog();
 	}
 
 	/**
@@ -212,7 +296,9 @@ class SimpleDebug
 	 */
 	public static function logException($e)
 	{
+		self::initLog();
 		self::initSettings();
+		self::$exceptionErrors[]=$e;
 		self::$settings['errorLevel']++;
 		$line_number=$e->getLine();
 		$file=$e->getFile();
@@ -246,13 +332,34 @@ class SimpleDebug
 	 */
 	public static function logDepends($depends)
 	{
+		self::initDepends();
 		if(is_array($depends))
+		{
 			self::logEvent("Depends", "Missing ${depends['name']}: ${depends['description']}");
+		}
 		else if(is_string($depends))
+		{
 			self::logEvent("Depends", $depends);
+			$depends==array("name"=>$depends, "description"=>"Unknown information.");
+		}
 		else
 		{
 			self::logException(new Exception("Bad depends passed to logDepends."));
+		}
+
+		// Make sure it's not a duplicate
+		$duplicate=false;
+		foreach(self::$missingDepends as $missingDepend)
+		{
+			if($missingDepend['name']==$depends['name'])
+			{
+				$duplicate=true;
+			}
+		}
+
+		if(!$duplicate)
+		{
+			self::$missingDepends[]=$depends;
 		}
 	}
 
@@ -265,9 +372,25 @@ class SimpleDebug
 	 * @param string $info The text to use to log the event
 	 * @return void
 	 */
-	public static function logEvent($type, $info)
+	public static function logEvent($type, $info, $errorLevel=0)
 	{
 		self::initLog();
+
+		if(self::$settings['loud'] & SDBG_TRACERUN)
+		{
+			echo "Outputting self::trace() -\n";
+			var_dump(self::trace());
+		}
+
+		if(self::$settings['loud'] & SDBG_DUMPRUN)
+		{
+			echo "Outputting self::dumpSelf() -\n";
+			var_dump(self::dumpSelf());
+		}
+
+
+		if(!isset(self::$log[$type]))
+			self::$log[$type]=array();
 		self::$log[$type][]=array("event_id"=>self::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);
 	}
 
@@ -354,7 +477,9 @@ class SimpleDebug
 	}
 
 	/**
-	 * Get the full (unseparated by type) array of logs
+	 * Get the full array of logs
+	 *
+	 * Returns in a one dimensional, unsorted, array.
 	 *
 	 * @param mixed $instances The instances to include in the logs (null means all)
 	 * @param array $combo_log A combo log that should be included in the log
@@ -377,15 +502,22 @@ class SimpleDebug
 	/**
 	 * Save the log to the output file
 	 *
+	 * File path is determined by the $settings array
+	 *
 	 * @return void
 	 */
-	public static function saveLog() // Save log to log file
+	public static function saveLog()
 	{
 		self::initLog();
 		self::initSettings();
 		if(self::$settings['savelog'])
 		{
-			file_put_contents(self::$settings['logfile'], self::formatLog(self::getFullLog())."\n", FILE_APPEND);
+			$logOutput=self::formatLog(self::getFullLog());
+			if(self::$settings['save_striptags'])
+			{
+				$logOutput=strip_tags($logOutput);
+			}
+			file_put_contents(self::$settings['logfile'], "${logOutput}\n", FILE_APPEND);
 		}
 	}
 
@@ -399,6 +531,9 @@ class SimpleDebug
 	{
 		if(is_null(self::$log))
 			self::$log=array( "Exception"=>array(), "Info"=>array(), "Depends"=>array() );
+		if(is_null(self::$exceptionErrors))
+			self::$exceptionErrors=array();
+		self::initDepends();
 	}
 
 	/**
@@ -412,6 +547,8 @@ class SimpleDebug
 			self::$depends=array( "hard" => array(), "soft" => array() );
 		if(is_null(self::$dependRel))
 			self::$dependRel=array();
+		if(is_null(self::$missingDepends))
+			self::$missingDepends=array();
 	}
 
 	/**
@@ -430,6 +567,8 @@ class SimpleDebug
 						"format"        => "Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}",
 						"exception_fmt" => "{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}",
 						"time_format"   => "m/d/Y H:i:s",
+						"fatalHandler"  => null,
+						"save_striptags"     => false
 					);
 	}
 
@@ -475,9 +614,10 @@ class SimpleDebug
 		else if(is_null($format))
 			$format=self::$settings['format'];
 
+		$x=0;
 		foreach($logs as $log)
 		{
-			$formattedLog.=$format."\n";
+			$formattedLog.="${format}\n";
 			$formattedLog=str_replace("{ID}", $log['event_id'], $formattedLog);
 			$formattedLog=str_replace("{TIME}", date(self::$settings['time_format'], $log['time']), $formattedLog);
 			$formattedLog=str_replace("{MESSAGE}", $log['message'], $formattedLog);
@@ -490,30 +630,34 @@ class SimpleDebug
 	 * Print the logs in the proper format
 	 *
 	 * @param string $instance The name of the instance to use the logs/format from
-	 * @param string $type The type of events to output the log of
+	 * @param bool $filtered Whether or not to filter the logs by certain types
+	 * @param bool $force Whether or not to force output even when loud is down
 	 * @return void
 	 */
-	public static function printLog($instance=null, $filtered=false)
+	public static function printLog($instance=null, $filtered=true, $force=false)
 	{
-		$full_log=array();
-		if(is_null($instance))
+		self::initSettings();
+		if((self::$settings['loud']>SDBG_QUIET) || $force)
 		{
-			if(!$filtered)
+			$full_log=array();
+			if(is_null($instance))
 			{
-				$full_log=self::getFullLog();
+				if(!$filtered)
+				{
+					$full_log=self::getFullLog();
+				}
+				else
+				{
+					$combo_log=self::filterLog(self::getComboLog());
+					$full_log=self::getFullLog(null, $combo_log);
+				}
 			}
 			else
 			{
-				$combo_log=self::filterLog(self::getComboLog());
-				$full_log=self::getFullLog(null, $combo_log);
+				$full_log=self::getInstanceLog($instance);
 			}
+			echo self::formatLog($full_log);
 		}
-		else
-		{
-			$full_log=self::getInstanceLog($instance);
-		}
-
-		echo self::formatLog($full_log);
 	}
 
 	/**
@@ -531,38 +675,21 @@ class SimpleDebug
 			$mode=self::$settings['loud'];
 		}
 
-		switch(self::$settings['loud'])
+		$filteredLog=array();
+		if((self::$settings['loud'] & SDBG_INFO))
 		{
-			case SDBG_QUIET:
-				return array();
-			case SDBG_INFO:
-				unset($comboLog["Depends"]);
-				unset($comboLog["Exception"]);
-				break;
-			case SDBG_DEPEND:
-				unset($comboLog["Info"]);
-				unset($comboLog["Exception"]);
-				break;
-			case (SDBG_INFO | SDBG_DEPEND):
-				unset($comboLog["Exception"]);
-				break;
-			case (SDBG_EXCEPT | SDBG_INFO):
-				unset($comboLog["Depends"]);
-				break;
-			case (SDBG_EXCEPT | SDBG_DEPEND):
-				unset($comboLog["Info"]);
-				break;
-			case SDBG_EXCEPT:
-				unset($comboLog["Depends"]);
-				unset($comboLog["Info"]);
-				break;
-			case SDBG_ALL:
-				break;
-			default:
-				self::logException(new Exception("Invalid debug setting detected...returning nothing."));
-				return array();
+			$filteredLog["Info"]=$comboLog["Info"];
 		}
-		return $comboLog;
+		if((self::$settings['loud'] & SDBG_DEPEND))
+		{
+			$filteredLog["Depends"]=$comboLog["Depends"];
+		}
+		if((self::$settings['loud'] & SDBG_EXCEPT))
+		{
+			$filteredLog["Depends"]=$comboLog["Depends"];
+		}
+
+		return $filteredLog;
 	}
 
 	/**
@@ -577,6 +704,15 @@ class SimpleDebug
 		return $backtrace;
 	}
 
+	/**
+	 * Log a Dump of self
+	 *
+	 * @return array The array returned from get_class_vars()
+	 */
+	public static function dumpSelf()
+	{
+		return get_class_vars("SimpleDebug");
+	}
 
 	/*
 	 * This section should be used for code related to using the class in a non-static
@@ -642,24 +778,35 @@ class SimpleDebug
 	 *
 	 * @param array $dependency Associative array containing basic information about the dependency.
 	 * @param callable|null $checkFunc Function to check if the dependency exists, otherwise it is assumed to use a constant
-	 * @param string|null $origDependency The name of the dependency that depends on this one (if applicable)
+	 * @param array $parentDepends The names of the dependencies that this dependency is dependent on
 	 * @param bool $hard Whether or not it's a "hard" dependency or not
 	 * @return void
-	 *
-	 * @todo implement $checkFunc
 	 */
-	public static function regDepend($dependency, $checkFunc=null, $origDependency=null, $hard=true)
+	public static function regDepend($dependency, $avoidFunc=null, $checkFunc=null, $parentDepends=array(), $hard=true)
 	{
 		self::initDepends();
-		self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(create_function("", $checkFunc), $dependency);
+
+		if(!is_null($checkFunc))
+			self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(create_function("", $checkFunc), $dependency);
+		else
+			self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(null, $dependency);
+
+		if(!isset(self::$dependRel[$dependency['name']]))
+			self::$dependRel[$dependency['name']]=array();
+
+		foreach($parentDepends as $pDepend)
+		{
+			self::$dependRel[$dependency['name']][]=$pDepend;
+		}
 	}
 
 	/**
 	 * Check dependencies
 	 *
 	 * @param string|null
+	 * @return bool If there were missing dependencies
 	 */
-	public static function checkDepend($dependency=null)
+	public static function checkDepend($dependency=null, $log=false)
 	{
 		self::initDepends();
 
@@ -667,6 +814,23 @@ class SimpleDebug
 
 		if(is_null($dependency))
 		{
+			foreach(self::$depends['hard'] as $depend)
+			{
+				if(!self::checkDepend($depend[1]['name']))
+				{
+					$errors[]=$depend[1];
+					self::logDepends($depend[1]);
+				}
+			}
+			foreach(self::$depends['soft'] as $depend)
+			{
+				if(!self::checkDepend($depend[1]['name']))
+				{
+					$errors[]=$depend[1];
+					self::logDepend($depend[1]);
+				}
+			}
+			return (count($errors)>0);
 		}
 		else if(is_string($dependency))
 		{
@@ -700,6 +864,11 @@ class SimpleDebug
 					self::logException(new Exception("Depend array isn't correctly formed."));
 					$errors[]=$depend[1];
 				}
+				else
+				{
+					if(!defined($depend[1]['name']))
+						$errors[]=$depend[1];
+				}
 			}
 		}
 		else
@@ -711,10 +880,27 @@ class SimpleDebug
 		foreach($errors as $error)
 		{
 			$isError=true;
-			self::logDepends($error);
+			if($log)
+			{
+				self::logDepends($error);
+			}
 		}
 
 		return $isError;
+	}
+
+	/**
+	 * Check Relationships
+	 */
+
+	/**
+	 * Retrieve list of missing dependencies
+	 */
+	public static function getDependErrors()
+	{
+		self::initDepends();
+
+		return self::$missingDepends;
 	}
 
 	/**
@@ -722,6 +908,31 @@ class SimpleDebug
 	 */
 	public static function rootCauseFinder()
 	{
+		if(self::checkDepend())
+		{
+			foreach(self::$missingDepends as $depend)
+			{
+				echo $depend['name'];
+			}
+		}
+		// Check the latest error
+			// Based on error and dependency type figure out if any of the missing dependencies caused the problem
+				// If so then the highest-level relevant missing dependency is the root cause
+					// Attempt to install the dependency (if $depends['fix'] is provided)
+				// Else
+					// Dependency is not the root cause
+		// Check through assertions in a reverse order
+			// If any assertions fail
+				// Check through exceptions which occurred AFTER the assertion
+					// Based on exception type, we can determine if the assertion led to the exception
+						// If so then that assertion is POSSIBLY the root cause
+							// If that assertion is dependent upon any previous assertions
+								// Check those and find the highest-level relevant assertion which failed
+						// Else continue backtracking
+			// If no assertions fail
+				// If the last exception occurred right before the fatal error
+					// That exception must be the root cause
+		// If it gets here then no root cause can be automatically identified
 	}
 }
 
@@ -855,6 +1066,8 @@ class SimpleDebugInstance
 	 *
 	 * @param string $depends The name of the dependency that is missing
 	 * @return void
+	 *
+	 * @todo Something similar to interact with SimpleDebug::logDepends()
 	 */
 	public function logDepends($depends)
 	{

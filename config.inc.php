@@ -209,6 +209,7 @@ $configs["debugging"]["errorLevel"]=0;
 $configs["debugging"]["format"]="Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}";
 $configs["debugging"]["exception_fmt"]="{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}";
 $configs["debugging"]["time_format"]="m/d/Y H:i:s";
+$configs["debugging"]["fatalHandler"]=function() { global $configs; $ssite=new $configs['default_controller']($configs); };
 SimpleDebug::setSettings($configs['debugging'], true); // Put these settings and propogate to any existing instances
 
 
