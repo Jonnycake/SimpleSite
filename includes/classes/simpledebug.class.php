@@ -79,6 +79,9 @@ define('SDBG_SUPERLOUD', 31);
  * @todo Root-Cause Analysis
  * @todo Assertions
  * @todo error_get_last() compatability
+ * @todo Error levels
+ * @todo SimpleDebug class log to instance
+ * @todo Update SimpleDebugInstance class
  */
 class SimpleDebug
 {
@@ -226,7 +229,7 @@ class SimpleDebug
 
 		self::logException($e);
 
-		self::printLog();
+		//self::printLog();
 	}
 
 	/**
@@ -243,39 +246,45 @@ class SimpleDebug
 		$error=error_get_last();
 		$wasFatal=false;
 		$handlerCalled=false;
+		$handleEID=null;
+		$errorEID=null;
 		$handler=self::$settings['fatalHandler'];
-		switch($error['type'])
+		try
 		{
-			case E_ERROR:
-				self::logException(new Exception("Fatal Error: ".json_encode($error)));
-				if(is_string($handler))
-				{
-					self::logInfo("Attempting to handle with ".self::$settings['fatalHandler']);
-					self::saveLog();
-					$handlerCalled=true;
-					$handleEID=self::$event_id-1;
-					self::printLog();
-					$handler();
-				}
-				$wasFatal=true;
-				break;
-			case E_PARSE:
-				self::logException(new Exception("Parse Error: ".json_encode($error)));
-				unset($_GET['mod']);
-				if(is_string($handler))
-				{
-					self::logInfo("Attempting to handle with ".self::$settings['fatalHandler']);
-					self::saveLog();
-					$handlerCalled=true;
-					$handleEID=self::$event_id-1;
-					self::printLog(); // Print in case $handler errors out
-					$handler();
-				}
-				$wasFatal=true;
-				break;
-			default:
-				break;
-
+			switch($error['type'])
+			{
+				case E_ERROR:
+					$errorEID=self::logException(new Exception("Fatal Error: ".json_encode($error)));
+					if(is_string($handler))
+					{
+						$handleEID=self::logInfo("Attempting to handle with ".self::$settings['fatalHandler']);
+						self::saveLog();
+						$handlerCalled=true;
+						self::printLog();
+						$handler();
+					}
+					$wasFatal=true;
+					break;
+				case E_PARSE:
+					$errorEID=self::logException(new Exception("Parse Error: ".json_encode($error)));
+					unset($_GET['mod']);
+					if(is_string($handler))
+					{
+						$handleEID=self::logInfo("Attempting to handle with ".self::$settings['fatalHandler']);
+						self::saveLog();
+						$handlerCalled=true;
+						self::printLog(); // Print in case $handler errors out
+						$handler();
+					}
+					$wasFatal=true;
+					break;
+				default:
+					break;
+			}
+		}
+		catch(Exception $e)
+		{
+			self::logInfo("Could not recover from fatal error - Event #${errorEID}");
 		}
 
 		if($handlerCalled)
@@ -310,7 +319,7 @@ class SimpleDebug
 		$info=str_replace("{LINE}", $line_number, $info);
 		$info=str_replace("{MESSAGE}", $message, $info);
 		$info=str_replace("{BACKTRACE}", $backtrace, $info);
-		self::logEvent("Exception", $info);
+		return self::logEvent("Exception", $info);
 	}
 
 	/**
@@ -321,7 +330,7 @@ class SimpleDebug
 	 */
 	public static function logInfo($info)
 	{
-		self::logEvent("Info", $info);
+		return self::logEvent("Info", $info);
 	}
 
 	/**
@@ -333,18 +342,19 @@ class SimpleDebug
 	public static function logDepends($depends)
 	{
 		self::initDepends();
+		$event_id=null;
 		if(is_array($depends))
 		{
-			self::logEvent("Depends", "Missing ${depends['name']}: ${depends['description']}");
+			$event_id=self::logEvent("Depends", "Missing ${depends['name']}: ${depends['description']}");
 		}
 		else if(is_string($depends))
 		{
-			self::logEvent("Depends", $depends);
+			$event_id=self::logEvent("Depends", $depends);
 			$depends==array("name"=>$depends, "description"=>"Unknown information.");
 		}
 		else
 		{
-			self::logException(new Exception("Bad depends passed to logDepends."));
+			$event_id=self::logException(new Exception("Bad depends passed to logDepends."));
 		}
 
 		// Make sure it's not a duplicate
@@ -361,6 +371,7 @@ class SimpleDebug
 		{
 			self::$missingDepends[]=$depends;
 		}
+		return $event_id;
 	}
 
 	/**
@@ -392,6 +403,8 @@ class SimpleDebug
 		if(!isset(self::$log[$type]))
 			self::$log[$type]=array();
 		self::$log[$type][]=array("event_id"=>self::$event_id++, "type"=>$type, "time"=>time(), "message"=>$info);
+
+		return (self::$event_id-1);
 	}
 
 	/**
@@ -686,7 +699,7 @@ class SimpleDebug
 		}
 		if((self::$settings['loud'] & SDBG_EXCEPT))
 		{
-			$filteredLog["Depends"]=$comboLog["Depends"];
+			$filteredLog["Exception"]=$comboLog["Exception"];
 		}
 
 		return $filteredLog;
@@ -785,7 +798,7 @@ class SimpleDebug
 	public static function regDepend($dependency, $avoidFunc=null, $checkFunc=null, $parentDepends=array(), $hard=true)
 	{
 		self::initDepends();
-
+		$dependency['avoidFunc']=create_function("",$avoidFunc);
 		if(!is_null($checkFunc))
 			self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(create_function("", $checkFunc), $dependency);
 		else
@@ -818,16 +831,23 @@ class SimpleDebug
 			{
 				if(!self::checkDepend($depend[1]['name']))
 				{
+					// TODO - Handle as fatal error
 					$errors[]=$depend[1];
 					self::logDepends($depend[1]);
+					if(isset($depend[1]['avoidFunc']))
+					{
+						self::logInfo("Attempting to avoid dependency: ".$depend[1]['name']." by using the avoidFunc...");
+						$depend[1]['avoidFunc']();
+					}
 				}
 			}
 			foreach(self::$depends['soft'] as $depend)
 			{
+				// TODO - Avoid dependency
 				if(!self::checkDepend($depend[1]['name']))
 				{
 					$errors[]=$depend[1];
-					self::logDepend($depend[1]);
+					self::logDepends($depend[1]);
 				}
 			}
 			return (count($errors)>0);
@@ -854,6 +874,7 @@ class SimpleDebug
 			{
 				if(!($depend[0]()))
 				{
+					// TODO - Handle soft vs hard
 					$errors[]=$depend[1];
 				}
 			}
@@ -866,6 +887,7 @@ class SimpleDebug
 				}
 				else
 				{
+					// TODO - Handle as hard
 					if(!defined($depend[1]['name']))
 						$errors[]=$depend[1];
 				}
@@ -875,7 +897,6 @@ class SimpleDebug
 		{
 			self::logException(new Exception("Bad dependency name"));
 		}
-
 		$isError=false;
 		foreach($errors as $error)
 		{
@@ -938,6 +959,8 @@ class SimpleDebug
 
 /**
  * Class for debug instances to use
+ *
+ * @todo Update to be more consistent with SimpleDebug, as little could should be rewritten as possible
  */
 class SimpleDebugInstance
 {
