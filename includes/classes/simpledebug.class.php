@@ -87,7 +87,7 @@ class SimpleDebug
 {
 	// Literals
 	/**
-	 * Number of eventsw that have been recorded so far
+	 * Number of events that have been recorded so far
 	 *
 	 * @var int $event_id
 	 */
@@ -239,11 +239,15 @@ class SimpleDebug
 	 *
 	 * @return void
 	 */
-	public static function shutdownFunction()
+	public static function shutdownFunction($error=null)
 	{
 		self::initSettings();
 
-		$error=error_get_last();
+		if(!is_array($error))
+		{
+			$error=error_get_last();
+		}
+
 		$wasFatal=false;
 		$handlerCalled=false;
 		$handleEID=null;
@@ -262,6 +266,8 @@ class SimpleDebug
 						$handlerCalled=true;
 						self::printLog();
 						$handler();
+						trigger_error("Dependency problem, see SimpleDebug log for more information.", E_USER_ERROR);
+						//die();
 					}
 					$wasFatal=true;
 					break;
@@ -284,6 +290,7 @@ class SimpleDebug
 		}
 		catch(Exception $e)
 		{
+			self::logException($e);
 			self::logInfo("Could not recover from fatal error - Event #${errorEID}");
 		}
 
@@ -813,6 +820,12 @@ class SimpleDebug
 		}
 	}
 
+	private static function handleHardDepend($depend, &$errors)
+	{
+		$errors[]=$depend[1];
+		self::logDepends($depend[1]);
+		self::shutdownFunction(array("type"=>1, "message"=>"Missing dependency: ".$depend[1]['name'], "file"=>__FILE__, "line"=>__LINE__));
+	}
 	/**
 	 * Check dependencies
 	 *
@@ -831,7 +844,13 @@ class SimpleDebug
 			{
 				if(!self::checkDepend($depend[1]['name']))
 				{
-					// TODO - Handle as fatal error
+					self::handleHardDepend($depend, $errors);
+				}
+			}
+			foreach(self::$depends['soft'] as $depend)
+			{
+				if(!self::checkDepend($depend[1]['name']))
+				{
 					$errors[]=$depend[1];
 					self::logDepends($depend[1]);
 					if(isset($depend[1]['avoidFunc']))
@@ -839,15 +858,6 @@ class SimpleDebug
 						self::logInfo("Attempting to avoid dependency: ".$depend[1]['name']." by using the avoidFunc...");
 						$depend[1]['avoidFunc']();
 					}
-				}
-			}
-			foreach(self::$depends['soft'] as $depend)
-			{
-				// TODO - Avoid dependency
-				if(!self::checkDepend($depend[1]['name']))
-				{
-					$errors[]=$depend[1];
-					self::logDepends($depend[1]);
 				}
 			}
 			return (count($errors)>0);
@@ -866,6 +876,7 @@ class SimpleDebug
 			}
 			else
 			{
+				//self::shutdownFunction(array("type"=>1, "message"=>"Missing dependency: ".$depend[1]['name'], "file"=>__FILE__, "line"=>__LINE__));
 				$depend=array( null, array( "name"=>$dependency, "description"=>"Assumed constant...", "fix"=>null ));
 				$hard=false;
 			}
@@ -874,8 +885,11 @@ class SimpleDebug
 			{
 				if(!($depend[0]()))
 				{
-					// TODO - Handle soft vs hard
 					$errors[]=$depend[1];
+					if($hard)
+					{
+						self::shutdownFunction(array("type"=>1, "message"=>"Missing dependency: ".$depend[1]['name'], "file"=>__FILE__, "line"=>__LINE__));
+					}
 				}
 			}
 			else
@@ -887,9 +901,14 @@ class SimpleDebug
 				}
 				else
 				{
-					// TODO - Handle as hard
-					if(!defined($depend[1]['name']))
+					if(isset($depend[1]['type']))
+					{
+						self::handleHardDepend($depend, $errors);
+					}
+					else if(!defined($depend[1]['name']))
+					{
 						$errors[]=$depend[1];
+					}
 				}
 			}
 		}

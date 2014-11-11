@@ -73,7 +73,7 @@ $configs=array();
  * SHOULD NOT BE MANUALLY EDITED *
  *********************************/
 SimpleDebug::logInfo("Setting display configurations.");
-$configs["default_theme"]="JCake";
+$configs["default_theme"]="theBasics";
 $configs["default_mod"]="";
 $configs["default_controller"]="DefaultSite";
 
@@ -206,10 +206,14 @@ $configs["debugging"]["loud"]=0;
 $configs["debugging"]["savelog"]=true;
 $configs["debugging"]["logfile"]=$configs["path"]["tmpdir"]."SimpleDebug.log";
 $configs["debugging"]["errorLevel"]=0;
-$configs["debugging"]["format"]="Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}";
+$configs["debugging"]["save_striptags"]=true;
+$configs["debugging"]["format"]="Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}<br/>";
 $configs["debugging"]["exception_fmt"]="{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}";
 $configs["debugging"]["time_format"]="m/d/Y H:i:s";
-$configs["debugging"]["fatalHandler"]=function() { global $configs; $ssite=new $configs['default_controller']($configs); };
+$configs["debugging"]["fatalHandler"]="fatalHandler";
+
+function fatalHandler() { $_GET['mod']=""; global $configs; $ssite=new $configs['default_controller']($configs); };
+
 SimpleDebug::setSettings($configs['debugging'], true); // Put these settings and propogate to any existing instances
 
 
