@@ -1,307 +1,351 @@
 <?php
-/*
- *    SimpleFile 0.1: Basic file access functions.
- *    Copyright (C) 2014 Jon Stockton
- * 
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
+/**
+ * SimpleFileInfo class
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @todo PHPDoc Comments
  */
 
-class SimpleFile
+/**
+ * SimpleFileInfo
+ *
+ * Extends SplFileInfo to provide a multiton pattern for handling file objects.
+ */
+class SimpleFileInfo extends SplFileInfo implements simpleFileI
 {
-	// Suffix Types
-	public const SUFFNUM="numeric"; // Example: filename => filename.1
-	public const SUFFVER="verbose"; // Example: filename => filename OVERWRITE OFF (1)
+	/**
+	 * An array of file objects with the absolute path being the key
+	 *
+	 * @var array $fileObjects
+	 */
+	private static $fileObjects=null;
 
-	private $rfd=null;
-	private $wfd=null;
-	private $content=null;
-	private $filename=null;
-	private $directory=null;
-	private $path=null;
-	private $delim=null;
-	private $debug=false;
-	private $url=null;
-	private $suftype=SUFFNUM;
+	/**
+	 * The class to use for file objects
+	 *
+	 * @var string $objectClass
+	 */
+	private static $objectClass="SimpleFileObject";
 
-	public function __construct($filepath, $toWrite=false, $delim="/", $debug=false)
+	/**
+	 * Initializes the file object cache
+	 *
+	 * @return void
+	 */
+	private static function initFileObjectCache()
 	{
-		if(preg_match("/((http)|(ftp))s?:\/\//si",$filepath,$match) && $match)
+		if(is_null(self::$fileObjects))
 		{
-			$this->url=$filepath;
-		}
-		else
-		{
-			$this->path=$this->getFullPath($filepath);
-			$this->getPathParts($delim);
-			$this->open();
-		}
-		$this->debug=$debug;
-	}
-	public function __destruct()
-	{
-		$this->close();
-	}
-
-	// General accessors
-	public function getDebug()
-	{
-		return $this->debug;
-	}
-	public function setDebug($debug)
-	{
-		$this->debug=$debug;
-	}
-	public function getSuffixType()
-	{
-		return $this->suftype;
-	}
-	public function setSuffixType($suftype)
-	{
-		$this->suftype=$suftype;
-	}
-
-	// File descriptor functions
-	public function open()
-	{
-		if(is_null($this->url))
-		{
-			if($this->debug)
-				echo "Dbg: Attempting to open ".$this->path."...";
-			if(file_exists($this->path) && !is_dir($this->path))
-			{
-				try
-				{
-					$this->rfd=(($f=fopen($this->path,"r"))?$f:null);
-					if(is_resource($this->rfd))
-					{
-						echo "Success.\n";
-						while(!(feof($this->rfd)))
-							$this->content.=fread($this->rfd, 250);
-					}
-					else if($this->debug)
-						echo "Failed.\n";
-				}
-				catch (Exception $e)
-				{
-					if($this->debug)
-						echo "\nDbg: ".$e->getMessage()."\n";
-				}
-			}
-			else if($this->debug)
-			{
-				echo "File not found.\n";
-			}
-		}
-		else
-		{
-			if($this->host=$this->isURL($this->url))
-			{
-				try
-				{
-					$this->content=file_get_contents($this->url); // I want to avoid connection refused warnings...but apparently gethostbyname() isn't going to fail unless the name's too long -_-
-				}
-				catch (Exception $e)
-				{
-					if($this->debug)
-						echo "Dbg: Exception - ".$e->getMessage()."\n";
-				}
-			}
+			self::$fileObjects=array();
 		}
 	}
 
-	// Static
-	public function isURL($filepath)
+	/**
+	 * Retrieve the object class (fileClass) to be used
+	 *
+	 * @return string The object class to be used.
+	 */
+	public static function getObjectClass()
 	{
-		if($this->debug)
-			echo "Dbg: Checking if '$filepath' is a URL...";
-		if(preg_match("/^[a-z]*:\/\/([^\/]*).*/si",$filepath,$matches) && $matches) // Should probably limit to certain protocols at some point
-		{
-			if($this->debug)
-				echo "Yes.\n";
-			$host=$matches[1];
-			if(!(preg_match("/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/si",$host,$matches2) && $matches2))
-			{
-				$hostip=gethostbyname($host);
-				if($host==$hostip)
-				{
-					if($this->debug)
-						echo "Dbg: Could not resolve hostname: '$host'\n";
-				}
-			}
-			return $host;
-		}
-		else
-		{
-			if($this->debug)
-				echo "No.\n";
-			return null;
-		}
-	}
-	public function close()
-	{
-		if($this->debug)
-			echo "Dbg: Closing file descriptor...";
-		if(is_resource($this->rfd))
-		{
-			if($this->debug)
-				echo "Success.\n";
-			fclose($this->rfd);
-		}
-		else
-		{
-			if($this->debug)
-				echo "Not a resource.\n";
-		}
-	}
-	public function reload()
-	{
-		if($this->debug)
-			echo "Dbg: Reloading file...";
-		$this->close();
-		$this->content="";
-		$this->open();
-		if($this->isOpen())
-			echo "Sucess.\n";
-		else
-			echo "Failure.\n";
+		return self::$objectClass;
 	}
 
-	// Access information
-	public function exists($filename=null) // Static
+	/**
+	 * Set the object class to be used.
+	 *
+	 * @param string $class The object class to be used.
+	 * @return void
+	 */
+	public static function setObjectClass($class)
+	{
+		self::$objectClass=$class;
+	}
+
+	/**
+	 * Check if the file actually exists
+	 *
+	 * @param string $filename The filename to check, if it's not passed it checks the file the info object was opened for.
+	 *
+	 * @return bool Whether or not the file exists
+	 */
+	public function exists($filename=null)
 	{
 		if(is_null($filename))
-			return file_exists($this->path);
+			return file_exists($this->getRealPath());
 		else
 			return file_exists($filename);
 	}
-	public function isOpen()
+
+	/**
+	 * Opens the file using the specified file class
+	 *
+	 * Any implementations must take into account that null can't be passed to splFileInfo::openFile() for $context
+	 *
+	 * @param string $open_mode The mode to open the file with (see fopen() in the PHP manual)
+	 * @param bool $use_include_path When set to TRUE the filename is also searched for within the include_path
+	 * @param resource $context Refer to the context section of the PHP manual for a description of contexts
+	 * @param string $fileClass The class to use within openFile() - default is SimpleFileObject
+	 * @return object The opened file as a $fileClass object
+	 */
+	public function openFile($open_mode="r", $use_include_path=false, $context=null, $reopen=false, $fileClass="SimpleFileObject")
 	{
-		if($this->wfd)
-			$fd=$this->wfd;
-		else
-			$fd=$this->rfd;
-		return is_resource($fd);
-	}
-	public function isReadable($filepath=null) // Static
-	{
-		if(is_null($filepath))
-			return is_readable($this->path);
-	}
-	public function isWritable($filepath=null) // Static
-	{
-		if($filepath)
-			return is_writable($filepath);
-		else
-			return is_writable($this->path);
-	}
-	public function getOwner($filepath=null) // Static
-	{
-		// Should check read access here
-		if($filepath)
-			return fileowner($filepath);
-		else
-		return fileowner($this->path);
-	}
-	public function setOwner($owner) // Static
-	{
-		// Should check write access
-		return chown($this->path,$owner);
-	}
-	public function getGroup($filepath)
-	{
-		// Should check read access here
-		return posix_getgrgid(filegroup($this->path));
-	}
-	public function setGroup($group)
-	{
-		// Should check write access
-		return chgrp($this->path,$group);
-	}
-	public function getPathParts($delim="/", $filepath=null)
-	{
-		if(is_null($filepath))
+		self::initFileObjectCache();
+		if(!is_null($fileClass))
+			$this->setFileClass($fileClass);
+		$absPath=$this->getRealPath();
+
+		if(!(isset(self::$fileObjects[$absPath])) || ($reopen))
 		{
-			$filepath=$this->path;
+			// If null is passed for $context a RuntimeException occurs, it must not be passed at all for it to work correctly
+			if(!is_null($context))
+				self::$fileObjects[$absPath]=parent::openFile($open_mode, $use_include_path, $context);
+			else
+				self::$fileObjects[$absPath]=parent::openFile($open_mode, $use_include_path);
 		}
-		$filepath=$this->getFullPath($filepath);
-		$pathArr=explode($delim,$filepath);
-		$this->filename=$pathArr[count($pathArr)-1];
-		unset($pathArr[count($pathArr)-1]);
-		$this->directory=implode($delim,$pathArr);
-		$this->delim=$delim;
+
+		return self::$fileObjects[$absPath];
 	}
-	public function getFullPath($pathname=null)
-	{
-		return ($pathname!=null) ? realpath($pathname) : $this->directory."/".$this->filename;
-	}
-	public function getDirPath()
-	{
-		return $this->directory;
-	}
-	public function getFileName()
-	{
-		return $this->filename;
-	}
-	public function getFileType()
-	{
-		return filetype($this->path);
-	}
-	public function getModified()
-	{
-		return filemtime($this->path);
-	}
-	public function getCreated()
-	{
-		return filemtime($this->path);
-	}
+}
+
+/**
+ * SimpleFileObject
+ *
+ * Contains more functions involving the manipulation of files after they're opened
+ */
+class SimpleFileObject extends SplFileObject
+{
+	/**
+	 * Retrieve the current size of the file
+	 *
+	 * Takes into account outside changes affecting the size
+	 *
+	 * @return int The size of the file in bytes.
+	 */
 	public function getSize()
 	{
-		return strlen($this->content);
+		$stats=$this->fstat();
+		return $stats['size'];
 	}
 
-	// File location functions
-	public function copy($newPath=null, $overwrite=false)
+	/**
+	 * Change the permissions on the file
+	 *
+	 * @param int $mode The octal version of the file mode to be used.
+	 *
+	 * @return bool TRUE on success and FALSE on failure
+	 */
+	public function chmod($mode)
 	{
-		$fullPath=$this->path;
-
-		if(is_null($newPath))
-		{
-			$newPath=$fullPath;
-		}
-
-		// If we don't want to overwrite the destination file, we need to add a suffix
-		if(!($newPath!=$fullPath && ($overwrite || !(file_exists("${newPath}")))))
-		{
-			$newPath=$this->addSuffix($newPath);
-		}
-
-		return copy($fullPath, $newPath); // Should add test for write permissions on $newPath
+		return chmod($this->getRealPath(), octdec($mode));
 	}
-	public function move($newPath, $overwrite=false)
+
+	/**
+	 * Change the owner of the file (only the superuser may do so)
+	 *
+	 * @param mixed $user The user to change the ownership to
+	 *
+	 * @return bool TRUE on success and FALSE on failure
+	 */
+	public function chown($user)
+	{
+		chown($this->getRealPath(), $user);
+	}
+
+	/**
+	 * Read the given number of bytes from the file
+	 *
+	 * Put in for compatability reasons - SplFileObject::fread() only exists in PHP5 >= 5.5.11
+	 *
+	 * @return string The string from the file
+	 */
+	public function fread($length)
+	{
+		$ret="";
+
+		$x=0;
+		while($x<$length)
+		{
+			$ret.=$this->fgetc();
+			$x++;
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Read the entire file
+	 *
+	 * @todo Protect against extremely large files
+	 *
+	 * @return string The content of the entire file
+	 */
+	public function readAll()
+	{
+		$this->rewind();
+		return $this->fread($this->getSize());
+	}
+
+	/**
+	 * Read the rest of the file from the current file pointer
+	 *
+	 * @return string The rest of the file content
+	 */
+	public function readRest()
+	{
+		return $this->fread(($this->getSize())-($this->ftell()));
+	}
+
+	/**
+	 * Replace all occurances of the search string within the file with the replacement string
+	 *
+	 * Can be also save the result to the file
+	 *
+	 * @param mixed $search The string(s) to search for.
+	 * @param mixed $replacement The replacement text(s).
+	 * @param int $count The variable to store the number of replacements in.
+	 * @param bool $write Whether or not to write the output to the file.
+	 * @return string The string with the replaced values.
+	 */
+	public function str_replace($search, $replacement, &$count=null, $write=false)
+	{
+		$content=$this->readAll();
+		$content=str_replace($search, $replacement, $content, $count);
+
+		if($write)
+		{
+			$this->fwrite($content);
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Searches the file for matches to pattern and replaces them with replacement
+	 *
+	 * @param mixed $pattern The pattern to search for.  It can be a string or an array of strings.
+	 * @param mixed $replacement The string or array with strings to replace.
+	 * @param int The maximum possible replacements for each search pattern.  Defaults to -1 (no limit).
+	 * @param int $count Will be filled with the number of replacements done.
+	 8 @return string The content with the replaced values.
+	 */
+	public function preg_replace($pattern, $replacement, $limit=-1, &$count=null, $write=false)
+	{
+		$content=$this->readAll();
+		$content=preg_replace($pattern, $replacement, $content, $limit, $count);
+
+		if($write)
+		{
+			$this->fwrite($content);
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Write a string to the file
+	 *
+	 * @param string $str The string to write to the file.
+	 * @param int $length The maximum number of bytes to write to the file.
+	 * @return int The number of bytes written or false on error.
+	 */
+	public function fwrite($str, $length=null)
+	{
+		if(is_null($length))
+		{
+			return parent::fwrite($str);
+		}
+		else
+		{
+			return parent::fwrite($str, $length);
+		}
+	}
+
+	/**
+	 * Retrieve the first X lines of a file.
+	 *
+	 * @param int $lines The number of lines to retrieve.
+	 * @return string The first X lines of the file.
+	 */
+	public function head($lines=10)
+	{
+		$curPos=$this->ftell();
+		$this->rewind();
+
+		$x=0;
+		$ret="";
+		for($x;$x<$lines && !($this->eof());$x++)
+			$ret.=$this->fgets();
+
+		$this->fseek($curPos); // Return to the position we were in when the function was called
+		return $ret;
+	}
+
+	/**
+	 * Retrieve the last X lines of a file.
+	 *
+	 * @param int $lines The number of lines to retrieve.
+	 * @return string The last X lines of the file.
+	 */
+	public function tail($lines=10)
+	{
+		$ret="";
+		$curPos=$this->ftell();
+		$begin=$this->lineCount()-($lines+1);
+
+		// We can't seek to a negative line number
+		if($begin<0)
+		{
+			$begin=0;
+		}
+		$this->seek($begin);
+
+		while(!$this->eof())
+		{
+			$ret.=$this->fgets();
+		}
+
+		$this->fseek($curPos); // Return to the position we were in when the function was called
+		return $ret;
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public function lineCount()
+	{
+		$curPos=$this->ftell();
+
+		$x=0;
+		while(!($this->eof()))
+		{
+			$this->current();
+			$x++;
+			$this->next();
+		}
+
+		$this->fseek($curPos); // Return to the position we were in when the function was called
+		return $x-1;
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public function move($newPath, &$obj=null, $overwrite=false)
 	{
 		// Protect against overwrites
 		if(file_exists($newPath) && !$overwrite)
 		{
-			$newPath=$this->addSuffix($newPath);
+			SimpleFile::addSuffix($newPath);
 		}
 
 		// It should then verify if the file has been moved and if it has update its path
-		if(rename($this->path, $newPath))
+		if(rename($this->getRealPath(), $newPath))
 		{
 			$success=true;
-			$this->path=$this->getFullPath($newPath);
-			$this->getPathParts();
+			$obj=new self($newPath);
 		}
 		else
 		{
@@ -310,139 +354,236 @@ class SimpleFile
 
 		return $success;
 	}
-	public function delete()
-	{
-		return unlink($this->path);
-	}
 
-	// File-name functions
-	public function addSuffix($filename, $style="numeric")
+	/**
+	 *
+	 *
+	 *
+	 */
+	public function copy($newPath=null, $overwrite=false)
 	{
-		$suffix=1;
-		while($suffix>0)
+		$fullPath=$this->getRealPath();
+
+		if(is_null($newPath))
 		{
-			switch($style)
-			{
-				case "verbose":
-					if(file_exists("${filename}.${suffix}"))
-					{
-						$suffix++;
-					}
-					else
-					{
-						$filename="${filename}.${suffix}";
-						break;
-					}
-					break;
-				default:
-					if(file_exists("${filename}.${suffix}"))
-					{
-						$suffix++;
-					}
-					else
-					{
-						$filename="${filename}.${suffix}";
-					}
-					break;
-			}
+			$newPath=$fullPath;
 		}
-		return $filename;
-	}
 
-	// File content functions
-	public function getContent()
-	{
-		return $this->content;
-	}
-	public function setContent($content)
-	{
-		if(!$this->isWritable())
-			return false;
+		$newPath=realpath($newPath);
 
-		$this->content=$content;
-		return true;
-	}
-	public function head()
-	{
-		$ret="";
-		$contentArr=explode("\n",$this->content);
-
-		$x=0;
-		for($x;$x<10 && isset($contentArr[$x]);$x++)
-			$ret.=$contentArr[$x]."\n";
-
-		return $ret;
-	}
-	public function tail()
-	{
-		$ret="";
-		$contentArr=explode("\n",$this->content);
-
-		$x=count($contentArr)-11;
-		$x=($x<0)?0:$x;
-		for($x;isset($contentArr[$x]);$x++)
-			$ret.=$contentArr[$x]."\n";
-
-		return $ret;
-	}
-	public function getSection($offset, $length=false)
-	{
-		return ($length === false) ? substr($this->content,$offset) : substr($this->content,$offset,$length);
-	}
-	public function append($string)
-	{
-		$this->content.=$string;
-		$this->write();
-		return true;
-	}
-	public function write()
-	{
-		if(!$this->isWritable())
-			return false;
-
-		$this->close();
-
-		$this->wfd=fopen($this->path, "w");
-		fwrite($this->wfd, $this->getContent());
-		fclose($this->wfd);
-
-		$this->reload();
-		return true;
-	}
-	public function regReplace($regex, $replacement="", $handler=null, $limit=-1)
-	{
-		if(!$this->isWritable())
-			return false;
-
-		$matches=array();
-		if(preg_match($regex,$this->content,$match) && $match)
+		// If we don't want to overwrite the destination file, we need to add a suffix
+		if(!($newPath!=$fullPath && ($overwrite || !(file_exists("${newPath}")))))
 		{
-	                preg_match_all($regex,$this->content,$matches);
-			foreach($matches as $match)
-			{
-				$count=1;
-				str_replace($match[0], (is_null($handler)) ? $replacement : $handler($match), $this->content, $count);
-			}
+			SimpleFile::addSuffix($newPath);
 		}
-		else
+
+		return copy($fullPath, $newPath); // Should add test for write permissions on $newPath
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public function delete(&$something)
+	{
+		//$something=null;
+		return unlink($this->getRealPath());
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public function md5sum()
+	{
+		var_dump($this);
+		return md5($this->readAll());
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public function base64_encode()
+	{
+		return base64_encode($this->readAll());
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public function base64_decode($base64_string)
+	{
+		$this->fwrite(base64_decode($base64_string));
+	}
+}
+
+/**
+ * SimpleFile
+ *
+ * Static class designed to make OOP-based file-access easier and quicker.
+ */
+class SimpleFile
+{
+	/**
+	 *
+	 *
+	 *
+	 */
+	private static $infoClass="SimpleFileInfo";
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	private static $objectClass="SimpleFileObject";
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	private static $files=null;
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	private static $blacklist=null;
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	private static function initBlacklist()
+	{
+		if(is_null(self::$blacklist))
 		{
-			$this->content=preg_replace($regex, $replacement, $this->content);
+			self::$blacklist=array();
 		}
 	}
-	public function strReplace($search, $replace, $permanent=false)
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function addSuffix(&$path)
 	{
-		if(!$this->isWritable())
-			return false;
+		$x=1;
+		for($x;file_exists($path.".${x}");++$x) { }
+		$path.=".${x}";
+	}
 
-		$this->content=str_replace($search,$replace,$this->content);
-
-		if($permanent)
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function safe_include($filename)
+	{
+		self::initBlacklist();
+		$absPath=realpath($filename);
+		if(!in_array($absPath, self::$blacklist))
 		{
-			if($this->write())
-				return true;
-			else 
-				return false;
+			include($absPath);
 		}
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	private static function initFiles()
+	{
+		if(is_null(self::$files))
+		{
+			self::$files=array();
+		}
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function getInfoClass()
+	{
+		return self::$infoClass;
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function setInfoClass($class)
+	{
+		self::$infoClass=$class;
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function getObjectClass()
+	{
+		return self::$objectClass;
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function setObjectClass($class)
+	{
+		self::$objectClass=$class;
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function getFile($file)
+	{
+		self::initFiles();
+		$absPath=realpath($file);
+
+		if(!isset(self::$files[$absPath]))
+		{
+			$infoClass=self::$infoClass;
+			self::$files[$absPath]=new $infoClass($file);
+		}
+
+		return self::$files[$absPath];
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	public static function openFile($file, $open_mode="r", $use_include_path=false, $context=null, $reopen=false, $fileClass=null)
+	{
+		if(is_null($fileClass))
+		{
+			$fileClass=self::$objectClass;
+		}
+
+		$fileInfo=self::getFile($file);
+		return $fileInfo->openFile($open_mode, $use_include_path, $context, $reopen, $fileClass); // Assumes that the info class set handles the null $context problem
 	}
 }
 ?>
