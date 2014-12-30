@@ -71,17 +71,43 @@ define('SDBG_LOUDRUN', 24);
 define('SDBG_SUPERLOUD', 31);
 
 
+// Assertion constants
+/**
+ * Character Class: Lowercase Alphabet
+ */
+define('SDBG_ASSERT_LOWERALPHA', 1);
+
+/**
+ * Character Class: Uppercase Alphabet
+ */
+define('SDBG_ASSERT_UPPERALPHA', 2);
+
+/**
+ * Character Class: Alphabet (Upper and/or Lower)
+ */
+define('SDBG_ASSERT_ALPHA', 3);
+
+/**
+ * Character Class: Numbers
+ */
+define('SDBG_ASSERT_NUMBERS', 4);
+
+/**
+ * Character Class: Symbols (! " # $ % & ' ( ) * + ` - . / : ; < = > ? @ ^ _ ] [ \ { | } ~)
+ */
+define('SDBG_ASSERT_SYMBOLS', 5);
+
 /**
  * SimpleDebug class
  *
  * @version 1.0
- * @todo Handle dependencies
- * @todo Root-Cause Analysis
- * @todo Assertions
- * @todo error_get_last() compatability
- * @todo Error levels
- * @todo SimpleDebug class log to instance
- * @todo Update SimpleDebugInstance class
+ * @todo Assertions *IN PROGRESS*
+ * @todo Root-Cause Analysis *IN ISSUE*
+ * @todo error_get_last() compatability *IN ISSUE*
+ * @todo Error levels *IN ISSUE
+ * @todo Update SimpleDebugInstance class *IN ISSUE*
+ * @todo More built-in dependency types *FUTURE*
+ * @todo SimpleDebug class log to instance *FUTURE*
  */
 class SimpleDebug
 {
@@ -143,6 +169,20 @@ class SimpleDebug
 	 */
 	private static $dependLevels=null;
 
+	/**
+	 * Array of dependency types
+	 *
+	 * @var array $dependTypes
+	 */
+	private static $dependTypes=null;
+
+	/**
+	 * Array of assertion types
+	 *
+	 * @var array $assertTypes
+	 */
+	private static $assertTypes=null;
+
 	// Configuration Functions
 	/**
 	 * Get the array of configuration settings
@@ -171,6 +211,9 @@ class SimpleDebug
 		}
 		if($propogate)
 			self::propogateSettings();
+
+		if(is_null(self::$assertTypes))
+			self::$assertTypes=array();
 	}
 
 	/**
@@ -228,8 +271,6 @@ class SimpleDebug
 		self::initSettings();
 
 		self::logException($e);
-
-		//self::printLog();
 	}
 
 	/**
@@ -266,8 +307,6 @@ class SimpleDebug
 						$handlerCalled=true;
 						self::printLog();
 						$handler();
-						trigger_error("Dependency problem, see SimpleDebug log for more information.", E_USER_ERROR);
-						//die();
 					}
 					$wasFatal=true;
 					break;
@@ -569,6 +608,21 @@ class SimpleDebug
 			self::$dependRel=array();
 		if(is_null(self::$missingDepends))
 			self::$missingDepends=array();
+		if(is_null(self::$dependTypes))
+			self::$dependTypes=array(
+							"function"=>array(
+										"handler"     =>create_function("\$depends", "return function_exists(\$depends[1]['name']);"),
+										"description" => "Checks if a function exists"
+									),
+							"class"=>array(
+										"handler"     =>create_function("\$depends", "return class_exists(\$depends[1]['name']);"),
+										"description" => "Checks if a function exists"
+									),
+							"constant"=>array(
+										"handler"     => create_function("\$depends", "if(defined(\$depends[1]['name'])) { if(isset(\$depends[1]['value'])) { return (\$depends[1]['value']===constant(\$depends[1]['name'])); } return true; } else { return false; }"),
+										"description" => "Checks if a constant is defined and has the specified value."
+									),
+						);
 	}
 
 	/**
@@ -793,6 +847,12 @@ class SimpleDebug
 			return self::createInstance($instanceName);
 	}
 
+	public static function newDependType($type, $description, &$handler)
+	{
+		self::initDepends();
+		self::$dependTypes[$type]=array("description"=>$description, "handler"=>$handler);
+	}
+
 	/**
 	 * Register Dependencies
 	 *
@@ -805,26 +865,47 @@ class SimpleDebug
 	public static function regDepend($dependency, $avoidFunc=null, $checkFunc=null, $parentDepends=array(), $hard=true)
 	{
 		self::initDepends();
-		$dependency['avoidFunc']=create_function("",$avoidFunc);
-		if(!is_null($checkFunc))
-			self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(create_function("", $checkFunc), $dependency);
-		else
-			self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(null, $dependency);
 
-		if(!isset(self::$dependRel[$dependency['name']]))
-			self::$dependRel[$dependency['name']]=array();
-
-		foreach($parentDepends as $pDepend)
+		// Was an avoid function passed?
+		if(!is_null($avoidFunc))
 		{
-			self::$dependRel[$dependency['name']][]=$pDepend;
+			$dependency['avoidFunc']=create_function("",$avoidFunc);
+		}
+		else
+		{
+			$dependency['avoidFunc']=null;
+		}
+
+		// Was a check function passed?
+		if(!is_null($checkFunc))
+		{
+			self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(create_function("", $checkFunc), $dependency);
+		}
+		else
+		{
+			self::$depends[($hard)?"hard":"soft"][$dependency["name"]]=array(null, $dependency);
+		}
+
+		// Set up relationships
+		if(!isset(self::$dependRel[$dependency['name']]))
+		{
+			self::$dependRel[$dependency['name']]=$parentDepends;
 		}
 	}
 
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
 	private static function handleHardDepend($depend, &$errors)
 	{
 		$errors[]=$depend[1];
 		self::logDepends($depend[1]);
 		self::shutdownFunction(array("type"=>1, "message"=>"Missing dependency: ".$depend[1]['name'], "file"=>__FILE__, "line"=>__LINE__));
+		trigger_error("Dependency problem, see SimpleDebug log for more information.", E_USER_ERROR);
 	}
 	/**
 	 * Check dependencies
@@ -842,70 +923,87 @@ class SimpleDebug
 		{
 			foreach(self::$depends['hard'] as $depend)
 			{
-				if(!self::checkDepend($depend[1]['name']))
+				if(self::checkDepend($depend[1]['name']))
 				{
 					self::handleHardDepend($depend, $errors);
 				}
 			}
 			foreach(self::$depends['soft'] as $depend)
 			{
-				if(!self::checkDepend($depend[1]['name']))
+				if(self::checkDepend($depend[1]['name']))
 				{
 					$errors[]=$depend[1];
 					self::logDepends($depend[1]);
 					if(isset($depend[1]['avoidFunc']))
 					{
-						self::logInfo("Attempting to avoid dependency: ".$depend[1]['name']." by using the avoidFunc...");
-						$depend[1]['avoidFunc']();
+						if(!is_null($depend[1]['avoidFunc']))
+						{
+							self::logInfo("Attempting to avoid dependency: ".$depend[1]['name']." by using the avoidFunc...");
+							$depend[1]['avoidFunc']();
+						}
 					}
 				}
 			}
 			return (count($errors)>0);
 		}
-		else if(is_string($dependency))
+		else if(is_string($dependency)) // We're checking a single dependency based on name
 		{
-			if(array_key_exists($dependency, self::$depends['hard']))
+			if(array_key_exists($dependency, self::$depends['hard'])) // It's a hard dependency
 			{
 				$depend=self::$depends['hard'][$dependency];
 				$hard=true;
 			}
-			else if(array_key_exists($dependency, self::$depends['soft']))
+			else if(array_key_exists($dependency, self::$depends['soft'])) // It's a soft dependency
 			{
 				$depend=self::$depends['soft'][$dependency];
 				$hard=false;
 			}
-			else
+			else // The dependency wasn't registered
 			{
-				//self::shutdownFunction(array("type"=>1, "message"=>"Missing dependency: ".$depend[1]['name'], "file"=>__FILE__, "line"=>__LINE__));
 				$depend=array( null, array( "name"=>$dependency, "description"=>"Assumed constant...", "fix"=>null ));
 				$hard=false;
 			}
 
-			if(!is_null($depend[0]))
+			if(!is_null($depend[0])) // We have a check function
 			{
 				if(!($depend[0]()))
 				{
 					$errors[]=$depend[1];
 					if($hard)
 					{
-						self::shutdownFunction(array("type"=>1, "message"=>"Missing dependency: ".$depend[1]['name'], "file"=>__FILE__, "line"=>__LINE__));
+						self::handleHardDepend($depend, $errors);
 					}
 				}
 			}
-			else
+			else // No or abnormal check function
 			{
-				if(!isset($depend[1]['name']))
+				if(!isset($depend[1]['name'])) // Depend array MUST contain a name
 				{
 					self::logException(new Exception("Depend array isn't correctly formed."));
 					$errors[]=$depend[1];
 				}
 				else
 				{
-					if(isset($depend[1]['type']))
+					if(isset($depend[1]['type'])) // So that applications can handle dependencies a specific way for each type
 					{
-						self::handleHardDepend($depend, $errors);
+						$type=$depend[1]['type'];
+						if(isset(self::$dependTypes[$depend[1]['type']]))
+						{
+							$handler=self::$dependTypes[$type]['handler'];
+							if(!$handler($depend))
+							{
+								if($hard)
+								{
+									self::handleHardDepend($depend, $errors);
+								}
+								else
+								{
+									$errors[]=$depend[1];
+								}
+							}
+						}
 					}
-					else if(!defined($depend[1]['name']))
+					else if(!defined($depend[1]['name'])) // Since the check function isn't defined, we assume that it's a constant
 					{
 						$errors[]=$depend[1];
 					}
@@ -914,8 +1012,10 @@ class SimpleDebug
 		}
 		else
 		{
-			self::logException(new Exception("Bad dependency name"));
+			self::logException(new Exception("Bad value passed to checkDepend"));
 		}
+
+		// Log any missing dependencies
 		$isError=false;
 		foreach($errors as $error)
 		{
@@ -925,16 +1025,293 @@ class SimpleDebug
 				self::logDepends($error);
 			}
 		}
-
 		return $isError;
 	}
 
+	// Assertions
 	/**
-	 * Check Relationships
+	 *
+	 *
+	 *
+	 *
+	 *
 	 */
+	public static function newAssertType($type, $handlerCode)
+	{
+		self::initSettings();
+		self::$assertTypes[$type]=create_function("\$input, \$args", $handlerCode);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertEquals($x, $y)
+	{
+		return ($x===$y);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertMore($x, $y)
+	{
+		return ($x>$y);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertLess($x, $y)
+	{
+		return ($x<$y);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertGTE($x, $y)
+	{
+		return ($x>=$y);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertLTE($x, $y)
+	{
+		return ($x<=$y);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertPreg($s, $pattern)
+	{
+		return preg_match($pattern, $s);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertNumeric($s)
+	{
+		return is_numeric($s);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertAlpha($s)
+	{
+		return (preg_match("[a-zA-Z]", $s)==strlen($s));
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertAlphanum($s)
+	{
+		return (preg_match("[a-zA-Z0-9]", $s)==strlen($s));
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertContains($needle, $haystack)
+	{
+		return (strstr($haystack, $needle));
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static function assertContainsClass($class, $input)
+	{
+		if(is_array($class))
+		{
+			$valid=1;
+			foreach($class as $c)
+			{
+				if(!self::assertContainsClass($c, $input))
+				{
+					$valid=0;
+				}
+			}
+			return $valid;
+		}
+		else
+		{
+			switch($class)
+			{
+				case SDBG_ASSERT_LOWERALPHA:
+					$pattern="/[a-z]+/s";
+					break;
+				case SDBG_ASSERT_UPPERALPHA:
+					$pattern="/[A-Z]+/s";
+					break;
+				case SDBG_ASSERT_ALPHA:
+					$pattern="/[a-zA-Z]+/s";
+					break;
+				case SDBG_ASSERT_NUMBERS:
+					$pattern="/[0-9]+/s";
+					break;
+				case SDBG_ASSERT_SYMBOLS:
+					$pattern="/[!\"#\$%&'()*+`\-.\/:;<=>?@^_\]\[\\{|}~]+/s";
+					break;
+				default:
+					self::logException(new Exception("Bad character class passed in assertion - ${class}."));
+					break;
+			}
+			return preg_match($pattern, $input);
+		}
+	}
+
+	/**
+	 * Check if a string is of a certain length
+	 *
+	 * @param string $s The string to check
+	 * @param int $min The minimum string length
+	 * @param int $max The maximum string length
+	 * @return bool Whether or not the string matches the specifications.
+	 */
+	public static function assertLength($s, $min, $max=-1)
+	{
+		if($max!=-1)
+		{
+			return (strlen($s)>=$min && strlen($s)<=$max);
+		}
+		else
+		{
+			return (strlen($s)>=$min);
+		}
+	}
+
+	/**
+	 * Check if a string begins with another string
+	 *
+	 * @param string $needle The string to search for
+	 * @param string $haystack The string to search within
+	 * @return bool Whether or not the needle is at the end of the string
+ 	 */
+	public static function assertStartsWith($needle, $haystack)
+	{
+		return (strpos($haystack, $needle)===0);
+	}
+
+	/**
+	 * Check if the given string is at the end of another string
+	 *
+	 * @param string $needle The string to search for
+	 * @param string $haystack The string to search within
+	 * @return bool Whether or not the needle is at the end of the haystack.
+	 */
+	public static function assertEndsWith($needle, $haystack)
+	{
+		return ((strrpos($haystack, $needle, (0-strlen($needle))))==(strlen($haystack)-strlen($needle)));
+	}
+
+	/**
+	 * Check whether an object is composed by a specific class
+	 *
+	 * @param mixed $object A class name or an object instance. No error is generated if the class does not exist.
+	 * @param string $class The class to check
+	 * @return bool Whether or not the given class/object is composed using the specified class.
+	 */
+	public static function assertISA($object, $class)
+	{
+		return is_subclass_of($object, $class);
+	}
+
+	/**
+	 * Check if a given class implements a certain interface
+	 *
+	 * @param mixed $class An object (class instance) or a string (class or interface name). 
+	 * @param mixed $interface The interface to look for.
+	 * @return bool Whether the given interface is implemented by the class.
+	 */
+	public static function assertImplements($class, $interface)
+	{
+		return in_array($interface, class_implements($class));
+	}
+
+	/**
+	 * Check if an array contains a specific key
+	 *
+	 * @param array $array Array with keys to check
+	 * @param mixed $key Value to check
+	 * @return bool Whether or not the key exists.
+	 */
+	public static function assertHasKey($array, $key)
+	{
+		return array_key_exists($key, $array);
+	}
+
+	/**
+	 * Check an assertion based on a custom assertion type
+	 *
+	 * @param string $type The name of the custom type
+	 * @param mixed $input The $input to be supplied to the handler
+	 * @param array $args The array of extra arguments to be supplied to the assertion handler
+	 * @return bool The result of the assertion handler
+	 */
+	public static function assertCustom($type, $input, $args=array())
+	{
+		self::initSettings();
+		if(isset(self::$assertTypes[$type]))
+		{
+			$assertHandler=self::$assertTypes[$type];
+			return $assertHandler($input, $args);
+		}
+	}
 
 	/**
 	 * Retrieve list of missing dependencies
+	 * 
+	 * @return array Dependency errors
 	 */
 	public static function getDependErrors()
 	{
@@ -945,6 +1322,8 @@ class SimpleDebug
 
 	/**
 	 * Find the root cause of an error
+	 *
+	 * @return mixed The integer event id of the root cause, the string of the dependency name which is the root cause, or false if no root cause can be identified.
 	 */
 	public static function rootCauseFinder()
 	{
