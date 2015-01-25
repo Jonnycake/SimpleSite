@@ -1,16 +1,7 @@
 #!/usr/bin/php
 <?php
+include("../../includes/interfaces/simplefile.interface.php");
 include("../../includes/classes/simplefile.class.php");
-
-$stdin=fopen("php://stdin","r"); // Hehe, you can actually use simplefile for this :P
-echo "URL: ";
-$filename=trim(fgets($stdin));
-fclose($stdin);
-
-$file=new SimpleFile($filename, false, "/", true);
-$file->open();
-echo "Content:\n".$file->getContent()."\n\n";
-$file->close();
 
 $stdin=fopen("php://stdin","r"); // Hehe, you can actually use SimpleFile for this :P
 echo "\nOriginal Filename: ";
@@ -21,20 +12,44 @@ echo "Copied Filename: ";
 $newfilename2=trim(fgets($stdin));
 fclose($stdin);
 
-$file=new SimpleFile($filename, false, "/", true);
-$file->move($newfilename); // Move it
-$file->copy($newfilename2);// Copy from the new location
+// Open the file up
+$file=SimpleFile::openFile($filename);
+$file->move($newfilename, false, $file); // Move it
+$file->copy($filename, false, $fileoldcopy);
+$file->copy($newfilename2, false, $filecopy);// Copy from the new location
+$origContent=$file->readAll();
 
 // Edit outside of SimpleSite class
 $f=fopen($newfilename, "w");
-fwrite($f, $file->getContent()." this has been edited.");
+fwrite($f, "${origContent}\n\tthis has been edited.");
 fclose($f);
-$file->close();
 
-// Reload the file and output content
-$file->reload();
-echo $file->getContent();
+// Read the copied file
+echo $filecopy->readAll();
 
-// Add suffix to file
-echo SimpleFile::addSuffix("test overwrite.txt");
+// Delete the copied file
+SimpleFileObject::delete($filecopy);
+
+//$file=new SimpleFileInfo("test.txt");
+//$file_object=$file->openFile();
+/*$f=SimpleFile::openFile("test.txt.1");
+$x=$f->readAll();
+//$f->copy("something");
+echo $f->md5sum()."\n";
+//$f->move("test.txt.5", $f);
+$file=fopen("test.txt.1", "w+");
+fwrite($file, $x." this has been edited.");
+fclose($file);
+echo $f->md5sum()."\n";
+echo $f->readAll();
+//echo $f->getRealPath();
+print_r($f);
+/*$file=SimpleFile::openFile("something");
+//echo $file->copy("test.txt");
+$file->delete($file);*/
+//$file->tail();
+//var_dump($file);
+//echo "Replaced $count times...";
+//$f=SimpleFile::openFile("/home/jonathan/bigfile");
+//echo $f->readAll();
 ?>

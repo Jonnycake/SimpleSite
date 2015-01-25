@@ -1,8 +1,6 @@
 <?php
 /**
- * SimpleFileInfo class
- *
- * @todo PHPDoc Comments
+ * SimpleFile Helper Classes
  */
 
 /**
@@ -308,9 +306,9 @@ class SimpleFileObject extends SplFileObject
 	}
 
 	/**
+	 * Get the line count in a file
 	 *
-	 *
-	 *
+	 * @return int The number of lines in the file
 	 */
 	public function lineCount()
 	{
@@ -329,11 +327,14 @@ class SimpleFileObject extends SplFileObject
 	}
 
 	/**
+	 * Move the file to a new location
 	 *
-	 *
-	 *
+	 * @param string $newPath The destination path
+	 * @param bool $overwrite Whether or not to force an overwrite of the destination path
+	 * @param SplFileObject $obj The object to update with the new location
+	 * @return bool Whether or not the move succeeded
 	 */
-	public function move($newPath, &$obj=null, $overwrite=false)
+	public function move($newPath, $overwrite=false, &$obj=null)
 	{
 		// Protect against overwrites
 		if(file_exists($newPath) && !$overwrite)
@@ -356,11 +357,14 @@ class SimpleFileObject extends SplFileObject
 	}
 
 	/**
+	 * Copy a file to a separate location
 	 *
-	 *
-	 *
+	 * @param string $newPath The destination path
+	 * @param bool $overwrite Whether or not to force an overwrite of the destination path
+	 * @param SplFileObject $obj The object to update with the new location
+	 * @return bool Whether the copy succeeded or not.
 	 */
-	public function copy($newPath=null, $overwrite=false)
+	public function copy($newPath=null, $overwrite=false, &$obj=null)
 	{
 		$fullPath=$this->getRealPath();
 
@@ -369,7 +373,11 @@ class SimpleFileObject extends SplFileObject
 			$newPath=$fullPath;
 		}
 
-		$newPath=realpath($newPath);
+		// If realpath() is supplied a non-existent filename it returns NULL so to avoid this we strip the filename
+		$lastDelim=strrpos($newPath, "/", -1);
+		$endDelim=($lastDelim===false) ? "" : "/";
+		$fileName=substr($newPath, $lastDelim);
+		$newPath=realpath(substr($newPath, 0, $lastDelim).$endDelim)."/${fileName}";
 
 		// If we don't want to overwrite the destination file, we need to add a suffix
 		if(!($newPath!=$fullPath && ($overwrite || !(file_exists("${newPath}")))))
@@ -377,24 +385,31 @@ class SimpleFileObject extends SplFileObject
 			SimpleFile::addSuffix($newPath);
 		}
 
-		return copy($fullPath, $newPath); // Should add test for write permissions on $newPath
+		if(copy($fullPath, $newPath))
+		{
+			$obj=new self($newPath);
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
+	 * Delete the file
 	 *
-	 *
-	 *
+	 * @param SplFileObject $fileObject To allow use from a static context to delete a specific file
+	 * @return Whether or not the deletion succeeded
 	 */
-	public function delete(&$something)
+	public function delete(&$fileObject=null)
 	{
 		//$something=null;
-		return unlink($this->getRealPath());
+		return (!is_null($fileObject)) ? unlink($fileObject->getRealPath()) : unlink($this->getRealPath());
 	}
 
 	/**
+	 * Calculate the md5 sum of the file
 	 *
-	 *
-	 *
+	 * @return string The md5-encoded result of the file content
 	 */
 	public function md5sum()
 	{
@@ -403,9 +418,9 @@ class SimpleFileObject extends SplFileObject
 	}
 
 	/**
+	 * Get the base64 encoded version of the file
 	 *
-	 *
-	 *
+	 * @return string The base64 encoded result of the file content
 	 */
 	public function base64_encode()
 	{
@@ -413,9 +428,10 @@ class SimpleFileObject extends SplFileObject
 	}
 
 	/**
+	 * Create the file content from a base64 string
 	 *
-	 *
-	 *
+	 * @param string $base64_string The base64 encoded version of the content you wish to write
+	 * @return void
 	 */
 	public function base64_decode($base64_string)
 	{
@@ -431,37 +447,37 @@ class SimpleFileObject extends SplFileObject
 class SimpleFile
 {
 	/**
+	 * The class to use for retrieving a file info object
 	 *
-	 *
-	 *
+	 * @var string $infoClass
 	 */
 	private static $infoClass="SimpleFileInfo";
 
 	/**
+	 * The class to use for manipulating files
 	 *
-	 *
-	 *
+	 * @var string $objectClass
 	 */
 	private static $objectClass="SimpleFileObject";
 
 	/**
+	 * The storage location for file info objects
 	 *
-	 *
-	 *
+	 * @var array $files
 	 */
 	private static $files=null;
 
 	/**
+	 * Files to avoid opening - mainly created so that files which cause parse errors can be blocked
 	 *
-	 *
-	 *
+	 * @var array $blacklist
 	 */
 	private static $blacklist=null;
 
 	/**
+	 * Initialize the blacklist
 	 *
-	 *
-	 *
+	 * @return void
 	 */
 	private static function initBlacklist()
 	{
@@ -472,9 +488,10 @@ class SimpleFile
 	}
 
 	/**
+	 * Add a suffix to a pathname
 	 *
-	 *
-	 *
+	 * @param string $path The pathname to add a suffix to
+	 * @return void
 	 */
 	public static function addSuffix(&$path)
 	{
@@ -484,24 +501,25 @@ class SimpleFile
 	}
 
 	/**
+	 * Safely include files - checks blacklist first
 	 *
-	 *
-	 *
+	 * @param string $filename The filename to include
+	 * @return void
 	 */
 	public static function safe_include($filename)
 	{
 		self::initBlacklist();
 		$absPath=realpath($filename);
-		if(!in_array($absPath, self::$blacklist))
+		if(!in_array($absPath, self::$blacklist) && !is_null($absPath))
 		{
 			include($absPath);
 		}
 	}
 
 	/**
+	 * Initialize files array
 	 *
-	 *
-	 *
+	 * @return void
 	 */
 	private static function initFiles()
 	{
@@ -512,9 +530,9 @@ class SimpleFile
 	}
 
 	/**
+	 * Retrieve the name of the file info class
 	 *
-	 *
-	 *
+	 * @return string The name of the file info class
 	 */
 	public static function getInfoClass()
 	{
@@ -522,9 +540,10 @@ class SimpleFile
 	}
 
 	/**
+	 * Set the name of the file info class
 	 *
-	 *
-	 *
+	 * @param string $class The name of the class to use for file info objects
+	 * @return void
 	 */
 	public static function setInfoClass($class)
 	{
@@ -532,9 +551,9 @@ class SimpleFile
 	}
 
 	/**
+	 * Get the name of the file object class
 	 *
-	 *
-	 *
+	 * @return string The name of the file object class
 	 */
 	public static function getObjectClass()
 	{
@@ -542,9 +561,10 @@ class SimpleFile
 	}
 
 	/**
+	 * Set the name of the file object class
 	 *
-	 *
-	 *
+	 * @param string $class The name of the class to use for file objects
+	 * @return void
 	 */
 	public static function setObjectClass($class)
 	{
@@ -552,16 +572,18 @@ class SimpleFile
 	}
 
 	/**
+	 * Get a file info object for $file
 	 *
-	 *
-	 *
+	 * @param string $file The name of the file to get an info object for
+	 * @param bool $reopen Whether or not to force SimpleFile to reopen the file
+	 * @return SplFileInfo The file info object
 	 */
-	public static function getFile($file)
+	public static function getFile($file, $reopen=false)
 	{
 		self::initFiles();
 		$absPath=realpath($file);
 
-		if(!isset(self::$files[$absPath]))
+		if(!isset(self::$files[$absPath]) || $reopen)
 		{
 			$infoClass=self::$infoClass;
 			self::$files[$absPath]=new $infoClass($file);
@@ -571,9 +593,15 @@ class SimpleFile
 	}
 
 	/**
+	 * Open a file for manipulation
 	 *
-	 *
-	 *
+	 * @param string $file The path to the file to open
+	 * @param string $open_mode The mode for opening the file. See the fopen() documentation for descriptions of possible modes. The default is read only. 
+	 * @param bool $use_include_path When set to TRUE, the filename is also searched for within the include_path.
+	 * @param resource $context Refer to the context section of the manual for a description of contexts. 
+	 * @para bool $reopen When set to true it creates a new file info object regardless of if one already exists for the file
+	 * @param string $fileClass The class to use to create the file object
+	 * @return SplFileObject An object created from the file object class
 	 */
 	public static function openFile($file, $open_mode="r", $use_include_path=false, $context=null, $reopen=false, $fileClass=null)
 	{
@@ -582,7 +610,7 @@ class SimpleFile
 			$fileClass=self::$objectClass;
 		}
 
-		$fileInfo=self::getFile($file);
+		$fileInfo=self::getFile($file, $reopen);
 		return $fileInfo->openFile($open_mode, $use_include_path, $context, $reopen, $fileClass); // Assumes that the info class set handles the null $context problem
 	}
 }
