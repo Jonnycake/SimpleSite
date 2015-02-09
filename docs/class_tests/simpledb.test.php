@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+include("../../includes/classes/simpledebug.class.php");
 include("../../includes/classes/simpledb.class.php");
 $stdin=fopen("php://stdin","r");
 
@@ -31,7 +32,20 @@ $tests=array(
 		)
 );
 
+$relationships=array( 
+			"Table2" => array(
+						"y"=>"x",
+						"Table3"=>array(
+							"y"=>"x"
+						)
+					)
+		);
+
 $sdb=new SimpleDB($configs,true); // Inherent test of constructor
+$tbl=$sdb->openTable("Table1");
+//echo $tbl->join("Table_1", $relationships, "LEFT");
+$tbl->select('*', array(), array('JOIN'=>$relationships, 'JTYPE'=>'LEFT'));
+var_dump($tbl->sdbGetRows());
 if($sdb->connected())
 {
 	foreach($tests as $test)
@@ -48,6 +62,12 @@ if($sdb->connected())
 					echo "\n";
 				}
 				break;
+			case "select":
+				echo "Testing select function...\n";
+				foreach($test['queries'] as $query)
+				{
+					
+				}
 			default:
 				echo "Unknown function: ${test['function']}.\n";
 				break;
