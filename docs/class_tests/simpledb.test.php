@@ -35,8 +35,11 @@ $tests=array(
 $relationships=array( 
 			"Table2" => array(
 						"y"=>"x",
+						"z"=>"y",
 						"Table3"=>array(
-							"y"=>"x"
+							"y"=>"x",
+							0=> "OR",
+							"x"=>"x"
 						)
 					)
 		);

@@ -333,7 +333,8 @@ class SDBTable extends SimpleDB
 		{
 			if(!is_null($jointype))
 				$query.=" ${jointype}";
-			$query.=" JOIN `${tblPrefix}${k}` ON `${tblPrefix}${table}`";
+			$query.=" JOIN `${tbl_prefix}${k}` ON `${tbl_prefix}${table}`";
+			$opNum=0;
 			foreach($v as $sk=>$sv)
 			{
 				if(is_array($sv))
@@ -342,7 +343,19 @@ class SDBTable extends SimpleDB
 				}
 				else
 				{
-					$query.=".`$sk`=`${tblPrefix}${k}`.`$sv`";
+					if(!is_int($sk))
+					{
+						if(isset($v[$opNum-1]))
+						{
+							$query.=" ".$v[$opNum-1]." `${tbl_prefix}${table}`";
+						}
+						else if($opNum>0)
+						{
+							$query.=" AND `${tbl_prefix}${table}`";
+						}
+						$opNum++;
+						$query.=".`$sk`=`${tbl_prefix}${k}`.`$sv`";
+					}
 				}
 			}
 		}
