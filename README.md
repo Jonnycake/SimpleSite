@@ -1,3 +1,5 @@
+**1.0.0 Postponed - Getting busy lately, I plan on picking back up in a month or two**
+
 **2.0 release finished, 1.0.0 in progress now**
 
 Hello all, my name's Jon Stockton and I've been working on SimpleSite for the past 3 years or so.  It started off as an attempt to create a social networking platform, but after a computer crash and all that hardwork going away, I switched over to developing a framework to help me create the social network easier and faster.  My latest release is 2.0 which was originally going to be considered production ready, but is now just another concept version.
