@@ -1,0 +1,143 @@
+<script type="text/javascript">
+var lastMenuShown=[];
+function showMenu(menuName, hideLast, dontPush)
+{
+	if(lastMenuShown!=[] && hideLast) {
+		var count=0;
+		for(var i=(lastMenuShown.length-1);i>=0 && (count++)!=hideLast;i--) {
+			$('#'+lastMenuShown[i]).slideUp(300, 'linear');
+			lastMenuShown.pop(1);
+		}
+	}
+	if(!dontPush) {
+		lastMenuShown.push(menuName);
+	}
+	$('#'+menuName).slideDown(300, 'linear');
+}
+function closeMenus()
+{
+	if(lastMenuShown!=[]) {
+		for(var i=(lastMenuShown.length-1);i>=0;i--) {
+			$('#'+lastMenuShown[i]).slideUp(300, 'linear');
+		}
+	}
+}
+function newColumn()
+{
+	var sel=window.getSelection().getRangeAt(0).cloneContents();
+	var div=document.createElement('div');
+	div.appendChild(sel.cloneNode(true));
+	sel=div.innerHTML;
+	if(sel)
+	{
+		document.execCommand('inserthtml', null, '<div class=\'half-width smright\'>'+sel+'</div><div class=\'half-width smright\'>New Column</div>')
+	}
+	else
+	{
+		document.execCommand('inserthtml', null, '<div class=\'half-width smright\'>New Column</div><div class=\'half-width smright\'>New Column</div>')
+	}
+}
+function savePage()
+{
+	var pageName=document.getElementById("createPage_curFile").value;
+	if(pageName=="") {
+		savePageAs();
+		return;
+	}
+	var content=btoa(document.getElementById("createPage_editArea").innerHTML);
+	$.post("{CONFIGS_path_root}?mod=createPage&func=save", "content="+encodeURIComponent(content)+"&pageName="+encodeURIComponent(pageName));
+//alert("content="+content+"&pageName="+pageName)
+}
+function savePageAs()
+{
+	var pageName=prompt('Page Name:');
+	document.getElementById('createPage_curFile').value=pageName;
+	savePage();
+}
+function deletePage()
+{
+	var pageName=document.getElementById('createPage_curFile').value;
+	$.post("{CONFIGS_path_root}?mod=createPage&func=delete", "pageName="+encodeURIComponent(pageName));
+}
+function openPage(current=false)
+{
+	if(!current)
+		var pageName=prompt('Page Name:');
+	document.getElementById('createPage_curFile').value=pageName;
+	$.get("{CONFIGS_path_root}?mod=createPage&func=open&pageName="+encodeURIComponent(pageName), function (data) { document.getElementById('createPage_editArea').innerHTML=data; });
+}
+function newPage()
+{
+	var pageName=prompt('Page Name:');
+	document.getElementById('createPage_curFile').value=pageName;
+	openPage(true);
+}
+function insertVideo()
+{
+	var url=prompt('Insert URL:');
+	document.execCommand('inserthtml', null, '<video width="320" height="240" controls><source src="'+url+'" type="video/mp4">Your browser does not support the video tag.</video>');
+}
+</script>
+<menu type="context" id="mainMenu">
+ <menu label="Font">
+  <menu label="Color">
+   <menuitem label="Black" onclick="document.execCommand('forecolor', false, '#000');"></menuitem>
+   <menuitem label="White" onclick="document.execCommand('forecolor', false, '#FFF');"></menuitem>
+   <menuitem label="Red" onclick="document.execCommand('forecolor', false, '#F00');"></menuitem>
+   <menuitem label="Blue" onclick="document.execCommand('forecolor', false, '#00F');"></menuitem>
+   <menuitem label="Green" onclick="document.execCommand('forecolor', false, '#0F0');"></menuitem>
+  </menu>
+  <menuitem label="Default" onclick="alert('Not done yet');"></menuitem>
+  <menuitem label="Bold" onclick="document.execCommand('bold');"></menuitem>
+  <menuitem label="Italic" onclick="document.execCommand('italic');"></menuitem>
+  <menuitem label="Underline" onclick="document.execCommand('underline');"></menuitem>
+  <menuitem label="Subscript" onclick="document.execCommand('subscript');"></menuitem>
+  <menuitem label="Superscript" onclick="document.execCommand('superscript');"></menuitem>
+ </menu>
+ <menu label="Lists">
+  <menuitem label="Ordered List" onclick="document.execCommand('insertorderedlist');"></menuitem>
+  <menuitem label="Un-Ordered List" onclick="document.execCommand('insertunorderedlist');"></menuitem>
+  <menuitem label="Indent" onclick="document.execCommand('indent');"></menuitem>
+  <menuitem label="Outdent" onclick="document.execCommand('outdent');"></menuitem>
+ </menu>
+ <menu label="Multimedia">
+  <menuitem label="Insert Image" onclick="var imghref=prompt('Insert URL: ');document.execCommand('insertimage', false, imghref);"></menuitem>
+  <menuitem label="Insert Video" onclick="insertVideo()"></menuitem>
+ </menu>
+ <menuitem label="Horizontal Rule" onclick="document.execCommand('inserthorizontalrule');"></menuitem>
+ <menuitem label="New Column" onclick="newColumn()"></menuitem>
+ <menuitem label="Create Hyperlink" onclick="var lhref=prompt('Insert URL: ');document.execCommand('createlink', false, lhref);"></menuitem>
+ <menuitem label="Unlink" onclick="document.execCommand('unlink');"></menuitem>
+ <menuitem label="View HTML" onclick="alert(document.getElementById('createPage_editArea').innerHTML);"></menuitem>
+ <menuitem label="Save Page" onclick="savePage()"></menuitem>
+</menu>
+<div id="controlsContainer" class="full-width">
+ <div id="menuBar" class="centered btop full-width">
+  <input id="createPage_curFile" name="pageName" value="" type="hidden"/>
+  <a href="#" onclick="newPage();">New</a> | <a href="#" onclick="openPage();">Open</a> | <a href="#" onclick="savePage()">Save</a> | <a href="#" onclick="savePageAs();">Save As</a> | <a href="#" onclick="deletePage();">Delete</a>
+ </div>
+ <div id="toolbar" class="hidden centered full-width">
+  <div class="full-width">
+   <a href="#" class="glyphicon halflings halflings-link blackText" onclick="var lhref=prompt('Insert URL: ');document.execCommand('createlink', false, lhref);" onmouseover="closeMenus();"></a><i class="glyphicon halflings halflings-font blackText" onmouseover="showMenu('font_buttons',1);"></i> <i class="glyphicon halflings halflings-list blackText" onmouseover="showMenu('list_buttons',1);"></i>
+  </div>
+  <div id="font_buttons" class="full-width hidden">
+   <div class="full-width centered btop">Font</div>
+   <a href="#" class="glyphicon halflings halflings-bold blackText"  onclick="document.execCommand('bold');"></a>
+   <a href="#" class="glyphicon halflings halflings-italic blackText" onclick="document.execCommand('italic');"></a>
+   <a href="#" class="glyphicon" onclick="document.execCommand('underline');"><u class="blackText"><b>U</b></u></a>
+   <a href="#" class="glyphicon halflings halflings-subscript blackText" onclick="document.execCommand('subscript');"></a>
+   <a href="#" class="glyphicon halflings halflings-superscript blackText" onclick="document.execCommand('superscript');"></a>
+   <a href="#" class="glyphicon halflings halflings-text-color blackText" onclick="colorPicker();"></a>
+  </div>
+  <div id="list_buttons" class="full-width hidden">
+   <div class="full-width btop">Lists</div>
+   <a href="#" class="blackText">Ordered</a>
+  </div>
+ </div>
+</div>
+<div id="createPage_editArea" style="min-height:10px;" class="full-width btop" contextmenu="mainMenu" contentEditable="true">
+</div>
+<script type="text/javascript">
+$('#controlsContainer').mouseenter(function() { $('#toolbar').slideDown(500, 'linear'); });
+$('#controlsContainer').mouseleave(function() { closeMenus(); $('#toolbar').slideUp(300, 'linear'); });
+</script>
