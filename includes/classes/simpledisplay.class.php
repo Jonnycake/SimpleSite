@@ -186,7 +186,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			$content.=$line;
 
 		// Editable stuff
-		if(!(array_key_exists(str_replace($_SERVER['DOCUMENT_ROOT'],"",$template))))
+		if(!(array_key_exists(str_replace($_SERVER['DOCUMENT_ROOT'],"",$template), $this->templateLengths)))
 			$this->templateLengths[str_replace($_SERVER['DOCUMENT_ROOT'],"",$template)]=strlen($content);
 
 		if(@($_GET['noparse']==1)) // Yeah...no? o.O
@@ -264,6 +264,8 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 								SimpleDebug::logException($e);
 							}
 							$content=@str_replace("{CONTENT}",(!is_null($replacement=$obj->getContent($this->configs))?$replacement:($content="")),$content);
+							$this->editArray=array_merge($this->editArray, $obj->editArray);
+							$this->templateLengths=array_merge($this->templateLengths, $obj->templateLengths);
 						}
 				}
 				catch(Exception $e)
