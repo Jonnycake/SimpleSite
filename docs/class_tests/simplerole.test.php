@@ -20,18 +20,22 @@ echo "DB Database: ";
 $configs['database']=trim(fgets($stdin));
 echo "DB Table Prefix: ";
 $configs['tbl_prefix']=trim(fgets($stdin));
+echo "User Role: ";
+$roleName=trim(fgets($stdin));
+echo "Privilege Name: ";
+$permName=trim(fgets($stdin));
 
 fclose($stdin);
 
-$adminRole=new SSRole("Administrator", $configs);
+$role=new SSRole($roleName, $configs);
 
-if($adminRole->hasPrivilege("View Site"))
+if($role->hasPrivilege($permName))
 {
-	echo "Yay\n";
+	echo "Yeah they can do that.\n";
 }
 else
 {
 	echo "Nope...\n";
 }
-
+print_r($role->getPrivileges());
 ?>
