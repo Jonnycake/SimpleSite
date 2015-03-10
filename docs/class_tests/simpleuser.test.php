@@ -32,6 +32,8 @@ echo "Password: ";
 $password=trim(fgets($stdin));
 fclose($stdin);
 $user=new SSUser($username, $password, $configs);
+print_r($user->roles);
+//var_dump($user);
 /*
 $role=new SSRole($roleName, $configs);
 

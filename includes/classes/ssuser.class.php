@@ -2,15 +2,12 @@
 class SSUser extends SimpleUser
 {
 	private $dbconf=null;
-	private $userInfo=null;
+	public $roles=array();
 
 	public function __construct($username, $password, $dbconf=array())
 	{
 		$this->dbconf=$dbconf;
-		if($this->login($username, $password))
-		{
-			echo "Welcome ".$this->userInfo->getUsername();
-		}
+		parent::__construct($username, $password);
 	}
 	public function login($username, $password)
 	{
@@ -32,6 +29,7 @@ class SSUser extends SimpleUser
 		$rows=$userTbl->sdbGetRows();
 		if(isset($rows[0])) {
 			$this->userInfo=$rows[0];
+			$this->roles=$this->getRoles();
 			return $this->userInfo;
 		} else {
 			return false;
@@ -39,9 +37,19 @@ class SSUser extends SimpleUser
 	}
 	public function logout()
 	{
+		$this->is_logged_in=false;
 	}
 	public function getRoles()
 	{
+		$db=new SimpleDB($this->dbconf);
+		$tbl=$db->openTable("user_roles");
+		$tbl->select('SS_roles.name', array('AND'=>array('uid'=>array('op'=>'=','val'=>$this->userInfo->getId()))), array('JOIN'=>array('roles'=>array('rid'=>'id'))));
+		$roles=array();
+		$rows=$tbl->sdbGetRows();
+		foreach($rows as $row) {
+			$roles[]=$row->getName();
+		}
+		return array_unique($roles);
 	}
 }
 ?>
