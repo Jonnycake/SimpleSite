@@ -50,6 +50,7 @@ class SSRole extends SimpleRole
 	 * Retrieves the privileges out of the database (requires SimpleDB)
 	 *
 	 * @param bool $force_reload Whether or not to reload the privileges if the array is already populated
+	 * @return array List of privilege names
 	 */
 	public function getPrivileges($force_reload=false)
 	{
