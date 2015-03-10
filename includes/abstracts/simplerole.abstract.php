@@ -1,4 +1,14 @@
 <?php
+/*
+ * SimpleRole Abstract Class
+ * 
+ * @package SimpleRole
+ * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
+ */
+ 
+/*
+ * SimpleRole abstract class
+ */
 abstract class SimpleRole implements simpleRoleI
 {
 	public $is_admin=false;
