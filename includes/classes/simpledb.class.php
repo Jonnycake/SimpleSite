@@ -187,7 +187,8 @@ class SimpleDB
 	public function sdbGetTblCreate($table, $database=null)
 	{
 		// SHOW CREATE TABLE 
-		$res=$this->rawQry(str_replace('{DATABASE}',($database)?$database:$this->sdbGetConfigs()['database'],str_replace('{TABLE}',$table,$this->compatQrys['SHOW CREATE TABLE'][$this->configs['type']])),array(),false);
+		$dbconf=$this->sdbGetConfigs();
+		$res=$this->rawQry(str_replace('{DATABASE}',($database)?$database:$dbconf['database'],str_replace('{TABLE}',$table,$this->compatQrys['SHOW CREATE TABLE'][$this->configs['type']])),array(),false);
 		return $res[0][1];
 	}
 	public function sdbGetColumns($table="",$database=null,$like='%')
@@ -195,7 +196,8 @@ class SimpleDB
 		// SHOW COLUMNS IN $table WHERE column_name LIKE $like[1] OR column_name LIKE $like[2]...
 		// orrr $tbl=$this->openTable($table);$tbl->select('*');getColumns
 		$columns=array();
-		$res=$this->rawQry(str_replace('{DATABASE}',($database)?$database:$this->sdbGetConfigs()['database'],str_replace('{TABLE}',$table,$this->compatQrys['SHOW COLUMNS'][$this->configs['type']])),array(':like' => $like),false);
+		$dbconf=$this->sdbGetConfigs();
+		$res=$this->rawQry(str_replace('{DATABASE}',($database)?$database:$dbconf['database'],str_replace('{TABLE}',$table,$this->compatQrys['SHOW COLUMNS'][$this->configs['type']])),array(':like' => $like),false);
 		foreach($res as $column)
 			$columns[$column['Field']] = $column;
 		return $columns;
@@ -271,7 +273,7 @@ class SDBTable extends SimpleDB
 	}
 
 	// Query building
-	public function where($conditions=array())
+	public function where($conditions=array(), $tblPrefix)
 	{
 		$query="";
 		$params=array();
@@ -302,7 +304,10 @@ class SDBTable extends SimpleDB
 				foreach($v as $col=>$arr)
 				{
 					$isInt=is_int($arr['val']);
-					$query.=" `$col` ".$arr['op']." :$col";
+					if(isset($arr['tbl']))
+						$query.=" `${tblPrefix}${arr['tbl']}`.`${col}` ${arr['op']} :${col}";
+					else
+						$query.=" `$col` ".$arr['op']." :$col";
 					$params[":$col"]=$arr['val'];
 					if(++$x<count($conditions[$k]))
 						$query.=" $k";
@@ -310,6 +315,55 @@ class SDBTable extends SimpleDB
 			}
 		}
 		return array($query,$params);
+	}
+	/*
+	Table_1
+	array(
+		"Table_2" => array(
+					"y"=>"x",
+					"Table_3"=>array(
+							"y"=>"x"
+					)
+		)
+	)
+	*/
+	public function join($table,$relationships, $jointype=null, $tbl_prefix="")
+	{
+		print_r($relationships);
+		$query="";
+		$joins="";
+		foreach($relationships as $k=>$v)
+		{
+			if(!is_null($jointype))
+				$query.=" ${jointype}";
+			$query.=" JOIN `${tbl_prefix}${k}` ON `${tbl_prefix}${table}`";
+			$opNum=0;
+			foreach($v as $sk=>$sv)
+			{
+				if(is_array($sv))
+				{
+					$joins.=$this->join($k, array("$sk"=>$sv), $jointype, $tbl_prefix);
+				}
+				else
+				{
+					if(!is_int($sk))
+					{
+						if(isset($v[$opNum-1]))
+						{
+							$query.=" ".$v[$opNum-1]." `${tbl_prefix}${table}`";
+						}
+						else if($opNum>0)
+						{
+							$query.=" AND `${tbl_prefix}${table}`";
+						}
+						$opNum++;
+						$query.=".`$sk`=`${tbl_prefix}${k}`.`$sv`";
+					}
+				}
+			}
+		}
+		$query.=$joins;
+		return $query;
 	}
 	public function select($cols,$conditions=array(),$extra=array(),$union=false)
 	{
@@ -326,11 +380,22 @@ class SDBTable extends SimpleDB
 		// Set up columns for the query
 		if(is_array($cols))
 		{
-			foreach($cols as $col)
+			foreach($cols as $k=>$col)
 			{
-				if($col!='*')
-					$col="`$col`";
-				$query.=" $col".((++$x<count($cols))?',':'');
+				if(is_array($col))
+				{
+					$y=0;
+					foreach($col as $colName)
+						$query.=" `${tblPrefix}${k}`.`$colName`".((++$y<count($col))?',':'');
+				}
+				else
+				{
+					if($col!='*')
+						$col="`$col`";
+					else
+						$query.=" $col";
+				}
+				$query.=((++$x<count($cols))?',':'');
 			}
 		}
 		else
@@ -341,21 +406,11 @@ class SDBTable extends SimpleDB
 		// $extra['JOIN']=array('userid'=>array('uid'='id'));
 		if(isset($extra['JOIN']))
 		{
-			if(!(isset($extra['Table'])))
-			{
-				foreach($extra['JOIN'] as $k=>$v)
-				{
-					if(isset($extra['JTYPE']))
-						$query.=" ${extra['JTYPE']}";
-					$query.=" JOIN `${tblPrefix}${k}` ON `$tblPrefix".$this->sdbGetName().'`.';
-					foreach($v as $sk=>$sv)
-						$query.="`$sk`=`${tblPrefix}${k}`.`$sv`";
-				}
-			}
+			$query.=$this->join($this->sdbGetName(), $extra['JOIN'], (isset($extra['JTYPE']))?$extra['JTYPE']:null,$tblPrefix);
 		}
 
 		// Get conditional statement
-		$where=$this->where($conditions);
+		$where=$this->where($conditions, $tblPrefix);
 		$query.=$where[0];
 		$params=$where[1];
 
