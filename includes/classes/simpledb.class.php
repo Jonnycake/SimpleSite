@@ -273,7 +273,7 @@ class SDBTable extends SimpleDB
 	}
 
 	// Query building
-	public function where($conditions=array())
+	public function where($conditions=array(), $tblPrefix)
 	{
 		$query="";
 		$params=array();
@@ -304,7 +304,10 @@ class SDBTable extends SimpleDB
 				foreach($v as $col=>$arr)
 				{
 					$isInt=is_int($arr['val']);
-					$query.=" `$col` ".$arr['op']." :$col";
+					if(isset($arr['tbl']))
+						$query.=" `${tblPrefix}${arr['tbl']}`.`${col}` ${arr['op']} :${col}";
+					else
+						$query.=" `$col` ".$arr['op']." :$col";
 					$params[":$col"]=$arr['val'];
 					if(++$x<count($conditions[$k]))
 						$query.=" $k";
@@ -339,7 +342,7 @@ class SDBTable extends SimpleDB
 			{
 				if(is_array($sv))
 				{
-					$joins.=$this->join($k, array("$sk"=>$sv), $jointype);
+					$joins.=$this->join($k, array("$sk"=>$sv), $jointype, $tbl_prefix);
 				}
 				else
 				{
@@ -377,11 +380,22 @@ class SDBTable extends SimpleDB
 		// Set up columns for the query
 		if(is_array($cols))
 		{
-			foreach($cols as $col)
+			foreach($cols as $k=>$col)
 			{
-				if($col!='*')
-					$col="`$col`";
-				$query.=" $col".((++$x<count($cols))?',':'');
+				if(is_array($col))
+				{
+					$y=0;
+					foreach($col as $colName)
+						$query.=" `${tblPrefix}${k}`.`$colName`".((++$y<count($col))?',':'');
+				}
+				else
+				{
+					if($col!='*')
+						$col="`$col`";
+					else
+						$query.=" $col";
+				}
+				$query.=((++$x<count($cols))?',':'');
 			}
 		}
 		else
@@ -396,7 +410,7 @@ class SDBTable extends SimpleDB
 		}
 
 		// Get conditional statement
-		$where=$this->where($conditions);
+		$where=$this->where($conditions, $tblPrefix);
 		$query.=$where[0];
 		$params=$where[1];
 
