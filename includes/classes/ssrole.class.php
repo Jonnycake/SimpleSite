@@ -58,16 +58,26 @@ class SSRole extends SimpleRole
 		{
 			$dbconf=$this->dbconf;
 			$db=new SimpleDB($dbconf);
-			$query="select ${dbconf['tbl_prefix']}roles.name, ${dbconf['tbl_prefix']}roles.is_admin, ${dbconf['tbl_prefix']}privileges.name as priv from ${dbconf['tbl_prefix']}roles left join ${dbconf['tbl_prefix']}role_privs on role_id=${dbconf['tbl_prefix']}roles.id left join ${dbconf['tbl_prefix']}privileges on priv_id=${dbconf['tbl_prefix']}privileges.id WHERE ${dbconf['tbl_prefix']}roles.name='".$this->name."';";
-			$res=$db->rawQry($query, array(), false);
+			$relationships=array( 
+						"role_privs" => array(
+							"id"=>"role_id",
+							"privileges"=>array(
+								"priv_id"=>"id",
+							)
+						)
+					);
+			$tbl=$db->openTable('roles');
+			$tbl->select(array('privileges'=>array('name'), 'roles'=>array('is_admin')), array('AND'=>array('name'=>array('tbl'=>'roles', 'op'=>'=', 'val'=>$this->name))), array('JOIN'=>$relationships, 'JTYPE'=>'LEFT'));
+			$res=$tbl->sdbGetRows();
+
 			$db->disconnect();
 			$is_admin=false;
 
 			$privs=array();
 			foreach($res as $row)
 			{
-				$privs[]=$row['priv'];
-				if($row['is_admin'])
+				$privs[]=$row->getName();
+				if($row->getIs_admin())
 				{
 					$this->is_admin=true;
 				}
