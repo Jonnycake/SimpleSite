@@ -1,3 +1,5 @@
+**1.0.0 Development Continues - Starting to pick back up on 1.0.0, I'll be doing an intermediary release later today/tomorrow, looks like we're getting on track so expect for 1.0.0 to be released September 28.  As an aside, we're coming up on a year of being on GitHub!  A lot has changed since then - we're becoming stable!**
+
 **1.0.0 Postponed - Getting busy lately, I plan on picking back up in a month or two**
 
 **2.0 release finished, 1.0.0 in progress now**
