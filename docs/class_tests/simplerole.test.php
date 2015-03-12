@@ -25,8 +25,6 @@ $roleName=trim(fgets($stdin));
 echo "Privilege Name: ";
 $permName=trim(fgets($stdin));
 
-fclose($stdin);
-
 $role=new SSRole($roleName, $configs);
 
 if($role->hasPrivilege($permName))
@@ -38,4 +36,17 @@ else
 	echo "Nope...\n";
 }
 print_r($role->getPrivileges());
+
+echo "Another Privilege: ";
+$permName2=trim(fgets($stdin));
+fclose($stdin);
+if($role->hasPrivilege(array($permName,$permName2)))
+{
+	echo "Yeah they can do both.\n";
+}
+else
+{
+	echo "Nope...\n";
+}
+
 ?>

@@ -6,33 +6,33 @@
  * @author Jonathan Stockton <jonathan@simplesite.ddns.net>
  */
 
-/*
+/**
  * SSRole class which implements abstract functions required by SimpleRole
  */
 class SSRole extends SimpleRole
 {
-	/*
+	/**
 	 * Whether or not the role should be defined as an admin (permissions must be specifically denied)
 	 *
-	 * @var bool
+	 * @var bool Whether or not the role is an administrator role (able to do anything)
 	 */
 	public $is_admin=false;
 
-	/*
+	/**
 	 * Database configurations (generally taken from $configs['database'] defined in config.inc.php)
 	 *
-	 * @var array
+	 * @var array The same as the array defined in config.inc.php as $configs['database']
 	 */
 	public $dbconf=array();
 
-	/*
+	/**
 	 * Privileges associated with the role
 	 *
-	 * @var null|array
+	 * @var null|array Array of strings (or null prior to being set)
 	 */
 	public $privs=null;
 
-	/*
+	/**
 	 * Constructor sets database configurations, the name, and then calls parent::__construct()
 	 *
 	 * @param string $name The name of the role to be constructed
@@ -46,9 +46,10 @@ class SSRole extends SimpleRole
 		parent::__construct($name, $this->is_admin);
 	}
 
-	/*
+	/**
 	 * Retrieves the privileges out of the database (requires SimpleDB)
 	 *
+	 * Notable Side-effect: sets $this->privs;
 	 * @param bool $force_reload Whether or not to reload the privileges if the array is already populated
 	 * @return array List of privilege names
 	 */
@@ -91,7 +92,7 @@ class SSRole extends SimpleRole
 		return $privs;
 	}
 
-	/*
+	/**
 	 * Checks if SSRole is set up correctly
 	 *
 	 * @return bool Whether or not SSRole will work.
