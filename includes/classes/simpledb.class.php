@@ -329,7 +329,6 @@ class SDBTable extends SimpleDB
 	*/
 	public function join($table,$relationships, $jointype=null, $tbl_prefix="")
 	{
-		print_r($relationships);
 		$query="";
 		$joins="";
 		foreach($relationships as $k=>$v)
