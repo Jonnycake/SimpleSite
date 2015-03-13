@@ -99,7 +99,17 @@ class SSRole extends SimpleRole
 	 */
 	public function isInstalled()
 	{
-		return TRUE;
+		return true;
+	}
+
+	/**
+	 * Install the role system (and return true if success or false if not)
+	 *
+	 * @return bool Whether or not the role system could be installed
+	 */
+	public function install()
+	{
+		return true;
 	}
 }
 ?>

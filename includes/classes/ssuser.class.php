@@ -1,14 +1,55 @@
 <?php
+/**
+ *
+ */
+
+/**
+ *
+ *
+ *
+ *
+ *
+ */
 class SSUser extends SimpleUser
 {
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
 	private $dbconf=null;
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
 	public $roles=array();
 
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
 	public function __construct($username, $password, $dbconf=array())
 	{
 		$this->dbconf=$dbconf;
 		parent::__construct($username, $password);
 	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
 	public function login($username, $password)
 	{
 		$db=new SimpleDB($this->dbconf);
@@ -35,10 +76,26 @@ class SSUser extends SimpleUser
 			return false;
 		}
 	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
 	public function logout()
 	{
 		$this->is_logged_in=false;
 	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
 	public function getRoles()
 	{
 		$db=new SimpleDB($this->dbconf);
@@ -50,6 +107,24 @@ class SSUser extends SimpleUser
 			$roles[]=$row->getName();
 		}
 		return array_unique($roles);
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public function hasPrivilege($privilege)
+	{
+		foreach($this->roles as $role) {
+			$roleObj=new SSRole($role, $this->dbconf);
+			if($roleObj->hasPrivilege($privilege)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 ?>

@@ -1,14 +1,12 @@
 <?php
 // SimpleUser includes
 include("../../includes/interfaces/simpleuser.interface.php");
+include("../../includes/interfaces/simplerole.interface.php");
 include("../../includes/abstracts/simpleuser.abstract.php");
-include("../../includes/classes/simpledb.class.php");
-include("../../includes/classes/ssuser.class.php");
-
-// SimpleRole Includes
-/*include("../../includes/interfaces/simplerole.interface.php");
 include("../../includes/abstracts/simplerole.abstract.php");
-include("../../includes/classes/ssrole.class.php");*/
+include("../../includes/classes/simpledb.class.php");
+include("../../includes/classes/ssrole.class.php");
+include("../../includes/classes/ssuser.class.php");
 
 $configs=array();
 $stdin=fopen("php://stdin","r");
@@ -33,18 +31,12 @@ $password=trim(fgets($stdin));
 fclose($stdin);
 $user=new SSUser($username, $password, $configs);
 print_r($user->roles);
-//var_dump($user);
-/*
-$role=new SSRole($roleName, $configs);
-
-if($role->hasPrivilege($permName))
-{
-	echo "Yeah they can do that.\n";
+if($user->hasPrivilege("View Site")) {
+	echo "Yes they can view the site.\n";
+	if($user->hasPrivilege("Edit Templates")) {
+		echo "Yes they can edit templates.\n";
+	}
+} else {
+	echo "No.\n";
 }
-else
-{
-	echo "Nope...\n";
-}
-print_r($role->getPrivileges());*/
-
 ?>

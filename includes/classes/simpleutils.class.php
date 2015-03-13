@@ -284,6 +284,7 @@ class SimpleUtils
 		$dbconf=$configs['database'];
 		foreach($reqTbls as $table)
 		{
+			// Yeah, we definitely need to finish up SimpleDB
 			if(!count($this->db->sdbGetColumns($dbconf['tbl_prefix'].$table))) // We should make a better way to do this in SimpleDB
 			{
 				return false;

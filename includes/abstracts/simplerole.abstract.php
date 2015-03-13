@@ -103,5 +103,12 @@ abstract class SimpleRole implements simpleRoleI
 	 * @return bool Whether or not the role system is installed
 	 */
 	abstract public function isInstalled();
+
+	/**
+	 * Should install the role system (and return true if success or false if not)
+	 *
+	 * @return bool Whether or not the role system could be installed
+	 */
+	abstract public function install();
 }
 ?>
