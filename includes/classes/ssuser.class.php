@@ -37,10 +37,12 @@ class SSUser extends SimpleUser
 	 *
 	 *
 	 */
-	public function __construct($username, $password, $dbconf=array())
+	public function __construct($username=null, $password=null, $dbconf=array())
 	{
 		$this->dbconf=$dbconf;
-		parent::__construct($username, $password);
+		if(!is_null($username)) {
+			parent::__construct($username, $password);
+		}
 	}
 
 	/**
@@ -50,7 +52,7 @@ class SSUser extends SimpleUser
 	 *
 	 *
 	 */
-	public function login($username, $password)
+	protected function _login($username, $password)
 	{
 		$db=new SimpleDB($this->dbconf);
 		$userTbl=$db->openTable("users");
@@ -75,6 +77,11 @@ class SSUser extends SimpleUser
 		} else {
 			return false;
 		}
+	}
+
+	public function login($username, $password)
+	{
+		parent::__construct($username, $password);
 	}
 
 	/**
@@ -125,6 +132,21 @@ class SSUser extends SimpleUser
 			}
 		}
 		return false;
+	}
+
+	public function isAdmin()
+	{
+		foreach($this->roles as $role) {
+			$roleObj=new SSRole($role, $this->dbconf);
+			if($roleObj->is_admin){
+				return true;
+			}
+		}
+	}
+
+	public function isGuest()
+	{
+		return !$this->is_logged_in;
 	}
 }
 ?>

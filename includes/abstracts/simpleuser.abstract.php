@@ -49,15 +49,7 @@ abstract class SimpleUser implements simpleUserI
 	 *
 	 *
 	 */
-	protected $userInfo=null;
-
-	/**
-	 *
-	 *
-	 *
-	 *
-	 */
-	private $privileges=null;
+	public $userInfo=null;
 
 	/**
 	 *
@@ -67,7 +59,7 @@ abstract class SimpleUser implements simpleUserI
 	 */
 	public function __construct($username, $password)
 	{
-		if($this->login($username, $password))
+		if($this->_login($username, $password))
 		{
 			$this->is_logged_in=true;
 			$this->uid=$this->userInfo->getId();
@@ -112,7 +104,15 @@ abstract class SimpleUser implements simpleUserI
 	 *
 	 *
 	 */
-	abstract public function logout();
+	public function logout()
+	{
+		$this->is_logged_in=false;
+		$this->uid=-1;
+		$this->is_admin=false;
+		$this->name=null;
+		$this->userInfo=null;
+		$this->roles=null;
+	}
 
 	/**
 	 *
