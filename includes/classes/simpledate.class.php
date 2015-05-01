@@ -24,6 +24,20 @@ class SimpleDate
 {
 	public static function getDOW($day, $month, $year)
 	{
+		$months=array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+		if(is_numeric($month)) {
+			$m=(int)$month;
+			if($m<=12 && $m>0) {
+				$month=$months[$m-1];
+			} else {
+				return false;
+			}
+		} else if(!in_array($month, $months)) {
+			return false;
+		}
+		$dateString="${day} ${month} ${year}";
+		$timestamp=strtotime($dateString);
+		return date("l", $timestamp);
 	}
 
 	public static function getDMY($timestamp)
