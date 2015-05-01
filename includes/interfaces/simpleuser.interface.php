@@ -1,6 +1,8 @@
 <?php
 /**
+ * SimpleUser interface
  *
+ * @package SimpleUser
  */
 
 /**
@@ -56,5 +58,25 @@ interface simpleUserI
 	 *
 	 */
 	public function getRoles();
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public function save($new=false);
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public function delete();
+
+	public function hashPassword($password=null);
 }
 ?>

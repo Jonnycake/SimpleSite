@@ -1,4 +1,7 @@
 <?php
+define('SIMPLESITE',1);
+include("../../includes/classes/simpledebug.class.php");
+include("../../includes/classes/simpleutils.class.php");
 include("../../includes/interfaces/simplerole.interface.php");
 include("../../includes/abstracts/simplerole.abstract.php");
 include("../../includes/classes/simpledb.class.php");
@@ -26,7 +29,6 @@ echo "Privilege Name: ";
 $permName=trim(fgets($stdin));
 
 $role=new SSRole($roleName, $configs);
-
 if($role->hasPrivilege($permName))
 {
 	echo "Yeah they can do that.\n";
@@ -48,5 +50,4 @@ else
 {
 	echo "Nope...\n";
 }
-
 ?>

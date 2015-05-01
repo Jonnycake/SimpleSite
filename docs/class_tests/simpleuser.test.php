@@ -1,5 +1,8 @@
 <?php
 // SimpleUser includes
+define('SIMPLESITE',1);
+include("../../includes/classes/simpleutils.class.php");
+include("../../includes/classes/simpledebug.class.php");
 include("../../includes/interfaces/simpleuser.interface.php");
 include("../../includes/interfaces/simplerole.interface.php");
 include("../../includes/abstracts/simpleuser.abstract.php");
@@ -8,6 +11,9 @@ include("../../includes/classes/simpledb.class.php");
 include("../../includes/classes/ssrole.class.php");
 include("../../includes/classes/ssuser.class.php");
 
+register_shutdown_function("SimpleDebug::shutdownFunction");
+set_exception_handler("SimpleDebug::exceptionHandler");
+SimpleDebug::setSettings(array("loud"=>1, "savelog"=>true));
 $configs=array();
 $stdin=fopen("php://stdin","r");
 
@@ -28,9 +34,49 @@ echo "Username: ";
 $username=trim(fgets($stdin));
 echo "Password: ";
 $password=trim(fgets($stdin));
-fclose($stdin);
 $user=new SSUser($username, $password, $configs);
+echo "New Password: ";
+$newpassword=trim(fgets($stdin));
+$user->password=$newpassword;
+echo "Current Roles:\n";
+print_r($user->getRoles());
+echo "Removed Role(s): ";
+$removedRoles=explode(';', trim(fgets($stdin)));
+$user->removeRole($removedRoles);
+echo "New Role(s): ";
+$newRoles=explode(';', trim(fgets($stdin)));
+$user->addRole($newRoles);
+$user->save();
+echo "New Username: ";
+$newuser=trim(fgets($stdin));
+echo "Password for ${newuser}: ";
+$newuserpass=trim(fgets($stdin));
+echo "New User Role: ";
+$newuserrole=trim(fgets($stdin));
+$user2=new SSUser(null, null, $configs);
+$user2->roles[]=$newuserrole;
+print_r($user2->roles);
+$user2->username=$newuser;
+$user2->password=$newuserpass;
+$user2->save(true);
+echo "User(s) to Delete: ";
+$usersDeleted=explode(';', trim(fgets($stdin)));
+fclose($stdin);
+foreach($usersDeleted as $username) {
+	$user3=new SSUser($username, null, $configs, false);
+	$user3->delete();
+}
+/*
+// Get user info
+print_r($user->getInfo());
+print_r($user->getInfo());
+
+// Get user's roles
 print_r($user->roles);
+
+//$user->delete();
+
+/// Check their permissions
 if($user->hasPrivilege("View Site")) {
 	echo "Yes they can view the site.\n";
 	if($user->hasPrivilege("Edit Templates")) {
@@ -38,5 +84,5 @@ if($user->hasPrivilege("View Site")) {
 	}
 } else {
 	echo "No.\n";
-}
+}*/
 ?>
