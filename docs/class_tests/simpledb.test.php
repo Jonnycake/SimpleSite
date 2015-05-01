@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+include("../../includes/classes/simpledebug.class.php");
 include("../../includes/classes/simpledb.class.php");
 $stdin=fopen("php://stdin","r");
 
@@ -20,6 +21,14 @@ $configs['tbl_prefix']=trim(fgets($stdin));
 fclose($stdin);
 
 // Tests to perform, may assume presence of specific tables
+$relationships=array( 
+			"role_privs" => array(
+						"id"=>"role_id",
+						"privileges"=>array(
+							"priv_id"=>"id",
+						)
+					)
+		);
 $tests=array(
 
 		array(
@@ -28,10 +37,29 @@ $tests=array(
 			"queries"     => array(
 						"SELECT username FROM SS_admins;"
 					)
+		),
+		array(
+			"function"    => "select",
+			"description" => "Test Joins",
+			"queries"     => array(
+						array(
+							'*',
+							array(),
+							array(
+								'JOIN'  => $relationships,
+								'JTYPE' => 'LEFT'
+							)
+						 )
+					 )
 		)
 );
 
+
 $sdb=new SimpleDB($configs,true); // Inherent test of constructor
+$tbl=$sdb->openTable("roles");
+//echo $tbl->join("Table_1", $relationships, "LEFT");
+//$tbl->select('*', array(), array('JOIN'=>$relationships, 'JTYPE'=>'LEFT'));
+//var_dump($tbl->sdbGetRows());
 if($sdb->connected())
 {
 	foreach($tests as $test)
@@ -48,6 +76,13 @@ if($sdb->connected())
 					echo "\n";
 				}
 				break;
+			case "select":
+				echo "Testing select function...\n";
+				foreach($test['queries'] as $query)
+				{
+					$tbl->select($query[0], $query[1], $query[2]);
+					var_dump($tbl->sdbGetRows());
+				}
 			default:
 				echo "Unknown function: ${test['function']}.\n";
 				break;
