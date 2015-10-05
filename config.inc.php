@@ -109,6 +109,11 @@ $configs["path"]["root"]="/";
 $configs["path"]["themes"]="templates/themes";
 $configs["path"]["mod_templates"]="templates/mods";
 $configs["path"]["custom_templates"]="templates/custom";
+$configs["path"]["js_assets"] = $configs["path"]["root"] . "assets/js/";
+$configs["path"]["css_assets"] = $configs["path"]["root"] . "assets/css/";
+$configs["path"]["img_assets"] = $configs["path"]["root"] . "assets/images/";
+$configs["path"]["contrib_assets"] = $configs["path"]["root"] . "assets/contrib/";
+
 
 SimpleDebug::logInfo("Setting dynamically generated path configurations.");
 // The following configurations should not be changed unless you know what you are doing as they are dynamically set
