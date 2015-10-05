@@ -1,0 +1,9 @@
+			<div id="footer" class="nabber navbar-default footer full-width centered full-width borders smtop" style="border-radius:9px;border-color:#CCC;padding:5px;">
+				Powered by <a href="http://simplesite.ddns.net/">SimpleSite v0.2.5</a>
+			</div>
+		</div>
+		<script type="text/javascript">
+                {ISADMIN}editArray='{EDITARRAY}';{/ISADMIN}
+		</script>
+	</body>
+</html>

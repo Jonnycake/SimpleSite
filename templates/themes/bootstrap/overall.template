@@ -1,0 +1,6 @@
+{HEADER}
+				<div id="middle" class="full-width borders smbottom" style="border-radius:9px;border-color:#CCC;padding:5px;background-color:#EEE;">
+					{CONTENT}
+				</div>		
+{FOOTER}
+
