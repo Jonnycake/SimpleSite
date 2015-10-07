@@ -199,3 +199,8 @@ v1.0.0 (Released ??/??/??):
 ====================
     - Issue #118 (bugfix): Module editArray Not Being Used
     - Issue #50 (enhancement): SimpleRole
+    - Issue #124 (enhancement): 
+    - Issue #42 (enhancement):
+    - Issue #135 (enhancement): 
+    - Issue #112 (enhancement):
+    - Issue #99 (enhancement):
