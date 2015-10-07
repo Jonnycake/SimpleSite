@@ -445,7 +445,22 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 					SimpleDebug::logException($e);
 				}
 
-				if(is_string($chosenPage))
+				if(is_int($chosenPage)) {
+					switch($chosenPage)
+					{
+						case SimpleDisplay::FORMAT_JSON:
+							header("Content-Type: text/json");
+							break;
+						case SimpleDisplay::FORMAT_BASE64:
+						case SimpleDisplay::FORMAT_SERIALIZED:
+						case SimpleDisplay::FORMAT_XML:
+						case SimpleDisplay::FORMAT_ARRAY:
+						default:
+							header("Content-Type: text/plain");
+							break;
+					}
+				}
+				else if(is_string($chosenPage))
 				{
 					$path=$this->configs["path"]["templates"]."/".$chosenPage;
 				}
