@@ -449,11 +449,14 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 					switch($chosenPage)
 					{
 						case SimpleDisplay::FORMAT_JSON:
-							header("Content-Type: text/json");
+							header("Content-Type: application/json");
 							break;
+						case SimpleDisplay::FORMAT_XML:
+							header("Content-Type: application/xml");
+							break;
+
 						case SimpleDisplay::FORMAT_BASE64:
 						case SimpleDisplay::FORMAT_SERIALIZED:
-						case SimpleDisplay::FORMAT_XML:
 						case SimpleDisplay::FORMAT_ARRAY:
 						default:
 							header("Content-Type: text/plain");
