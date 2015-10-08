@@ -37,6 +37,8 @@ if(SIMPLESITE!=1)
  */
 $funcsperformed=0;
 
+$route = null;
+
 /**
  * SimpleDisplay Class
  *
@@ -433,6 +435,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 
 			SimpleDebug::logInfo("\$obj->choosePage(\$this->configs)");
 
+			// @todo: Get rid of this conditional once we have the API
 			if(@($_POST['ajax']!=1))
 			{
 				try
@@ -462,12 +465,14 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 							header("Content-Type: text/plain");
 							break;
 					}
+					echo $obj->getContent($this->configs);
+					return 0;
 				}
 				else if(is_string($chosenPage))
 				{
 					$path=$this->configs["path"]["templates"]."/".$chosenPage;
 				}
-				else if(is_array($chosenPage) && count($chosenPage)>=2) // Can't remember what I was doing here - something to do with commponents customizing their display I know that much
+				else if(is_array($chosenPage) && count($chosenPage)>=2) // This was to determine what type of template the module was requesting
 				{
 					$path="";
 					switch($chosenPage[0])

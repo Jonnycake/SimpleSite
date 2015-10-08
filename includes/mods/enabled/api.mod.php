@@ -25,9 +25,41 @@ class api extends SimpleModule
 				    "version" => "0.1",
 				    "date"=> "October 6, 2015"
 	);
+	public $route = "";
+
 	public function choosePage()
 	{
-		return SimpleDisplay::FORMAT_JSON;
+		global $route;
+		$route = explode("/", @$_GET['r']);
+
+		if(!(count($route) >= 1)) {
+			header("HTTP/1.1 500 Internal Server Error");
+			return "";
+		}
+
+		$format = 0;
+		switch($route[0]){
+			case "json":
+				$format = SimpleDisplay::FORMAT_JSON;
+				break;
+			case "xml":
+				$format = SimpleDisplay::FORMAT_XML;
+				break;
+			case "array":
+				$format = SimpleDisplay::FORMAT_ARRAY;
+				break;
+			case "serialize":
+				$format = SimpleDisplay::FORMAT_SERIALIZED;
+				break;
+			case "base64":
+				$format = SimpleDisplay::FORMAT_BASE64;
+				break;
+			default:
+				header("HTTP/1.1 500 Internal Server Error");
+				return "";
+		}
+
+		return $format;
 	}
 	public function sideparse($content,$configs=array())
 	{

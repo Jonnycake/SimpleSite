@@ -79,6 +79,11 @@ abstract class SimpleModule extends SimpleDisplay implements simpleModuleI
 	abstract public function uninstall();
 
 	// Default overloadable methods
+	public function api($route, $configs = array())
+	{
+		return null;
+	}
+
 	/**
 	 * Choose what page to use, default behavior is an empty string (default page)
 	 */
