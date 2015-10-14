@@ -297,7 +297,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			if($_SESSION['is_admin']==1)
 				$this->editArray[]=array("template" => $editTemplateName, "start" => $match[1], "length" => strlen($match[0]), "unparsed" => $unparsedMatch[1]);
 			$this->editables++;
-			$replacement=(($_SESSION['is_admin']==1)?"<span id=\"editable_".$this->editables."\"><span id=\"origContent".$this->editables."\">".$matches[1][$elementNum][0]."</span><span id=\"toolbar_".$this->editables."\"><img src=\"{CONFIGS_path_root}images/edit.jpg\" style=\"width:20px;\" onclick=\"edit(".$this->editables.");\" alt=\"Edit\" title=\"Edit\"/></span></span>":$matches[1][$elementNum][0]);
+			$replacement=(($_SESSION['is_admin']==1)?"<span id=\"editable_".$this->editables."\"><span id=\"origContent".$this->editables."\">".$matches[1][$elementNum][0]."</span><span id=\"toolbar_".$this->editables."\"><img src=\"{CONFIGS_path_img_assets}edit.jpg\" style=\"width:20px;\" onclick=\"edit(".$this->editables.");\" alt=\"Edit\" title=\"Edit\"/></span></span>":$matches[1][$elementNum][0]);
 			$content=substr_replace($content,$replacement,$match[1]+$lengthDif,strlen($match[0]));
 			$lengthDif+=strlen($replacement)-strlen($match[0]);
 		}
