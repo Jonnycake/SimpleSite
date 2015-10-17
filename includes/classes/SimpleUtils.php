@@ -462,5 +462,10 @@ class SimpleUtils
 		SimpleDebug::logInfo("simplefilter");
 		return str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars((($db)?$this->db->quote($input):$input))));
 	}
+
+	public static function enabledFilter($modConfig)
+	{
+		return $modConfig["enabled"];
+	}
  }
  ?>

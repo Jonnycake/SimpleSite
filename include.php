@@ -47,13 +47,6 @@ include("includes/classes/SimpleDebug.php");
 include("config.inc.php");                                                  // SimpleSite Configuration File
 
 /**
- * SimpleDB class for database work.
- *
- * @include includes/classes/simpledb.class.php
- */
-include("includes/classes/SimpleDB.php");                             // SimpleDB DBO class
-
-/**
  * SimpleUtils class which is basically the parent/grandparent of 
  * all other core classes.
  *
