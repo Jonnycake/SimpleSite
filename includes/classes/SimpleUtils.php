@@ -242,6 +242,12 @@ class SimpleUtils
 					self::$include_file_list[$className] = $configs["path"]["includes"]."abstracts/${componentName}/${path}";
 				}
 			}
+
+			if(isset($componentConfig["include_files"]["interfaces"])) {
+				foreach($componentConfig["include_files"]["interfaces"] as $className => $path) {
+					self::$include_file_list[$className] = $configs["path"]["includes"]."interfaces/${componentName}/${path}";
+				}
+			}
 		}
 		$this->loadModules($configs);
 	}
