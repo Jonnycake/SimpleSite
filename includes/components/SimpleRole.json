@@ -1,0 +1,15 @@
+{
+	"assets":[
+	],
+	"include_files":[
+		"classes":[
+			"SSRole":"SSRole.php",
+		],
+		"abstracts":[
+			"SimpleRole":"SimpleRole.php",
+		],
+		"interfaces":[
+			"simpleRoleI":"simpleRoleI.php"
+		]
+	]
+}

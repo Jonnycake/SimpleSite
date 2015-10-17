@@ -38,6 +38,14 @@ if(SIMPLESITE!=1)
 class SimpleUtils
 {
 	/**
+	 * Array of paths to classes/interfaces
+	 *   Key should be the class/interface name and value filename
+	 *
+	 * @var array
+	 */
+	protected static $include_file_list=array();
+
+	/**
 	 * Array of enabled modules
 	 *
 	 * @var array
@@ -218,10 +226,11 @@ class SimpleUtils
 		SimpleDebug::logInfo("loadModules($enabled)");
 		$this->mods=array();
 		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".(($enabled)?"enabled":"disabled")."/";
-		$dir=opendir($modsdir);
+		
+		/*$dir=opendir($modsdir);
 		while(@($file=readdir($dir)))
 			if(preg_match("/(.*)\.mod\.php/si",$file,$matches) && (@$matches))
-					$this->mods[]=$matches[1];
+					$this->mods[]=$matches[1];*/
 	}
 
 	/**
