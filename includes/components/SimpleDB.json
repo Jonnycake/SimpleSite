@@ -1,11 +1,11 @@
 {
 	"assets":[
 	],
-	"include_files":[
-		"classes":[
+	"include_files":{
+		"classes":{
 			"SimpleDB":"SimpleDB.php",
 			"SDBTable":"SDBTable.php",
 			"SDBRes":"SDBRes.php"
-		]
-	]
+		}
+	}
 }

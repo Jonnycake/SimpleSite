@@ -215,22 +215,49 @@ class SimpleUtils
 	}
 
 	/**
+	 * Load list of autoloadables
+	 *
+	 * @param array $configs Associative array of configurations set by config.inc.php
+	 * @return void
+	 */
+	public function loadComponents($configs=array())
+	{
+		$path = "";
+		self::$include_file_list = array();
+		$componentFiles = $this->createDirTree($configs["path"]["includes"]."components", 1);
+		foreach($componentFiles as $file) {
+			$componentName = explode(".json", $file);
+			$componentName = $componentName[0];
+
+			$componentFilePath = $configs["path"]["includes"]."components/${file}";
+			$componentConfig = json_decode(file_get_contents($componentFilePath), true);
+			if(isset($componentConfig["include_files"]["classes"])) {
+				foreach($componentConfig["include_files"]["classes"] as $className => $path) {
+					self::$include_file_list[$className] = $configs["path"]["includes"]."classes/${componentName}/${path}";
+				}
+			}
+
+			if(isset($componentConfig["include_files"]["abstracts"])) {
+				foreach($componentConfig["include_files"]["abstracts"] as $className => $path) {
+					self::$include_file_list[$className] = $configs["path"]["includes"]."abstracts/${componentName}/${path}";
+				}
+			}
+		}
+		$this->loadModules($configs);
+	}
+
+	/**
 	 * Load the list of modules that are enabled/disabled
 	 *
 	 * @param array $configs Associative array of configurations set by config.inc.php
-	 * @param bool $enabled Whether to check the enabled or disabled modules.
 	 * @return void
 	 */
-	public function loadModules($configs=array(),$enabled=true)
+	public function loadModules($configs=array())
 	{
 		SimpleDebug::logInfo("loadModules($enabled)");
 		$this->mods=array();
-		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".(($enabled)?"enabled":"disabled")."/";
-		
-		/*$dir=opendir($modsdir);
-		while(@($file=readdir($dir)))
-			if(preg_match("/(.*)\.mod\.php/si",$file,$matches) && (@$matches))
-					$this->mods[]=$matches[1];*/
+		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/";
+		$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
 	}
 
 	/**
