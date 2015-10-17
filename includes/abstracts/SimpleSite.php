@@ -55,8 +55,8 @@ abstract class SimpleSite extends SimpleDisplay
 		$this->loadComponents($this->configs);
 		// Check modules
 		if(array_key_exists($name, $this->mods)) {
-			if($this->mods['name']['enabled'] || $loadDisabled) {
-				include($configs['path']['mods'] . (($this->mods['name']['enabled'])?"enabled":"disabled")."/${name}.mod.php");
+			if($this->mods[$name]['enabled'] || $loadDisabled) {
+				include($this->configs['path']['includes'] . "mods/" . (($this->mods[$name]['enabled'])?"enabled":"disabled")."/${name}.mod.php");
 			}
 		}
 		// Check components
