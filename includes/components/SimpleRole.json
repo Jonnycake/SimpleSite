@@ -1,6 +1,4 @@
 {
-	"assets":[
-	],
 	"include_files":[
 		"classes":[
 			"SSRole":"SSRole.php",

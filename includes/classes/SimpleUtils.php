@@ -257,6 +257,7 @@ class SimpleUtils
 	 *
 	 * @param string $name The name of the component you wish to load.
 	 * @param array $configs The configurations set by config.inc.php
+	 * @param bool $allowFail Whether failures should be allowed (missing files).
 	 *
 	 * @return bool Whether or not the component was successfully loaded.
 	 */

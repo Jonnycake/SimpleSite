@@ -1,0 +1,9 @@
+{
+	"include_files":{
+		"abstracts":{
+			"Factory":"Factory.php",
+			"Singleton":"Singleton.php",
+			"Multiton":"Multiton.php"
+		}
+	}
+}
