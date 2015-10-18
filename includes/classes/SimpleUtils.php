@@ -234,7 +234,7 @@ class SimpleUtils
 
 			// Consolidated to match loadComponentFiles() and checkComponentFiles()
 			foreach($componentConfig["include_files"] as $type => $fileList) {
-				foreach($fileList as $file) {
+				foreach($fileList as $className => $file) {
 					self::$include_file_list[$className] = $configs["path"]["includes"]."${type}/${componentName}/${file}";
 				}
 			}
