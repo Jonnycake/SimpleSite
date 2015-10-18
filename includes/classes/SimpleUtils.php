@@ -231,21 +231,11 @@ class SimpleUtils
 
 			$componentFilePath = $configs["path"]["includes"]."components/${file}";
 			$componentConfig = json_decode(file_get_contents($componentFilePath), true);
-			if(isset($componentConfig["include_files"]["classes"])) {
-				foreach($componentConfig["include_files"]["classes"] as $className => $path) {
-					self::$include_file_list[$className] = $configs["path"]["includes"]."classes/${componentName}/${path}";
-				}
-			}
 
-			if(isset($componentConfig["include_files"]["abstracts"])) {
-				foreach($componentConfig["include_files"]["abstracts"] as $className => $path) {
-					self::$include_file_list[$className] = $configs["path"]["includes"]."abstracts/${componentName}/${path}";
-				}
-			}
-
-			if(isset($componentConfig["include_files"]["interfaces"])) {
-				foreach($componentConfig["include_files"]["interfaces"] as $className => $path) {
-					self::$include_file_list[$className] = $configs["path"]["includes"]."interfaces/${componentName}/${path}";
+			// Consolidated to match loadComponentFiles() and checkComponentFiles()
+			foreach($componentConfig["include_files"] as $type => $fileList) {
+				foreach($fileList as $file) {
+					self::$include_file_list[$className] = $configs["path"]["includes"]."${type}/${componentName}/${file}";
 				}
 			}
 		}
