@@ -253,6 +253,87 @@ class SimpleUtils
 	}
 
 	/**
+	 * Load the include files listed by the specified component.
+	 *
+	 * @param string $name The name of the component you wish to load.
+	 * @param array $configs The configurations set by config.inc.php
+	 *
+	 * @return bool Whether or not the component was successfully loaded.
+	 */
+	public static function loadComponentFiles($name, $configs, $allowFail = false)
+	{
+		SimpleDebug::logInfo("Attempting to load the component '${name}'...");
+		$path = $configs['path']['includes'] . "components/${name}.json";
+		if(file_exists($path)) {
+			$componentJSON = file_get_contents($path);
+			$component = json_decode($componentJSON, true);
+			foreach($component['include_files'] as $type => $fileList) {
+				foreach($fileList as $file) {
+					$filePath = $configs['path']['includes'] . "${type}/${name}/${file}";
+					if(file_exists($filePath)) {
+						include($filePath);
+					} else {
+						if(!$allowFail) {
+							SimpleDebug::logException(new Exception("The component '${name}' appears to be corrupted - '${filePath}' does not exist."));
+							return false;
+						}
+					}
+				}
+			}
+		} else {
+			SimpleDebug::logException(new Exception("The component '${name}' does not exist!"));
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Check the specified component's dependencies
+	 *
+	 * @param string $name The name of the component you wish to check.
+	 * @param array $configs The configurations set by config.inc.php
+	 *
+	 * @return bool Whether or not the dependencies are in place.
+	 */
+	public static function checkComponentFiles($name, $configs)
+	{
+		SimpleDebug::logInfo("Checking dependencies for the component '${name}'");
+		$path = $configs['path']['includes'] . "components/${name}.json";
+		if(file_exists($path)) {
+			$componentJSON = file_get_contents($path);
+			$component = json_decode($componentJSON, true);
+
+			// Check PHP includes
+			foreach(@$component['include_files'] as $type => $fileList) {
+				foreach($fileList as $file) {
+					$filePath = $configs['path']['includes'] . "${type}/${name}/${file}";
+					if(!file_exists($filePath)) {
+						return false;
+					}
+				}
+			}
+
+			// Check HTML assets
+			foreach(@$component['assets'] as $file) {
+				if(!file_exists($_SERVER['DOCUMENT_ROOT'] . $configs['path']['assets'] . "${file}")) {
+					return false;
+				}
+			}
+
+			// Check template files
+			foreach(@$component['templates'] as $file) {
+				if(!file_exists($_SERVER['DOCUMENT_ROOT'] . $configs['path']['root'] . $configs['path']['template_subdir'] . "${file}")) {
+					return false;
+				}
+			}
+		} else {
+			SimpleDebug::logException(new Exception("The component '${name}' does not exist!"));
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Load the list of modules that are enabled/disabled
 	 *
 	 * @param array $configs Associative array of configurations set by config.inc.php
@@ -473,5 +554,5 @@ class SimpleUtils
 	{
 		return $modConfig["enabled"];
 	}
- }
- ?>
+}
+?>
