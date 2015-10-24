@@ -106,9 +106,18 @@ $configs["default_controller"]="DefaultSite";
  ***************************************************************************************************/
 SimpleDebug::logInfo("Setting path configurations.");
 $configs["path"]["root"]="/";
-$configs["path"]["themes"]="templates/themes";
-$configs["path"]["mod_templates"]="templates/mods";
-$configs["path"]["custom_templates"]="templates/custom";
+$configs["path"]["template_subdir"] = "templates";
+$configs["path"]["themes"]=$configs["path"]["template_subdir"] . "/themes";
+$configs["path"]["mod_templates"]=$configs["path"]["template_subdir"] . "/mods";
+$configs["path"]["custom_templates"]=$configs["path"]["template_subdir"] . "/custom";
+$configs["path"]["assets"] = $configs["path"]["root"] . "assets";
+$configs["path"]["js_assets"] = $configs["path"]["assets"] . "/js/";
+$configs["path"]["css_assets"] = $configs["path"]["assets"] . "/css/";
+$configs["path"]["img_assets"] = $configs["path"]["assets"] . "/images/";
+$configs["path"]["contrib_assets"] = $configs["path"]["assets"] . "/contrib/";
+$configs["path"]["theme_assets"] = $configs["path"]["assets"] . "/themes/";
+$configs["path"]["mod_assets"] = $configs["path"]["assets"] . "/mods/";
+$configs["path"]["widget_assets"] = $configs["path"]["assets"] . "/widgets/";
 
 SimpleDebug::logInfo("Setting dynamically generated path configurations.");
 // The following configurations should not be changed unless you know what you are doing as they are dynamically set
