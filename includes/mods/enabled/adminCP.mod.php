@@ -669,7 +669,7 @@ class adminCP extends SimpleModule
 		foreach($modsAvailable as $mods)
 		{
 			$x++;
-			foreach($mods as $mod)
+			foreach($mods as $mod => $modConfigs)
 			{
 				$f=@fopen($_SERVER['DOCUMENT_ROOT'].$configs["path"]["root"].$configs["path"]["mod_templates"]."/adminCP_modAdmin_modules.template","r");
 				while(($line=fgets($f)))

@@ -252,4 +252,3 @@ class SSRole extends SimpleRole
 		return SimpleUtils::installReqTbls($tables, array("database" => ((is_null($dbconf))?$this->dbconf:$dbconf)));
 	}
 }
-?>

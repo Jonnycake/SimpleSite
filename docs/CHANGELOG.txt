@@ -201,3 +201,5 @@ v1.0.0 (Released ??/??/??):
     - Issue #49 (enhancement): SimpleUser
     - Issue #50 (enhancement): SimpleRole
     - Issue #9 (enhancement): SimpleDB Update
+    - Issue #145 (enhancement): Creational Pattern Wrapper Classes (Breakout of #41)
+    - Issue #130 (enhancement): Autoload Components
