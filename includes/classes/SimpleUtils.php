@@ -334,7 +334,7 @@ class SimpleUtils
 	{
 		SimpleDebug::logInfo("loadModules($enabled)");
 		$this->mods=array();
-		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/";
+		$modsdir=$configs['path']['includes']."mods/";
 		$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
 	}
 
