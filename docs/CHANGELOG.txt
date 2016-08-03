@@ -201,3 +201,4 @@ v1.0.0 (Released ??/??/??):
     - Issue #50 (enhancement): SimpleRole
     - Issue #145: Creational Pattern Wrapper Classes (Breakout of #41)
     - Issue #130: Autoload Components
+    - Issue #153 (bugfix): adminCP: Modules Are Listed as Both Enabled and Disabled
