@@ -648,12 +648,11 @@ class adminCP extends SimpleModule
 			$this->toggleMod(@($_GET['module']),@($_GET['currentState']),$configs);
 		else if(@($_GET['func'])=="upload")
 			$this->uploadMod($configs);
-		$this->loadModules($configs);
-		$modsAvailable=array();
-		$modsAvailable['enabled']=$this->mods;
-		$this->mods=array();
-		$this->loadModules($configs,false);
-		$modsAvailable['disabled']=$this->mods;
+		$modules = $this->loadModules($configs);
+		$modsAvailable = array();
+		$modsEnabled = array_filter($modules, "SimpleUtils::enabledFilter");
+		$modsAvailable["enabled"] = array_keys($modsEnabled);
+		$modsAvailable["disabled"] = array_diff(array_keys($modules), $modsEnabled);
 		natcasesort($modsAvailable["enabled"]);
 		natcasesort($modsAvailable["disabled"]);
 		return str_replace("{MODULES}",$this->mods2Feed($modsAvailable,$configs),$content);
