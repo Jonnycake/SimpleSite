@@ -650,13 +650,14 @@ class adminCP extends SimpleModule
 			$this->uploadMod($configs);
 
 		// Get list of modules
-		$modules = $this->loadModules($configs);
+		$modules = $this->loadModules($configs, true);
 
 		// Separate enabled vs disabled
 		$modsAvailable = array();
 		$modsEnabled = array_filter($modules, "SimpleUtils::enabledFilter");
 		$modsAvailable["enabled"] = array_keys($modsEnabled);
-		$modsAvailable["disabled"] = array_diff(array_keys($modules), $modsEnabled);
+		$modsAvailable["disabled"] = array_diff(array_keys($modules), $modsAvailable["enabled"]);
+
 
 		// Sort by name
 		natcasesort($modsAvailable["enabled"]);
@@ -664,7 +665,7 @@ class adminCP extends SimpleModule
 
 		// Flip so now it's an associative array
 		$modsAvailable["enabled"] = array_flip($modsAvailable["enabled"]);
-		$modsAvailable["disabled"] = array_flip($modsAvailable["disabled"])
+		$modsAvailable["disabled"] = array_flip($modsAvailable["disabled"]);
 
 		// Populate the information for each module
 		foreach($modsAvailable as $modStatus => $modsList) {
@@ -692,12 +693,12 @@ class adminCP extends SimpleModule
 				while(($line=fgets($f)))
 					$feed.=$line;
 				$feed=str_replace("{MODFILE}",$mod,$feed);
-				if(isset($mod["info"]))
+				if(isset($modConfigs))
 				{
 					// Replace the name info
-					if(isset($mod["info"]["name"]))
+					if(isset($modConfigs["name"]))
 					{
-						$feed=str_replace("{NAME}", $mod["info"]['name'], $feed);
+						$feed=str_replace("{NAME}", $modConfigs['name'], $feed);
 					}
 					else
 					{
@@ -706,9 +707,9 @@ class adminCP extends SimpleModule
 					}
 
 					// Replace the author info
-					if(isset($mod["info"]['author']))
+					if(isset($modConfigs['author']))
 					{
-						$feed=str_replace("{AUTHOR}", $mod["info"]['author'], $feed);
+						$feed=str_replace("{AUTHOR}", $modConfigs['author'], $feed);
 					}
 					else
 					{
@@ -718,9 +719,9 @@ class adminCP extends SimpleModule
 					}
 
 					// Get the create date info
-					if(isset($mod["info"]['date']))
+					if(isset($modConfigs['date']))
 					{
-						$feed=str_replace("{DATE}", $mod["info"]['date'], $feed);
+						$feed=str_replace("{DATE}", $modConfigs['date'], $feed);
 					}
 					else
 					{

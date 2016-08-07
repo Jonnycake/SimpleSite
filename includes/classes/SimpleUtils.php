@@ -330,12 +330,17 @@ class SimpleUtils
 	 * @param array $configs Associative array of configurations set by config.inc.php
 	 * @return void
 	 */
-	public function loadModules($configs=array())
+	public function loadModules($configs=array(), $return_result = false)
 	{
 		SimpleDebug::logInfo("loadModules($enabled)");
 		$this->mods=array();
 		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/";
-		$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
+		if(!$return_result) {
+			$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
+		}
+		else {
+			return json_decode(file_get_contents($modsdir."mods.json"), true);
+		}
 	}
 
 	/**
