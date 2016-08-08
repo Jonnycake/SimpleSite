@@ -328,6 +328,7 @@ class SimpleUtils
 	 * Load the list of modules that are enabled/disabled
 	 *
 	 * @param array $configs Associative array of configurations set by config.inc.php
+	 * @param bool $return_result Specifies if the result should be returned or set to mods property
 	 * @return void
 	 */
 	public function loadModules($configs=array(), $return_result = false)
