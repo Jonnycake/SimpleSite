@@ -29,7 +29,7 @@ class SimpleConfiguration implements ArrayAccess
 		}
 	}
 
-	protected function parseDynamicConfigs($config = null)
+	protected function parseDynamicConfigs($config = null, $resolve = false)
 	{
 		if(is_null($config)) {
 			foreach($this->dynamicConfigs as $config) {
@@ -37,7 +37,7 @@ class SimpleConfiguration implements ArrayAccess
 				$expandedConfig = self::getVariableByAlias($config);
 				foreach($expandedConfig as $portion) {
 					if(is_array($portion)) {
-						$val .= $this->parseDynamicConfigs($portion);
+						$val .= $this->parseDynamicConfigs($portion, true);
 					}
 					else {
 						$val .= $portion;
@@ -49,15 +49,59 @@ class SimpleConfiguration implements ArrayAccess
 		else {
 			$val = "";
 			if(is_array($config)) {
-				foreach($config as $portion) {
-					if(is_array($portion)) {
-						$val .= $this->parseDynamicConfigs($portion);
-					}
-					else {
-						$val .= self::getVariableByAlias($portion);
+				if(isset($config["check"])) {
+					$matches = array();
+					switch($config["check"][0])
+					{
+						case "=":
+							if(preg_match("/{(.*)}/si", $config["check"][1], $matches)) {
+								$val1 = self::getVariableByAlias($matches[1]);
+							}
+							else {
+								$val1 = $config["check"][1];
+							}
+
+							if(preg_match("/{(.*)}/si", $config["check"][2], $matches)) {
+								$val2 = self::getVariableByAlias($matches[2]);
+							}
+							else {
+								$val2 = $config["check"][2];
+							}
+
+							if($val1 == $val2) {
+								return $this->parseDynamicConfigs($config["true"]);
+							}
+							else {
+								return $this->parseDynamicConfigs($config["false"]);
+							}
+							break;
+						case "<>":
+							break;
+						case "<":
+							break;
+						case ">":
+							break;
+						case "<=":
+							break;
+						case ">=":
+							break;
 					}
 				}
-				return $val;
+				else {
+					foreach($config as $portion) {
+						if(is_array($portion)) {
+							$val .= $this->parseDynamicConfigs($portion, true);
+						}
+						else {
+							if($resolve) {
+								$val .= self::getVariableByAlias($portion);
+							} else {
+								$val .= $portion;
+							}
+						}
+					}
+					return $val;
+				}
 			}
 			else {
 				return self::getVariableByAlias($config);
@@ -72,20 +116,26 @@ class SimpleConfiguration implements ArrayAccess
 		switch($expanded[0])
 		{
 			case "this":
-				for($i = 1; $i < count($expanded); $i++) {
-					if($val == null) {
-						$val = self::$instance[$expanded[$i]];
-					} else {
-						$val = $val[$expanded[$i]];
-					}
-				}
+				$val = self::$instance;
 				break;
 			case "server":
+				$val = $_SERVER;
 				break;
 			case "get":
+				$val = $_GET;
 				break;
 			case "post":
+				$val = $_POST;
 				break;
+			case "session":
+				$val = $_SESSION;
+				break;
+			default:
+				return null;
+		}
+
+		for($i = 1; $i < count($expanded); $i++) {
+			$val = $val[$expanded[$i]];
 		}
 		return $val;
 	}
@@ -107,13 +157,18 @@ class SimpleConfiguration implements ArrayAccess
 			case "post":
 				$reference = &$_POST;
 				break;
+			case "session":
+				$reference = &$_SESSION;
+				break;
+			default:
+				return false;
 		}
 		unset($expanded[0]);
 		foreach($expanded as $expander) {
 			$reference = &$reference[$expander];
 		}
 		$reference = $val;
-		return $val;
+		return true;
 	}
 
 	// Singleton
