@@ -43,7 +43,7 @@ class SimpleConfiguration implements ArrayAccess
 						$val .= $portion;
 					}
 				}
-				self::setVariableByAlias($this, $config, $val);
+				self::setVariableByAlias($config, $val);
 			}
 		}
 		else {
@@ -90,10 +90,24 @@ class SimpleConfiguration implements ArrayAccess
 		return $val;
 	}
 
-	public static function setVariableByAlias($self, $alias, $val)
+	public static function setVariableByAlias($alias, $val)
 	{
 		$expanded = explode(".", $alias);
-		$reference = &$self->configs;
+		switch($expanded[0])
+		{
+			case "this":
+				$reference = &self::$instance->configs;
+				break;
+			case "server":
+				$reference = &$_SERVER;
+				break;
+			case "get":
+				$reference = &$_GET;
+				break;
+			case "post":
+				$reference = &$_POST;
+				break;
+		}
 		unset($expanded[0]);
 		foreach($expanded as $expander) {
 			$reference = &$reference[$expander];
