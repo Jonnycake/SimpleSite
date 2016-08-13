@@ -4,5 +4,68 @@
     "themes": [
         ["this.path.template_subdir"],
         "/themes"
+    ],
+    "mod_templates": [
+        ["this.path.template_subdir"],
+        "/mods"
+    ],
+    "custom_templates": [
+        ["this.path.template_subdir"],
+        "/custom"
+    ],
+    "assets": [
+        ["this.path.root"],
+        "assets"
+    ],
+    "js_assets": [
+        ["this.path.assets"],
+        "js"
+    ],
+    "css_assets": [
+        ["this.path.assets"],
+        "css"
+    ],
+    "img_assets": [
+        ["this.path.assets"],
+        "images"
+    ],
+    "contrib_assets": [
+        ["this.path.assets"],
+        "contrib"
+    ],
+    "theme_assets": [
+        ["this.path.assets"],
+        "theme"
+    ],
+    "mod_assets": [
+        ["this.path.assets"],
+        "mod"
+    ],
+    "widget_assets": [
+        ["this.path.assets"],
+        "widget"
+    ],
+    "includes": [
+        ["server.DOCUMENT_ROOT","this.path.root"],
+        "includes/"
+    ],
+    "tmpdir": [
+        ["server.DOCUMENT_ROOT","this.path.root"],
+        "tmp/"
+    ],
+    "templates": [
+       {
+           "check": ["=","session.selected_theme",""],
+           "true": [
+               ["this.path.themes"],
+               "/",
+               ["this.base.default_theme"]
+           ],
+           "false": [
+               ["this.path.themes"],
+               "/",
+               ["session.selected_theme"]
+           ]
+       }
     ]
 }
