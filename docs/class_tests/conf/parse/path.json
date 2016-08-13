@@ -1,0 +1,8 @@
+{
+    "root": "/",
+    "template_subdir": "templates",
+    "themes": [
+        ["this.path.template_subdir"],
+        "/themes"
+    ]
+}
