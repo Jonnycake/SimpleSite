@@ -319,7 +319,15 @@ class SimpleConfiguration implements ArrayAccess
 		}
 		unset($expanded[0]);
 		foreach($expanded as $expander) {
-			$reference = &$reference[$expander];
+			if(is_array($reference)) {
+				if(!isset($reference[$expander])) {
+					$reference[$expander] = array();
+				}
+				$reference = &$reference[$expander];
+			}
+			else {
+				return false;
+			}
 		}
 		$reference = $val;
 		return true;
