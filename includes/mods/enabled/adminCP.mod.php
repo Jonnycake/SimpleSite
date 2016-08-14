@@ -648,14 +648,32 @@ class adminCP extends SimpleModule
 			$this->toggleMod(@($_GET['module']),@($_GET['currentState']),$configs);
 		else if(@($_GET['func'])=="upload")
 			$this->uploadMod($configs);
-		$this->loadModules($configs);
-		$modsAvailable=array();
-		$modsAvailable['enabled']=$this->mods;
-		$this->mods=array();
-		$this->loadModules($configs,false);
-		$modsAvailable['disabled']=$this->mods;
+
+		// Get list of modules
+		$modules = $this->loadModules($configs, true);
+
+		// Separate enabled vs disabled
+		$modsAvailable = array();
+		$modsEnabled = array_filter($modules, "SimpleUtils::enabledFilter");
+		$modsAvailable["enabled"] = array_keys($modsEnabled);
+		$modsAvailable["disabled"] = array_diff(array_keys($modules), $modsAvailable["enabled"]);
+
+
+		// Sort by name
 		natcasesort($modsAvailable["enabled"]);
 		natcasesort($modsAvailable["disabled"]);
+
+		// Flip so now it's an associative array
+		$modsAvailable["enabled"] = array_flip($modsAvailable["enabled"]);
+		$modsAvailable["disabled"] = array_flip($modsAvailable["disabled"]);
+
+		// Populate the information for each module
+		foreach($modsAvailable as $modStatus => $modsList) {
+			foreach($modsList as $modName => $modInfo) {
+				$modsAvailable[$modStatus][$modName] = $modules[$modName]["info"];
+			}
+		}
+
 		return str_replace("{MODULES}",$this->mods2Feed($modsAvailable,$configs),$content);
 	}
 	public function mods2Feed($modsAvailable,$configs) // This should be replaced with SimpleUtils::arr2Feed() with the array coming from a mods table maybe?
@@ -675,30 +693,39 @@ class adminCP extends SimpleModule
 				while(($line=fgets($f)))
 					$feed.=$line;
 				$feed=str_replace("{MODFILE}",$mod,$feed);
-				if(isset($mod::$info))
+				if(isset($modConfigs))
 				{
-					if(isset($mod::$info['name']))
+					// Replace the name info
+					if(isset($modConfigs["name"]))
 					{
-						$feed=str_replace("{NAME}", $mod::$info['name'], $feed);
+						$feed=str_replace("{NAME}", $modConfigs['name'], $feed);
 					}
 					else
 					{
+						// Default to the mod name
 						$feed=str_replace("{NAME}", $mod, $feed);
 					}
-						if(isset($mod::$info['author']))
+
+					// Replace the author info
+					if(isset($modConfigs['author']))
 					{
-						$feed=str_replace("{AUTHOR}", $mod::$info['author'], $feed);
+						$feed=str_replace("{AUTHOR}", $modConfigs['author'], $feed);
 					}
 					else
 					{
+
+						// Display message if there's no data
 						$feed=str_replace("{AUTHOR}", "No data available...", $feed);
 					}
-					if(isset($mod::$info['date']))
+
+					// Get the create date info
+					if(isset($modConfigs['date']))
 					{
-						$feed=str_replace("{DATE}", $mod::$info['date'], $feed);
+						$feed=str_replace("{DATE}", $modConfigs['date'], $feed);
 					}
 					else
 					{
+						// Display message if there's no data
 						$feed=str_replace("{DATE}", "No data available...", $feed);
 					}
 

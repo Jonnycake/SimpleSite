@@ -328,14 +328,20 @@ class SimpleUtils
 	 * Load the list of modules that are enabled/disabled
 	 *
 	 * @param array $configs Associative array of configurations set by config.inc.php
+	 * @param bool $return_result Specifies if the result should be returned or set to mods property
 	 * @return void
 	 */
-	public function loadModules($configs=array())
+	public function loadModules($configs=array(), $return_result = false)
 	{
 		SimpleDebug::logInfo("loadModules($enabled)");
 		$this->mods=array();
 		$modsdir=$configs['path']['includes']."mods/";
-		$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
+		if(!$return_result) {
+			$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
+		}
+		else {
+			return json_decode(file_get_contents($modsdir."mods.json"), true);
+		}
 	}
 
 	/**
