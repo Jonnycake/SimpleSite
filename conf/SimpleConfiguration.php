@@ -1,7 +1,7 @@
 <?php
 class SimpleConfiguration implements ArrayAccess
 {
-        protected static $instance = null;
+protected static $instance = null;
 
 	protected $configs = array();
 	protected $dynamicConfigs = array();
@@ -14,19 +14,31 @@ class SimpleConfiguration implements ArrayAccess
 		// Load up all of the configs
 		foreach($config_files as $file) {
 			if(substr($file, -5, 5) == ".json") {
+				$subconf = substr($file, 0, -5);
 				$config_info = json_decode(file_get_contents($parseDirPath."/".$file), true);
-				$this->offsetSet(substr($file, 0, -5), $config_info);
+				if($subconf == "base") {
+					foreach($config_info as $property => $value) {
+						$this[$property] = $value;
+					}
+				}
+				else {
+					$this[substr($file, 0, -5)] = $config_info;
+				}
 			}
 		}
 
 		// Determine which configs have dynamic values
 		foreach($this->configs as $subconfig => $properties) {
-			foreach($properties as $property => $value) {
-				if(is_array($value)) {
-					$this->dynamicConfigs[] = "this.${subconfig}.${property}";
+			if(is_array($properties)) {
+				foreach($properties as $property => $value) {
+					if(is_array($value)) {
+						$this->dynamicConfigs[] = "this.${subconfig}.${property}";
+					}
 				}
 			}
 		}
+
+		$this->configs["base"] = &$this->configs;
 	}
 
 	protected function parseDynamicConfigs($config = null, $resolve = false)
@@ -109,6 +121,16 @@ class SimpleConfiguration implements ArrayAccess
 		}
 	}
 
+	public static function reload($config_directory = null)
+	{
+		$configs = self::instance();
+		if(is_null($config_directory)) {
+			$config_directory = $configs->config_directory;
+		}
+
+		return self::instance($config_directory, true);
+	}
+
 	public static function getVariableByAlias($alias)
 	{
 		$expanded = explode(".", $alias);
@@ -172,15 +194,15 @@ class SimpleConfiguration implements ArrayAccess
 	}
 
 	// Singleton
-        public static function instance($config_directory = __DIR__)
-        {
-                if(is_null(self::$instance)) {
-                        self::$instance = new SimpleConfiguration($config_directory);
+	public static function instance($config_directory = __DIR__, $force_reload = false)
+	{
+		if(is_null(self::$instance) || $force_reload) {
+			self::$instance = new SimpleConfiguration($config_directory);
 			self::$instance->parseDynamicConfigs();
-                }
-
-                return self::$instance;
-        }
+			self::$instance->config_directory = $config_directory;
+		}
+		return self::$instance;
+	}
 
 
 	// Interface: ArrayAccess
