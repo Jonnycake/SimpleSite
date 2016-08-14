@@ -63,23 +63,27 @@ protected static $instance = null;
 			if(is_array($config)) {
 				if(isset($config["check"])) {
 					$matches = array();
+					if(isset($config["check"][1])) {
+						if(preg_match("/{(.*)}/si", $config["check"][1], $matches)) {
+							$val1 = self::getVariableByAlias($matches[1]);
+						}
+						else {
+							$val1 = $config["check"][1];
+						}
+					}
+
+					if(isset($config["check"][2])) {
+						if(preg_match("/{(.*)}/si", $config["check"][2], $matches)) {
+							$val2 = self::getVariableByAlias($matches[2]);
+						}
+						else {
+							$val2 = $config["check"][2];
+						}
+					}
+
 					switch($config["check"][0])
 					{
 						case "=":
-							if(preg_match("/{(.*)}/si", $config["check"][1], $matches)) {
-								$val1 = self::getVariableByAlias($matches[1]);
-							}
-							else {
-								$val1 = $config["check"][1];
-							}
-
-							if(preg_match("/{(.*)}/si", $config["check"][2], $matches)) {
-								$val2 = self::getVariableByAlias($matches[2]);
-							}
-							else {
-								$val2 = $config["check"][2];
-							}
-
 							if($val1 == $val2) {
 								return $this->parseDynamicConfigs($config["true"]);
 							}
@@ -88,14 +92,44 @@ protected static $instance = null;
 							}
 							break;
 						case "<>":
+							if($val1 != $val2) {
+								return $this->parseDynamicConfigs($config["true"]);
+							}
+							else {
+								return $this->parseDynamicConfigs($config["false"]);
+							}
 							break;
 						case "<":
+							if($val1 < $val2) {
+								return $this->parseDynamicConfigs($config["true"]);
+							}
+							else {
+								return $this->parseDynamicConfigs($config["false"]);
+							}
 							break;
 						case ">":
+							if($val1 > $val2) {
+								return $this->parseDynamicConfigs($config["true"]);
+							}
+							else {
+								return $this->parseDynamicConfigs($config["false"]);
+							}
 							break;
 						case "<=":
+							if($val1 <= $val2) {
+								return $this->parseDynamicConfigs($config["true"]);
+							}
+							else {
+								return $this->parseDynamicConfigs($config["false"]);
+							}
 							break;
 						case ">=":
+							if($val1 >= $val2) {
+								return $this->parseDynamicConfigs($config["true"]);
+							}
+							else {
+								return $this->parseDynamicConfigs($config["false"]);
+							}
 							break;
 					}
 				}
