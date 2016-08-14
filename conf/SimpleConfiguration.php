@@ -117,72 +117,21 @@ class SimpleConfiguration implements ArrayAccess
 					$matches = array();
 					if(isset($config["check"][1])) {
 						if(preg_match("/{(.*)}/si", $config["check"][1], $matches)) {
-							$val1 = self::getVariableByAlias($matches[1]);
-						}
-						else {
-							$val1 = $config["check"][1];
+							$config["check"][1] = self::getVariableByAlias($matches[1]);
 						}
 					}
 
 					if(isset($config["check"][2])) {
 						if(preg_match("/{(.*)}/si", $config["check"][2], $matches)) {
-							$val2 = self::getVariableByAlias($matches[2]);
-						}
-						else {
-							$val2 = $config["check"][2];
+							$config["check"][2] = self::getVariableByAlias($matches[2]);
 						}
 					}
 
-					switch($config["check"][0])
-					{
-						case "=":
-							if($val1 == $val2) {
-								return $this->parseDynamicConfigs($config["true"]);
-							}
-							else {
-								return $this->parseDynamicConfigs($config["false"]);
-							}
-							break;
-						case "<>":
-							if($val1 != $val2) {
-								return $this->parseDynamicConfigs($config["true"]);
-							}
-							else {
-								return $this->parseDynamicConfigs($config["false"]);
-							}
-							break;
-						case "<":
-							if($val1 < $val2) {
-								return $this->parseDynamicConfigs($config["true"]);
-							}
-							else {
-								return $this->parseDynamicConfigs($config["false"]);
-							}
-							break;
-						case ">":
-							if($val1 > $val2) {
-								return $this->parseDynamicConfigs($config["true"]);
-							}
-							else {
-								return $this->parseDynamicConfigs($config["false"]);
-							}
-							break;
-						case "<=":
-							if($val1 <= $val2) {
-								return $this->parseDynamicConfigs($config["true"]);
-							}
-							else {
-								return $this->parseDynamicConfigs($config["false"]);
-							}
-							break;
-						case ">=":
-							if($val1 >= $val2) {
-								return $this->parseDynamicConfigs($config["true"]);
-							}
-							else {
-								return $this->parseDynamicConfigs($config["false"]);
-							}
-							break;
+					if($this->parseCheck($config["check"])) {
+						return $this->parseDynamicConfigs($config["true"]);
+					}
+					else {
+						return $this->parseDynamicConfigs($config["false"]);
 					}
 				}
 				else {
@@ -210,6 +159,72 @@ class SimpleConfiguration implements ArrayAccess
 			else {
 				return self::getVariableByAlias($config);
 			}
+		}
+	}
+
+	/**
+	 * Parse conditional configuration checks
+	 *
+	 * @param array $check The check to be performed
+	 * @return string The value to set as the configuration
+	 */
+	protected function parseCheck($check)
+	{
+		switch($check[0])
+		{
+			case "=":
+				echo "This is a check for ${check[0]} '${check[1]}' '${check[2]}'\n";
+				if($check[1] == $check[2]) {
+					return true;
+				}
+				else {
+					return false;
+				}
+				break;
+			case "<>":
+				if($check[1] != $check[2]) {
+					return true;
+				}
+				else {
+					return false;
+				}
+				break;
+			case "<":
+				if($check[1] < $check[2]) {
+					return true;
+				}
+				else {
+					return false;
+				}
+				break;
+			case ">":
+				if($check[1] > $check[2]) {
+					return true;
+				}
+				else {
+					return false;
+				}
+				break;
+			case "<=":
+				if($check[1] <= $check[2]) {
+					return true;
+				}
+				else {
+					return false;
+				}
+				break;
+			case ">=":
+				if($check[1] >= $check[2]) {
+					return true;
+				}
+				else {
+					return false;
+				}
+				break;
+
+			// If we don't match any comparison operators, consider it true
+			default:
+				return true;
 		}
 	}
 
