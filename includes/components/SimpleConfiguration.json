@@ -1,7 +1,0 @@
-{
-	"include_files":{
-		"classes":{
-			"SimpleConfiguration":"SimpleConfiguration.php",
-		}
-	}
-}

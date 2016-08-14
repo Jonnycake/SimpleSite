@@ -39,6 +39,7 @@ define('SIMPLESITE',1);
  */
 include("conf/SimpleConfiguration.php");                                                  // SimpleSite Configuration File
 $configs = SimpleConfiguration::instance();
+$loadDisabled = $configs["loadDisabled"];
 
 /**
  * SimpleDebug class for debugging.

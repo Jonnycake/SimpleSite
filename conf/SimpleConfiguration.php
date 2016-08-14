@@ -195,7 +195,13 @@ protected static $instance = null;
 		}
 
 		for($i = 1; $i < count($expanded); $i++) {
-			$val = $val[$expanded[$i]];
+			if(isset($val[$expanded[$i]])) {
+				$val = $val[$expanded[$i]];
+			}
+			else {
+				$val = null;
+				break;
+			}
 		}
 		return $val;
 	}
