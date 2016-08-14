@@ -1,11 +1,56 @@
 <?php
+/*
+ *    SimpleConfiguration Class v1.0: JSON based configuration file parser
+ *    Copyright (C) 2016 Jon Stockton
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * SimpleConfiguration Class - Used to maintain a configuration objeect
+ *
+ * @package SimpleConfiguration
+ */
 class SimpleConfiguration implements ArrayAccess
 {
-protected static $instance = null;
+	/**
+	 * Instance of this class
+	 *
+	 * @var SimpleConfiguration
+	 */
+	protected static $instance = null;
 
+	/**
+	 * Internal configuration array
+	 *
+	 * @var array
+	 */
 	protected $configs = array();
+
+	/**
+	 * List of dynamic configuration aliases
+	 *
+	 * @var array
+	 */
 	protected $dynamicConfigs = array();
 
+	/**
+	 * Constructor
+	 *
+	 * @param string $config_directory The full path to the directory containing parse and noparse
+	 * @return void
+	 */
 	protected function __construct($config_directory)
 	{
 		$parseDirPath = $config_directory."/parse";
@@ -41,6 +86,13 @@ protected static $instance = null;
 		$this->configs["base"] = &$this->configs;
 	}
 
+	/**
+	 * Parse dynamic configurations to consolidate them into a string
+	 *
+	 * @param mixed $config The config that's currently being parsed
+	 * @param bool $resolve Whether or not to resolve the portion as an alias or leave it as is
+	 * @return mixed Void if $config isn't passed and the resulting value if it is
+	 */
 	protected function parseDynamicConfigs($config = null, $resolve = false)
 	{
 		if(is_null($config)) {
@@ -161,6 +213,12 @@ protected static $instance = null;
 		}
 	}
 
+	/**
+	 * Reload the configurations
+	 *
+	 * @param mixed $config_directory The directory containing parse and noparse (defaults to the current config_directory)
+	 * @return SimpleConfiguration The instance of this class
+	 */
 	public static function reload($config_directory = null)
 	{
 		$configs = self::instance();
@@ -171,6 +229,12 @@ protected static $instance = null;
 		return self::instance($config_directory, true);
 	}
 
+	/**
+	 * Retrieve the value of a configuration based on it's alias
+	 *
+	 * @param string $alias The configuration variables alias
+	 * @return mixed The value of the configuration
+	 */
 	public static function getVariableByAlias($alias)
 	{
 		$expanded = explode(".", $alias);
@@ -208,6 +272,13 @@ protected static $instance = null;
 		return $val;
 	}
 
+	/**
+	 * Set a configuration variable based on it's  alias
+	 *
+	 * @param string $alias The variables alias
+	 * @param mixed $val The value to set it to
+	 * @return bool Whether ot not he operation succeeded
+	 */
 	public static function setVariableByAlias($alias, $val)
 	{
 		$expanded = explode(".", $alias);
@@ -239,7 +310,13 @@ protected static $instance = null;
 		return true;
 	}
 
-	// Singleton
+	/**
+	 * Get an instance of this class (in a Singleton fashion)
+	 *
+	 * @param string $config_directory The directory that contains parse and noparse
+	 * @param bool $force_reload Whether or not to force a reload of the instance
+	 * @return SimpleConfiguration The instance that was created during this run or a previous one
+	 */
 	public static function instance($config_directory = __DIR__, $force_reload = false)
 	{
 		if(is_null(self::$instance) || $force_reload) {
@@ -250,24 +327,51 @@ protected static $instance = null;
 		return self::$instance;
 	}
 
-
-	// Interface: ArrayAccess
+	/**
+	 * Inherited from ArrayAccess
+	 *   Checks if an index exists in the array object
+	 *
+	 * @param mixed $offset The index to check for
+	 * @return bool True if it exists, false if not.
+	 */
 	public function offsetExists($offset)
 	{
 		return isset($this->configs[$offset]);
 	}
 
+	/**
+	 * Inherited from ArrayAccess
+	 *   Gets the value at the specified index
+	 *
+	 * @param mixed $offset The index to retrieve the value from
+	 * @return mixed The value that is at the index
+	 */
 	public function offsetGet($offset)
 	{
 		return $this->configs[$offset];
 	}
 
+	/**
+	 * Inherited from ArrayAccess
+	 *   Sets the value at the speciifed index
+	 *
+	 * @param mixed $offset The index to set the value of
+	 * @param mixed $value The value to set
+	 * @return void
+	 */
 	public function offsetSet($offset, $value)
 	{
 		$this->configs[$offset] = $value;
 		return;
 	}
 
+	/**
+	 * Inherited from ArrayAccess
+	 *   Unsets the value at the speciifed index
+	 *
+	 * @param mixed $offset The index to unset
+	 * @return void
+	 */
 	public function offsetUnset($offset)
 	{
 		unset($this->configs[$offset]);
