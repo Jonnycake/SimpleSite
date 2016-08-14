@@ -5,6 +5,10 @@
         ["this.path.template_subdir"],
         "/themes"
     ],
+    "tmpdir": [
+        ["server.DOCUMENT_ROOT","this.path.root"],
+        "tmp/"
+    ],
     "templates": [
        {
            "check": ["=","{session.selected_theme}",""],

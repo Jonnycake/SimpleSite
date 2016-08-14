@@ -106,7 +106,11 @@ protected static $instance = null;
 						}
 						else {
 							if($resolve) {
-								$val .= self::getVariableByAlias($portion);
+								$portionVal = self::getVariableByAlias($portion);
+								if(is_array($portionVal)) {
+									$portionVal = $this->parseDynamicConfigs($portionVal);
+								}
+								$val .= $portionVal;
 							} else {
 								$val .= $portion;
 							}
@@ -116,7 +120,7 @@ protected static $instance = null;
 				}
 			}
 			else {
-				return self::getVariableByAlias($config);
+				return $this->parseDynamicConfigs(self::getVariableByAlias($config));
 			}
 		}
 	}
