@@ -140,7 +140,7 @@ class adminCP extends SimpleModule
 			return FALSE;
 
 		// Check for required database tables
-		if(!($this->checkReqTbls($reqTbls,$configs)))
+		if($this->db->connected() && !($this->checkReqTbls($reqTbls,$configs)))
 			return FALSE;
 
 		return TRUE;
