@@ -76,12 +76,13 @@ class SimpleDB
 
 		if(!$this->connected())
 		{
-			$dsn=$this->configs['type'].':host='.$this->configs['host'].';dbname='.$this->configs['database'];// Construct connection string from $this->configs
+			$dsn=$this->configs['type'].':host='.$this->configs['host'];// Construct connection string from $this->configs
 
 			// Attempt to create a PDO database connection
 			try
 			{
 				$this->connection=new PDO($dsn,$this->configs['username'],$this->configs['password'], array(PDO::ATTR_PERSISTENT => true));
+				$this->connection->query("USE `"  . $this->configs['database'] . "`;");
 			}
 			catch(Exception $e)
 			{
