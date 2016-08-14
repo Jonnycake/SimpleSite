@@ -141,6 +141,8 @@ protected static $instance = null;
 						else {
 							if($resolve) {
 								$portionVal = self::getVariableByAlias($portion);
+
+								// Avoids a race condition where the configuration this one is based on is not parsed yet
 								if(is_array($portionVal)) {
 									$portionVal = $this->parseDynamicConfigs($portionVal);
 								}
@@ -154,7 +156,7 @@ protected static $instance = null;
 				}
 			}
 			else {
-				return $this->parseDynamicConfigs(self::getVariableByAlias($config));
+				return self::getVariableByAlias($config);
 			}
 		}
 	}
