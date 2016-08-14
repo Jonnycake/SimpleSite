@@ -199,9 +199,10 @@ v1.0.0 (Released ??/??/??):
 ====================
     - Issue #118 (bugfix): Module editArray Not Being Used
     - Issue #50 (enhancement): SimpleRole
-    - Issue #145: Creational Pattern Wrapper Classes (Breakout of #41)
-    - Issue #130: Autoload Components
-    - Issue #156: Helper Class: SimpleConfigurations
+    - Issue #145 (feature): Creational Pattern Wrapper Classes (Breakout of #41)
+    - Issue #130 (enhancement): Autoload Components
+    - Issue #156 (enhancement): Helper Class: SimpleConfigurations
     - Issue #152 (bugfix): SimpleDB Connection Issues
     - Issue #150 (bugfix): Ensure All References to includes Directory Are Replaced by Config
     - Issue #153 (bugfix): adminCP: Modules Are Listed as Both Enabled and Disabled
+    - Issue #35 (enhancement): Make SimpleUtils Manage Two Arrays of Multitons
