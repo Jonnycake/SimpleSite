@@ -173,7 +173,6 @@ class SimpleConfiguration implements ArrayAccess
 		switch($check[0])
 		{
 			case "=":
-				echo "This is a check for ${check[0]} '${check[1]}' '${check[2]}'\n";
 				if($check[1] == $check[2]) {
 					return true;
 				}
