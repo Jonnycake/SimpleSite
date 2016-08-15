@@ -46,7 +46,7 @@ $loadDisabled = $configs["loadDisabled"];
  *
  * @include includes/classes/simpledebug.class.php
  */
-include($configs["path"]["includes"] . "classes/SimpleDebug.php");
+include($configs["path"]["includes"] . "classes/Core/SimpleDebug.php");
 set_exception_handler("SimpleDebug::exceptionHandler"); // Allow logging of uncaught exceptions
 SimpleDebug::setSettings($configs['debugging'], true); // Put these settings and propogate to any existing instances
 
@@ -56,7 +56,7 @@ SimpleDebug::setSettings($configs['debugging'], true); // Put these settings and
  *
  * @include includes/classes/simpleutils.class.php
  */
-include($configs["path"]["includes"] . "classes/SimpleUtils.php");                          // Generic utility functions
+include($configs["path"]["includes"] . "classes/Core/SimpleUtils.php");                          // Generic utility functions
 
 /**
  * simpleDisplayI interface which should be implemented by any class
@@ -64,35 +64,35 @@ include($configs["path"]["includes"] . "classes/SimpleUtils.php");              
  *
  * @include includes/interfaces/simpledisplay.interface.php
  */
-include($configs["path"]["includes"] . "interfaces/simpleDisplayI.php");                 // Interface for SimpleDisplay to allow a compatible replacement
+include($configs["path"]["includes"] . "interfaces/Core/simpleDisplayI.php");                 // Interface for SimpleDisplay to allow a compatible replacement
 
 /**
  * SimpleDisplay class which is the default parser for SimpleSite.
  *
  * @include includes/classes/simpledisplay.class.php
  */
-include($configs["path"]["includes"] . "classes/SimpleDisplay.php");                        // Display functions
+include($configs["path"]["includes"] . "classes/Core/SimpleDisplay.php");                        // Display functions
 
 /**
  * simpleModuleI interface which should be implemented by all modules.
  *
  * @include includes/interfaces/simplemodule.interface.php
  */
-include($configs["path"]["includes"] . "interfaces/simpleModuleI.php");                  // Interface for modules (simpleModuleI)
+include($configs["path"]["includes"] . "interfaces/Core/simpleModuleI.php");                  // Interface for modules (simpleModuleI)
 
 /**
  * SimpleModule abstract class which should be extended by all modules.
  *
  * @include includes/abstracts/simplemodule.abstract.php
  */
-include($configs["path"]["includes"] . "abstracts/SimpleModule.php");                    // Abstract class for modules (default properties)
+include($configs["path"]["includes"] . "abstracts/Core/SimpleModule.php");                    // Abstract class for modules (default properties)
 
 /**
  * SimpleSite abstract class which should be extended by all controllers.
  *
  * @include includes/sites/simplesite.abstract.php
  */
-include($configs["path"]["includes"] . "abstracts/SimpleSite.php");                      // Main Site Abstract Class - Magic Happens Here 
+include($configs["path"]["includes"] . "abstracts/Core/SimpleSite.php");                      // Main Site Abstract Class - Magic Happens Here 
 
 /**
  * Controller class, set dynamically in the configurations.
