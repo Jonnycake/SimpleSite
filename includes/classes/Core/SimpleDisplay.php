@@ -425,7 +425,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			{
 				try
 				{
-					$obj=new $mod($this->configs,$this->db);
+					$obj=SimpleUtils::modInstance($mod, $this->configs, $this->db);
 				}
 				catch(Exception $e)
 				{
