@@ -53,5 +53,23 @@ interface simpleRoleI
 	 * @return bool Whether or not the user can do anything regardless of privilege list
 	 */
 	public function isAdmin();
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public function save($new=false);
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public function delete();
 }
 ?>

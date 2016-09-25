@@ -408,10 +408,12 @@ class SimpleUtils
 	 */
 	public function checkReqTbls($reqTbls,$configs=array())
 	{
+		$db = SimpleDB::getConnection("Main");
 		$dbconf=$configs['database'];
 		foreach($reqTbls as $table)
 		{
-			if(!count($this->db->sdbGetColumns($dbconf['tbl_prefix'].$table))) // We should make a better way to do this in SimpleDB
+			// Yeah, we definitely need to finish up SimpleDB
+			if(!count($db->sdbGetColumns($dbconf['tbl_prefix'].$table))) // We should make a better way to do this in SimpleDB
 			{
 				return false;
 			}
@@ -431,6 +433,7 @@ class SimpleUtils
 		// We need to add a table creator to SimpleDB....
 		SimpleDebug::logInfo("Installing required tables...");
 		$dbconf=$configs["database"];
+		$db = SimpleDB::getConnection("Main");
 		foreach($defaultTbls as $name => $columns)
 		{
 			$x=0;
@@ -442,7 +445,7 @@ class SimpleUtils
 			}
 			$query.=");";
 			SimpleDebug::logInfo("Query: $query");
-			$this->db->rawQry($query);
+			$db->rawQry($query);
 		}
 		SimpleDebug::logInfo("Installed.");
 	}

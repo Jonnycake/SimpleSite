@@ -12,6 +12,14 @@
 abstract class SimpleRole implements simpleRoleI
 {
 	/**
+	 *
+	 *
+	 *
+	 *
+	 */
+	protected $id=null;
+
+	/**
 	 * Whether or not the role is an administrative role (can do anything)
 	 *
 	 * @var bool $is_admin
@@ -45,6 +53,7 @@ abstract class SimpleRole implements simpleRoleI
 		$this->is_admin=$admin;
 		$this->name=$name;
 		$this->privileges=$this->getPrivileges();
+		$this->id=$this->getID();
 	}
 
 	/**
@@ -91,6 +100,30 @@ abstract class SimpleRole implements simpleRoleI
 	}
 
 	/**
+	 *
+	 *
+	 *
+	 *
+	 */
+	abstract public function getID();
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 */
+	abstract public function save($new=false);
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 */
+	abstract public function delete();
+
+	/**
 	 * Should return the privileges array as well as set it in $this->privileges
 	 *
 	 * @return array Array of privileges
@@ -103,5 +136,12 @@ abstract class SimpleRole implements simpleRoleI
 	 * @return bool Whether or not the role system is installed
 	 */
 	abstract public function isInstalled();
+
+	/**
+	 * Should install the role system (and return true if success or false if not)
+	 *
+	 * @return bool Whether or not the role system could be installed
+	 */
+	abstract public function install();
 }
 ?>
