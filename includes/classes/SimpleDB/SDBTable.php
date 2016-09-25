@@ -6,7 +6,7 @@ class SDBTable extends SimpleDB
 	private $foreignKeys=array();
 	private $rows=array();
 
-	public function __construct($conn,$name,$configs,$primaryKey="")
+	public function __construct($conn = null,$name = null,$configs = null,$primaryKey="")
 	{
 		$this->connection=$conn;
 		parent::__construct($configs);
