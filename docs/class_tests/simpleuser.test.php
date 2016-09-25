@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 // SimpleUser includes
 define('SIMPLESITE',1);

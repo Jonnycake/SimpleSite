@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 define("SIMPLESITE", 1);
 
