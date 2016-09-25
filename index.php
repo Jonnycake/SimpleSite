@@ -53,11 +53,6 @@
 	session_start();
 
 	/**
-	 * Define SIMPLESITE constants as some includes can't be opened directly.
-	 */
-	define('SIMPLESITE',1);
-
-	/**
 	 * Include the include file
 	 *
 	 * @include include.php
@@ -76,7 +71,15 @@
 
 	register_shutdown_function("SimpleDebug::shutdownFunction");
 	SimpleDebug::setSetting("loud", $_GET['debug']);
-	SimpleDebug::logInfo("Start");
+	$keys=array_keys($_SERVER);
+	$headers=preg_grep("/^HTTP_(.*)/s", $keys);
+	$headervals=array("Method"=>$_SERVER['REQUEST_METHOD'], "URI"=>$_SERVER['REQUEST_URI']);
+	foreach($headers as $header)
+	{
+		$headervals[substr($header, 5)]=$_SERVER[$header];
+	}
+
+	SimpleDebug::logInfo("Start - ".json_encode($headervals));
 
 	/**
 	 * Start the site with the default controller.

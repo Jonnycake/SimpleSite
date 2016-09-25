@@ -553,7 +553,7 @@ class SimpleUtils
 	 */
 	public function simpleFilter($input,$db=true)
 	{
-		SimpleDebug::logInfo("simplefilter");
+		SimpleDebug::logInfo("simplefilter - $input");
 		return str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars((($db)?$this->db->quote($input):$input))));
 	}
 
