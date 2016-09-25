@@ -200,6 +200,7 @@ v1.0.0 (Released ??/??/??):
     - Issue #118 (bugfix): Module editArray Not Being Used
     - Issue #49 (enhancement): SimpleUser
     - Issue #50 (enhancement): SimpleRole
+    - Issue #45: adminCP: DBAdmin Returns Blank Page Loading information_schema
     - Issue #145 (feature): Creational Pattern Wrapper Classes (Breakout of #41)
     - Issue #130 (enhancement): Autoload Components
     - Issue #156 (enhancement): Helper Class: SimpleConfigurations
