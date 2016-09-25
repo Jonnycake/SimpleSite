@@ -1,0 +1,19 @@
+/* Basic HTML Tags */
+input, textarea
+{
+	width:50%;
+}
+table
+{
+	width:100%;
+}
+td
+{
+	max-width:50px;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+}
+*
+{
+	list-style-type:none;
+}
