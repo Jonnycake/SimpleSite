@@ -102,4 +102,3 @@ class SSRole extends SimpleRole
 		return TRUE;
 	}
 }
-?>
