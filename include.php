@@ -33,25 +33,22 @@
 define('SIMPLESITE',1);
 
 /**
- * SimpleDebug class for debugging.
- *
- * @include includes/classes/simpledebug.class.php
- */
-include("includes/classes/simpledebug.class.php");
-
-/**
  * PHP file setting up all of the configurations.
  *
  * @include config.inc.php
  */
-include("config.inc.php");                                                  // SimpleSite Configuration File
+include("conf/SimpleConfiguration.php");                                                  // SimpleSite Configuration File
+$configs = SimpleConfiguration::instance();
+$loadDisabled = $configs["loadDisabled"];
 
 /**
- * SimpleDB class for database work.
+ * SimpleDebug class for debugging.
  *
- * @include includes/classes/simpledb.class.php
+ * @include includes/classes/simpledebug.class.php
  */
-include("includes/classes/simpledb.class.php");                             // SimpleDB DBO class
+include($configs["path"]["includes"] . "classes/Core/SimpleDebug.php");
+set_exception_handler("SimpleDebug::exceptionHandler"); // Allow logging of uncaught exceptions
+SimpleDebug::setSettings($configs['debugging'], true); // Put these settings and propogate to any existing instances
 
 /**
  * SimpleUtils class which is basically the parent/grandparent of 
@@ -59,7 +56,7 @@ include("includes/classes/simpledb.class.php");                             // S
  *
  * @include includes/classes/simpleutils.class.php
  */
-include("includes/classes/simpleutils.class.php");                          // Generic utility functions
+include($configs["path"]["includes"] . "classes/Core/SimpleUtils.php");                          // Generic utility functions
 
 /**
  * simpleDisplayI interface which should be implemented by any class
@@ -67,40 +64,40 @@ include("includes/classes/simpleutils.class.php");                          // G
  *
  * @include includes/interfaces/simpledisplay.interface.php
  */
-include("includes/interfaces/simpledisplay.interface.php");                 // Interface for SimpleDisplay to allow a compatible replacement
+include($configs["path"]["includes"] . "interfaces/Core/simpleDisplayI.php");                 // Interface for SimpleDisplay to allow a compatible replacement
 
 /**
  * SimpleDisplay class which is the default parser for SimpleSite.
  *
  * @include includes/classes/simpledisplay.class.php
  */
-include("includes/classes/simpledisplay.class.php");                        // Display functions
+include($configs["path"]["includes"] . "classes/Core/SimpleDisplay.php");                        // Display functions
 
 /**
  * simpleModuleI interface which should be implemented by all modules.
  *
  * @include includes/interfaces/simplemodule.interface.php
  */
-include("includes/interfaces/simplemodule.interface.php");                  // Interface for modules (simpleModuleI)
+include($configs["path"]["includes"] . "interfaces/Core/simpleModuleI.php");                  // Interface for modules (simpleModuleI)
 
 /**
  * SimpleModule abstract class which should be extended by all modules.
  *
  * @include includes/abstracts/simplemodule.abstract.php
  */
-include("includes/abstracts/simplemodule.abstract.php");                    // Abstract class for modules (default properties)
+include($configs["path"]["includes"] . "abstracts/Core/SimpleModule.php");                    // Abstract class for modules (default properties)
 
 /**
  * SimpleSite abstract class which should be extended by all controllers.
  *
  * @include includes/sites/simplesite.abstract.php
  */
-include("includes/abstracts/simplesite.abstract.php");                      // Main Site Abstract Class - Magic Happens Here 
+include($configs["path"]["includes"] . "abstracts/Core/SimpleSite.php");                      // Main Site Abstract Class - Magic Happens Here 
 
 /**
  * Controller class, set dynamically in the configurations.
  *
  * @include includes/sites/default_controller.class.php
  */
-include("includes/sites/${configs['default_controller']}.class.php");       // Class Implementing SimpleSite
+include($configs["path"]["includes"] . "sites/${configs['default_controller']}.php");       // Class Implementing SimpleSite
 ?>

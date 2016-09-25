@@ -1,0 +1,29 @@
+Repository is hosted on GitHub at https://github.com/Jonnycake/SimpleSite
+
+Branches:
+	* Issue branches are created - one branch per issue
+	* Branch for next release is created once an issue is complete (development branch for example: 1.0.0-development)
+	* Branch for future release (initiative branch for example: 2.0.0-Initiative).
+	* Issue branches are pulled into 1.0.0-development once the issues are complete. After it's integrated under a separate issue, it gets pulled into 2.0.0-Initiative from 1.0.0-development
+	* Any work for the next major release will just get pulled directly into the 2.0.0-Initiative branch (following the same rules as pulling into 1.0.0-development).
+		+ After a release is complete it is pulled into master and tagged. 
+		+ A hotfix branch will be created once the tag is released.
+
+Version Scheme:
+
+All prior versions (0.1, 1.0, 1.1, 1.2, 1.5, and 2.0) have an invisible 0 in front of them so are (0.)0.1, (0.)1.0, etc.
+
+Current versions have 3 decimals:
+	* Production Ready Version.Development Version.Hotfix Version
+		+ Production ready version will only be changed when there non-backwards compatible changes made or there are sufficient changes to warrant a new major version.
+		+ Development version will be updated when there are new features added to the SimpleSite core
+		+ Hotfix version should only be used for hotfixes.
+		+ Hotfixes, once tested, should be pushed to master and retagged
+		+ They should then be ported forward up to the current development release and any intermediary releases.
+
+	* Modules and other components should only use 2 version numbers: Major Version.Minor Version
+		+ Reason being, that there really should only be backwards-compatible changes from 1.0.0 forward at least within components as that's what I'm trying to prevent with the framework.
+			- This might change in the future, in which case it will follow the same pattern as the core version.
+
+	* Files should be versioned as well
+		+ They should get the version of the SimpleSite release they were last updated in.
