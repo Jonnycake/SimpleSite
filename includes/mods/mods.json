@@ -1,0 +1,64 @@
+{
+	"adminCP":{
+		"assets":[
+		],
+		"enabled":true,
+		"required_components":[
+			"SimpleDB"
+		],
+		"templates":[
+		],
+		"info":{
+			"author":"Jon Stockton",
+                        "name":"SimpleAdmin",
+			"version":"2.0",
+			"date":"September 28, 2014"                   
+		}
+	},
+	"Guestbook":{
+		"assets":[
+		],
+		"enabled":true,
+		"required_components":[
+			"SimpleDB"
+		],
+		"templates":[
+		],
+		"info":{
+			"author":"Jon Stockton",
+                        "name":"Guestbook",
+			"version":"0.2",
+			"date":"September 28, 2014"                   
+		}
+	},
+	"SimpleSiteInstaller":{
+		"assets":[
+		],
+		"enabled":true,
+		"required_components":[
+		],
+		"templates":[
+		],
+		"info":{
+			"author":"Jon Stockton",
+                        "name":"SimpleSite Installer",
+			"version":"0.1",
+			"date":"September 29, 2014"                   
+		}
+	},
+	"testModule":{
+		"assets":[
+		],
+		"enabled":false,
+		"required_components":[
+		],
+		"templates":[
+		],
+		"info":{
+			"author":"Jon Stockton",
+                        "name":"Test Module",
+			"version":"1.1",
+			"date":"April 9, 2012"                   
+		}
+	}
+}

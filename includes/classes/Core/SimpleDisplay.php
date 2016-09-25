@@ -297,7 +297,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			if($_SESSION['is_admin']==1)
 				$this->editArray[]=array("template" => $editTemplateName, "start" => $match[1], "length" => strlen($match[0]), "unparsed" => $unparsedMatch[1]);
 			$this->editables++;
-			$replacement=(($_SESSION['is_admin']==1)?"<span id=\"editable_".$this->editables."\"><span id=\"origContent".$this->editables."\">".$matches[1][$elementNum][0]."</span><span id=\"toolbar_".$this->editables."\"><img src=\"{CONFIGS_path_root}images/edit.jpg\" style=\"width:20px;\" onclick=\"edit(".$this->editables.");\" alt=\"Edit\" title=\"Edit\"/></span></span>":$matches[1][$elementNum][0]);
+			$replacement=(($_SESSION['is_admin']==1)?"<span id=\"editable_".$this->editables."\"><span id=\"origContent".$this->editables."\">".$matches[1][$elementNum][0]."</span><span id=\"toolbar_".$this->editables."\"><img src=\"{CONFIGS_path_img_assets}edit.jpg\" style=\"width:20px;\" onclick=\"edit(".$this->editables.");\" alt=\"Edit\" title=\"Edit\"/></span></span>":$matches[1][$elementNum][0]);
 			$content=substr_replace($content,$replacement,$match[1]+$lengthDif,strlen($match[0]));
 			$lengthDif+=strlen($replacement)-strlen($match[0]);
 		}
@@ -344,9 +344,9 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			try
 			{
 				$widget=$match[1];
-				if(is_file($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php"))
+				if(is_file($this->configs['path']['includes']."widgets/$widget.widget.php"))
 				{
-					include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php");
+					include($this->configs['path']['includes']."widgets/$widget.widget.php");
 					$content=str_replace($match[0],((@($widgetTemp=$this->$widget($this->configs))!="")?$widgetTemp:"Widget Failed: $widget"),$content);
 				}
 				$content=str_replace($match[0],"",$content);
@@ -423,7 +423,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			{
 				try
 				{
-					$obj=new $mod($this->configs,$this->db);
+					$obj=SimpleUtils::modInstance($mod, $this->configs, $this->db);
 				}
 				catch(Exception $e)
 				{

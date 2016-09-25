@@ -1,0 +1,27 @@
+{
+    "root": "/",
+    "template_subdir": "templates",
+    "themes": [
+        ["this.path.template_subdir"],
+        "/themes"
+    ],
+    "tmpdir": [
+        ["server.DOCUMENT_ROOT","this.path.root"],
+        "tmp/"
+    ],
+    "templates": [
+       {
+           "check": ["=","{session.selected_theme}",""],
+           "true": [
+               ["this.path.themes"],
+               "/",
+               ["this.base.default_theme"]
+           ],
+           "false": [
+               ["this.path.themes"],
+               "/",
+               ["session.selected_theme"]
+           ]
+       }
+    ]
+}

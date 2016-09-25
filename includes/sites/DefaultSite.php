@@ -92,7 +92,8 @@ class DefaultSite extends SimpleSite
 			die("Your IP has been blocked, please contact the administrator for more information.");
 
 		$this->loadModules($this->configs);
-		if(@(in_array($_GET['mod'],$this->mods)))
+		$enabled_mods = array_filter($this->mods, "SimpleUtils::enabledFilter");
+		if(array_key_exists($_GET['mod'], $enabled_mods))
 			$this->showSite($_GET['mod']);
 		else
 		{
