@@ -1,0 +1,7 @@
+{
+	"include_files":{
+		"classes":{
+			"SimpleDirectory":"SimpleDirectory.php"
+		}
+	}
+}
