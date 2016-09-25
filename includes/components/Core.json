@@ -1,0 +1,17 @@
+{
+	"include_files":{
+		"classes":{
+			"SimpleDebug":"SimpleDebug.php",
+			"SimpleUtils":"SimpleUtils.php",
+			"SimpleDisplay":"SimpleDisplay.php"
+		},
+		"abstracts":{
+			"SimpleModule":"SimpleModule.php",
+			"SimpleSite":"SimpleSite.php"
+		},
+		"interfaces":{
+			"simpleDisplayI":"simpleDisplayI.php",
+			"simpleModuleI":"simpleModuleI.php"
+		}
+	}
+}

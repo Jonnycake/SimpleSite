@@ -19,6 +19,8 @@
 
 class SimpleDB
 {
+	private static $connections = null;
+
 	protected $configs=array();
 	protected $connection=null;
 	protected $debug=0;
@@ -41,7 +43,7 @@ class SimpleDB
 							),
 				);
 
-	public function __construct($configs=array("type" => "mysql", "host" => "127.0.0.1", "username" => "root", "password" => "", "database" => "", "tbl_prefix" => ""),$debug=0)
+	public function __construct($configs=array("type" => "mysql", "host" => "127.0.0.1", "username" => "root", "password" => "", "database" => "", "tbl_prefix" => ""),$debug=0, $connectionName = "Main")
 	{
 		$this->configs=$configs;
 		$this->curConfigs=$this->configs;
@@ -50,7 +52,7 @@ class SimpleDB
 		// Create a connection
 		try
 		{
-			$this->connect();
+			$this->connect($connectionName);
 		}
 		catch(Exception $e)
 		{
@@ -69,19 +71,20 @@ class SimpleDB
 	{
 		return ($this->connection==null)?false:true;
 	}
-	public function connect()
+	public function connect($connectionName = "Main")
 	{
 		if($this->sdbGetErrorLevel()>2)
 			return false;
 
 		if(!$this->connected())
 		{
-			$dsn=$this->configs['type'].':host='.$this->configs['host'].';dbname='.$this->configs['database'];// Construct connection string from $this->configs
+			$dsn=$this->configs['type'].':host='.$this->configs['host'];// Construct connection string from $this->configs
 
 			// Attempt to create a PDO database connection
 			try
 			{
 				$this->connection=new PDO($dsn,$this->configs['username'],$this->configs['password'], array(PDO::ATTR_PERSISTENT => true));
+				$this->connection->query("USE `"  . $this->configs['database'] . "`;");
 			}
 			catch(Exception $e)
 			{
@@ -91,7 +94,16 @@ class SimpleDB
 					throw new Exception("Database Connection Error: ".$e->getMessage());
 				}
 			}
-			//if($this->connection==null)
+			if(self::$connections == null) {
+				self::$connections = array();
+			}
+			self::$connections[$connectionName] = $this;
+		}
+	}
+	public static function getConnection($connectionName)
+	{
+		if(isset(self::$connections[$connectionName])) {
+			return self::$connections[$connectionName];
 		}
 	}
 	public function disconnect()
