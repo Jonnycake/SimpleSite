@@ -1,14 +1,14 @@
 <?php
 // SimpleUser includes
 define('SIMPLESITE',1);
-include("../../includes/classes/simpleutils.class.php");
-include("../../includes/classes/simpledebug.class.php");
+include("../../includes/classes/Core/SimpleUtils.php");
+include("../../includes/classes/Core/SimpleDebug.php");
 include("../../includes/interfaces/simpleuser.interface.php");
-include("../../includes/interfaces/simplerole.interface.php");
+include("../../includes/interfaces/SimpleRole/simpleRoleI.php");
 include("../../includes/abstracts/simpleuser.abstract.php");
-include("../../includes/abstracts/simplerole.abstract.php");
-include("../../includes/classes/simpledb.class.php");
-include("../../includes/classes/ssrole.class.php");
+include("../../includes/abstracts/SimpleRole/SimpleRole.php");
+include("../../includes/classes/SimpleDB/SimpleDB.php");
+include("../../includes/classes/SimpleRole/SSRole.php");
 include("../../includes/classes/ssuser.class.php");
 
 register_shutdown_function("SimpleDebug::shutdownFunction");
