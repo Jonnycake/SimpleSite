@@ -209,10 +209,10 @@ v0.3.0 (Released 9/25/16):
 v1.0.0 (Released ??/??/??):
 ====================
     - Issue #49 (enhancement): SimpleUser
-    - Issue #45: adminCP: DBAdmin Returns Blank Page Loading information_schema
     - Issue #124 (enhancement): 
     - Issue #42 (enhancement):
     - Issue #135 (enhancement): 
     - Issue #112 (enhancement):
     - Issue #99 (enhancement):
-    - Issue #155: Make Bootstrapper File
+    - Issue #155 (enhancement): Make Bootstrapper File
+    - Issue #144 (enhancement): Add DBAbstraction Interface
