@@ -206,6 +206,7 @@ v1.0.0 (Released ??/??/??):
     - Issue #135 (enhancement): 
     - Issue #112 (enhancement):
     - Issue #99 (enhancement):
+    - Issue #155: Make Bootstrapper File
     - Issue #145 (feature): Creational Pattern Wrapper Classes (Breakout of #41)
     - Issue #130 (enhancement): Autoload Components
     - Issue #156 (enhancement): Helper Class: SimpleConfigurations
