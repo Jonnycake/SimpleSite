@@ -52,6 +52,7 @@ class SSRole extends SimpleRole
 	{
 		$this->name=$name;
 		$this->dbconf=$dbconf;
+		$this->db=new SimpleDB($dbconf);
 		parent::__construct($name, $this->is_admin);
 	}
 
@@ -63,8 +64,7 @@ class SSRole extends SimpleRole
 	 */
 	public static function getByID($id, $dbconf)
 	{
-		$db=new SimpleDB($dbconf);
-		$tbl=$db->openTable("roles");
+		$tbl=$this->db->openTable("roles");
 		$tbl->select('name', array('AND'=>array('id'=>array('op'=>'=', 'val'=>$id))));
 		$rows=$tbl->sdbGetRows();
 		if(isset($rows[0])) {
@@ -139,8 +139,14 @@ class SSRole extends SimpleRole
 	 */
 	public function save($new=false)
 	{
-		// Name description
-		// Privileges
+		if($new || !$this->getID()) {
+			$tbl = $this->db->openTable("roles");
+			$tbl->insert(array('name' => (string)$this->name, 'description' => (string)$this->description, 'is_admin' => (bool)$this->is_admin));
+			$this->id = $this->getID(true);
+		}
+		else {
+			// Update
+		}
 	}
 
 	/**
@@ -175,11 +181,14 @@ class SSRole extends SimpleRole
 	public function delete()
 	{
 		// Name description
-		$db = SimpleDB::getConnection("Main");
-		$tbl = $db->openTable("roles");
-		$tbl->delete(array('AND'=>array('id' => $this->getID(true))));
-
 		// Privileges
+		if($this->getID(true)) {
+			$db = SimpleDB::getConnection("Main");
+			$tbl = $db->openTable("roles");
+			$tbl->delete(array('AND'=>array('id' => array("op" => "=", "val" => $this->getID()))));
+			$tbl = $db->openTable("role_privs");
+			$tbl->delete(array('AND'=>array('role_id' => array("op" => "=", "val" => $this->getID()))));
+		}
 	}
 
 	/**

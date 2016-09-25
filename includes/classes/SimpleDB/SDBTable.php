@@ -39,7 +39,7 @@ class SDBTable extends SimpleDB
 	}
 
 	// Query building
-	public function where($conditions=array(), $tblPrefix)
+	public function where($conditions=array(), $tblPrefix = "")
 	{
 		$query="";
 		$params=array();
@@ -62,7 +62,9 @@ class SDBTable extends SimpleDB
 			$x=0;
 			foreach($conditions as $k=>$v)
 			{
-				if($v['op'])
+				// @note This is for the cases where there is no boolean operator specified (default AND)
+				// @todo How well does this really work?  Looks hack'ish
+				if(@$v['op'])
 				{
 					$v=array($k => $v);
 					$k="AND";
@@ -300,7 +302,7 @@ class SDBTable extends SimpleDB
 		$query='DELETE FROM `'.(@$this->configs['tbl_prefix']).$this->sdbGetName().'`';
 
 		// $conditions=array("id" => 5);
-		$where=$this->where($conditions);
+		$where=$this->where($conditions, $this->configs['tbl_prefix']);
 		$query.=$where[0];
 		$params=$where[1];
 		$stmt=$this->connection->prepare($query);

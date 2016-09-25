@@ -1,12 +1,14 @@
 #!/usr/bin/php
 <?php
 define('SIMPLESITE',1);
-include("../../includes/classes/simpledebug.class.php");
-include("../../includes/classes/simpleutils.class.php");
-include("../../includes/interfaces/simplerole.interface.php");
-include("../../includes/abstracts/simplerole.abstract.php");
-include("../../includes/classes/simpledb.class.php");
-include("../../includes/classes/ssrole.class.php");
+include("../../includes/classes/Core/SimpleDebug.php");
+include("../../includes/classes/Core/SimpleUtils.php");
+include("../../includes/interfaces/SimpleRole/simpleRoleI.php");
+include("../../includes/abstracts/SimpleRole/SimpleRole.php");
+include("../../includes/classes/SimpleDB/SimpleDB.php");
+include("../../includes/classes/SimpleDB/SDBTable.php");
+include("../../includes/classes/SimpleDB/SDBRes.php");
+include("../../includes/classes/SimpleRole/SSRole.php");
 
 $configs=array();
 $stdin=fopen("php://stdin","r");
@@ -28,8 +30,8 @@ echo "User Role: ";
 $roleName=trim(fgets($stdin));
 echo "Privilege Name: ";
 $permName=trim(fgets($stdin));
-
 $role=new SSRole($roleName, $configs);
+
 if($role->hasPrivilege($permName))
 {
 	echo "Yeah they can do that.\n";
