@@ -1,0 +1,7 @@
+{
+	"include_files":{
+		"classes":{
+			"SimpleDate":"SimpleDate.php"
+		}
+	}
+}
