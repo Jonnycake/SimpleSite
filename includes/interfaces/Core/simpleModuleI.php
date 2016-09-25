@@ -70,5 +70,12 @@ interface simpleModuleI
 	 * @return string What to replace the {CONTENT} constant with.
 	 */
 	public function getContent();
+
+	/**
+	 * Retrieve data based on arguments passed through API
+	 *
+	 * @return array The data that should be sent back to the client
+	 */
+	public static function api($route, $configs = array());
 }
 ?>
