@@ -195,7 +195,7 @@ v2.0 (Released 9/28/14):
     - Issue #14 (enhancement): adminCP: Debug Session Toggle
     - Issue #15 (enhancement): SimpleSite Installer
 
-v1.0.0 (Released ??/??/??):
+v0.3.0 (Released 9/25/16):
 ====================
     - Issue #118 (bugfix): Module editArray Not Being Used
     - Issue #50 (enhancement): SimpleRole
@@ -205,4 +205,3 @@ v1.0.0 (Released ??/??/??):
     - Issue #152 (bugfix): SimpleDB Connection Issues
     - Issue #150 (bugfix): Ensure All References to includes Directory Are Replaced by Config
     - Issue #153 (bugfix): adminCP: Modules Are Listed as Both Enabled and Disabled
-    - Issue #35 (enhancement): Make SimpleUtils Manage Two Arrays of Multitons
