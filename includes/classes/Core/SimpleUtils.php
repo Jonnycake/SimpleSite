@@ -38,6 +38,13 @@ if(SIMPLESITE!=1)
 class SimpleUtils
 {
 	/**
+	 * Array of module instaces
+	 *
+	 * @var array
+	 */
+	protected static $mod_instances = null;
+
+	/**
 	 * Array of paths to classes/interfaces
 	 *   Key should be the class/interface name and value filename
 	 *
@@ -328,14 +335,20 @@ class SimpleUtils
 	 * Load the list of modules that are enabled/disabled
 	 *
 	 * @param array $configs Associative array of configurations set by config.inc.php
+	 * @param bool $return_result Specifies if the result should be returned or set to mods property
 	 * @return void
 	 */
-	public function loadModules($configs=array())
+	public function loadModules($configs=array(), $return_result = false)
 	{
 		SimpleDebug::logInfo("loadModules($enabled)");
 		$this->mods=array();
-		$modsdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/";
-		$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
+		$modsdir=$configs['path']['includes']."mods/";
+		if(!$return_result) {
+			$this->mods = json_decode(file_get_contents($modsdir."mods.json"), true);
+		}
+		else {
+			return json_decode(file_get_contents($modsdir."mods.json"), true);
+		}
 	}
 
 	/**
@@ -541,9 +554,32 @@ class SimpleUtils
 		return str_replace("{","&#123;",str_replace("}","&#125;",htmlspecialchars((($db)?$this->db->quote($input):$input))));
 	}
 
+	/**
+	 * Check if a module is enabled based on it's array in mods.json
+	 *
+	 * @param array $modConfig The array from mods.json
+	 * @return bool If the module is enabled
+	 */
 	public static function enabledFilter($modConfig)
 	{
 		return $modConfig["enabled"];
+	}
+
+	/**
+	 * Retrieve an instance of a module
+	 *
+	 * @param string $module The name of the module
+	 * @param array $configs The configuration array
+	 * @param object The database object
+	 * @return Object An instance of the module
+	 */
+	public static function modInstance($module, $configs, $db)
+	{
+		if(!is_array(self::$mod_instances)) self::$mod_instances = array();
+		if(is_null(self::$mod_instances[$module])) {
+			self::$mod_instances[$module] = new $module($configs,$db);
+		}
+		return self::$mod_instances[$module];
 	}
 }
 ?>
