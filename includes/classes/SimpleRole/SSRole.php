@@ -133,11 +133,9 @@ class SSRole extends SimpleRole
 	}
 
 	/**
+	 * Creates/updates a role
 	 *
-	 *
-	 *
-	 *
-	 *
+	 * @return void
 	 */
 	public function save($new=false)
 	{
@@ -170,15 +168,17 @@ class SSRole extends SimpleRole
 	}
 
 	/**
+	 * Deletes the currently loaded role
 	 *
-	 *
-	 *
-	 *
-	 *
+	 * @return void
 	 */
 	public function delete()
 	{
 		// Name description
+		$db = SimpleDB::getConnection("Main");
+		$tbl = $db->openTable("roles");
+		$tbl->delete(array('AND'=>array('id' => $this->getID(true))));
+
 		// Privileges
 	}
 
