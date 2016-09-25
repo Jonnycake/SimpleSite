@@ -344,9 +344,9 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			try
 			{
 				$widget=$match[1];
-				if(is_file($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php"))
+				if(is_file($this->configs['path']['includes']."widgets/$widget.widget.php"))
 				{
-					include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/widgets/$widget.widget.php");
+					include($this->configs['path']['includes']."widgets/$widget.widget.php");
 					$content=str_replace($match[0],((@($widgetTemp=$this->$widget($this->configs))!="")?$widgetTemp:"Widget Failed: $widget"),$content);
 				}
 				$content=str_replace($match[0],"",$content);
@@ -423,7 +423,7 @@ class SimpleDisplay extends SimpleUtils implements SimpleDisplayI
 			{
 				try
 				{
-					$obj=new $mod($this->configs,$this->db);
+					$obj=SimpleUtils::modInstance($mod, $this->configs, $this->db);
 				}
 				catch(Exception $e)
 				{

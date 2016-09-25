@@ -52,47 +52,16 @@ abstract class SimpleSite extends SimpleDisplay
 	{
 		global $loadDisabled; // We could probably also use something like this instead of the singleton pattern (global $reloadMods or something) - look into performance comparison
 		SimpleDebug::logInfo("Attempting to autoload $name...");
-		$this->loadModules($this->configs);
-		if((in_array($name,$this->mods)) && !(in_array($name,$this->loaded))) // Disabled modules aren't put into $this->mods
-		{
-			if(file_exists($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php"))
-			{
-				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/enabled/${name}.mod.php");
-				if(!(class_exists($name)))
-				{
-					SimpleDebug::logInfo("Error!");
-				}
-				else
-				{
-					$this->loaded[]=$name;
-					SimpleDebug::logInfo("Good.");
-				}
-			}
-			else
-			{
-				SimpleDebug::logInfo("Error!");
+		$this->loadComponents($this->configs);
+		// Check modules
+		if(array_key_exists($name, $this->mods)) {
+			if($this->mods[$name]['enabled'] || $loadDisabled) {
+				include($this->configs['path']['includes'] . "mods/" . (($this->mods[$name]['enabled'])?"enabled":"disabled")."/${name}.mod.php");
 			}
 		}
-		else if($loadDisabled && !(in_array($name, $this->loaded)))
-		{
-			if(file_exists($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/disabled/${name}.mod.php"))
-			{
-				include($_SERVER['DOCUMENT_ROOT'].$this->configs['path']['root']."includes/mods/disabled/${name}.mod.php");
-				if(!(class_exists($name)))
-				{
-					SimpleDebug::logInfo("Error!");
-				}
-				else
-				{
-					$this->loaded[]=$name;
-					SimpleDebug::logInfo("Good.");
-				}
-			}
-			else
-			{
-				SimpleDebug::logInfo("Could not find disabled module...creating false class.");
-				eval("class $name { public static \$info=array(\"name\" => \"$name (Unknown Module)\", \"author\" => \"Unknown Module\", \"date\" => \"Unknown Module\"); }");
-			}
+		// Check components
+		else if(array_key_exists($name, self::$include_file_list)) {
+			include(self::$include_file_list[$name]);
 		}
 	}
 

@@ -1,0 +1,12 @@
+{
+    "loud": 0,
+    "savelog": true,
+    "logfile": [
+        ["this.path.tmpdir"],
+        "SimpleDebug.log"
+    ],
+    "errorLevel": 0,
+    "format": "Dbg: {TYPE}: #{ID} ({TIME}): {MESSAGE}",
+    "exception_fmt": "{MESSAGE} in {FILE} on line {LINE} - backtrace JSON: {BACKTRACE}",
+    "time_format": "m/d/Y H:i:s"
+}

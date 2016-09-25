@@ -139,9 +139,9 @@ class adminCP extends SimpleModule
 		if(!($this->checkReqFiles($reqFiles,$configs)))
 			return FALSE;
 
-		/*// Check for required database tables
-		if(!($this->checkReqTbls($reqTbls,$configs)))
-			return FALSE;*/
+		// Check for required database tables
+		if($this->db->connected() && !($this->checkReqTbls($reqTbls,$configs)))
+			return FALSE;
 
 		return TRUE;
 	}
@@ -539,7 +539,7 @@ class adminCP extends SimpleModule
 		{
 			$zip->addEmptyDir("includes");
 			$zip->addEmptyDir("templates");
-			$maindir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/";
+			$maindir=$configs['path']['includes']."mods/";
 			$mtdir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['mod_templates'];
 			$this->createBak($mtdir,$configs,$type,(($curdir==NULL)?$mtdir:$curdir),"templates",$zip,TRUE);
 			$zipdir="includes";
@@ -648,14 +648,32 @@ class adminCP extends SimpleModule
 			$this->toggleMod(@($_GET['module']),@($_GET['currentState']),$configs);
 		else if(@($_GET['func'])=="upload")
 			$this->uploadMod($configs);
-		$this->loadModules($configs);
-		$modsAvailable=array();
-		$modsAvailable['enabled']=$this->mods;
-		$this->mods=array();
-		$this->loadModules($configs,false);
-		$modsAvailable['disabled']=$this->mods;
+
+		// Get list of modules
+		$modules = $this->loadModules($configs, true);
+
+		// Separate enabled vs disabled
+		$modsAvailable = array();
+		$modsEnabled = array_filter($modules, "SimpleUtils::enabledFilter");
+		$modsAvailable["enabled"] = array_keys($modsEnabled);
+		$modsAvailable["disabled"] = array_diff(array_keys($modules), $modsAvailable["enabled"]);
+
+
+		// Sort by name
 		natcasesort($modsAvailable["enabled"]);
 		natcasesort($modsAvailable["disabled"]);
+
+		// Flip so now it's an associative array
+		$modsAvailable["enabled"] = array_flip($modsAvailable["enabled"]);
+		$modsAvailable["disabled"] = array_flip($modsAvailable["disabled"]);
+
+		// Populate the information for each module
+		foreach($modsAvailable as $modStatus => $modsList) {
+			foreach($modsList as $modName => $modInfo) {
+				$modsAvailable[$modStatus][$modName] = $modules[$modName]["info"];
+			}
+		}
+
 		return str_replace("{MODULES}",$this->mods2Feed($modsAvailable,$configs),$content);
 	}
 	public function mods2Feed($modsAvailable,$configs) // This should be replaced with SimpleUtils::arr2Feed() with the array coming from a mods table maybe?
@@ -669,36 +687,45 @@ class adminCP extends SimpleModule
 		foreach($modsAvailable as $mods)
 		{
 			$x++;
-			foreach($mods as $mod)
+			foreach($mods as $mod => $modConfigs)
 			{
 				$f=@fopen($_SERVER['DOCUMENT_ROOT'].$configs["path"]["root"].$configs["path"]["mod_templates"]."/adminCP_modAdmin_modules.template","r");
 				while(($line=fgets($f)))
 					$feed.=$line;
 				$feed=str_replace("{MODFILE}",$mod,$feed);
-				if(isset($mod::$info))
+				if(isset($modConfigs))
 				{
-					if(isset($mod::$info['name']))
+					// Replace the name info
+					if(isset($modConfigs["name"]))
 					{
-						$feed=str_replace("{NAME}", $mod::$info['name'], $feed);
+						$feed=str_replace("{NAME}", $modConfigs['name'], $feed);
 					}
 					else
 					{
+						// Default to the mod name
 						$feed=str_replace("{NAME}", $mod, $feed);
 					}
-						if(isset($mod::$info['author']))
+
+					// Replace the author info
+					if(isset($modConfigs['author']))
 					{
-						$feed=str_replace("{AUTHOR}", $mod::$info['author'], $feed);
+						$feed=str_replace("{AUTHOR}", $modConfigs['author'], $feed);
 					}
 					else
 					{
+
+						// Display message if there's no data
 						$feed=str_replace("{AUTHOR}", "No data available...", $feed);
 					}
-					if(isset($mod::$info['date']))
+
+					// Get the create date info
+					if(isset($modConfigs['date']))
 					{
-						$feed=str_replace("{DATE}", $mod::$info['date'], $feed);
+						$feed=str_replace("{DATE}", $modConfigs['date'], $feed);
 					}
 					else
 					{
+						// Display message if there's no data
 						$feed=str_replace("{DATE}", "No data available...", $feed);
 					}
 
@@ -711,8 +738,8 @@ class adminCP extends SimpleModule
 	}
 	public function toggleMod($module,$currentState,$configs) // TODO: SimpleFile class
 	{
-		$file=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".((strtolower($currentState)=="yes")?"enabled":"disabled")."/$module.mod.php";
-		$newfile=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/".((strtolower($currentState)=="yes")?"disabled":"enabled")."/$module.mod.php";
+		$file=$configs['path']['includes']."mods/".((strtolower($currentState)=="yes")?"enabled":"disabled")."/$module.mod.php";
+		$newfile=$configs['path']['includes']."mods/".((strtolower($currentState)=="yes")?"disabled":"enabled")."/$module.mod.php";
 		if(is_file($file))
 			if(copy($file,$newfile))
 				unlink($file);
@@ -735,7 +762,7 @@ class adminCP extends SimpleModule
 			{
 				if(is_file("$extractDir/includes/$modname.mod.php"))
 				{
-					if(copy("$extractDir/includes/$modname.mod.php",$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/disabled/$modname.mod.php"))
+					if(copy("$extractDir/includes/$modname.mod.php",$configs['path']['includes']."mods/disabled/$modname.mod.php"))
 						unlink("$extractDir/includes/$modname.mod.php");
 					else $error=1;
 				}
@@ -820,7 +847,7 @@ class adminCP extends SimpleModule
 		}
 		$widgetsTxt="";
 		$widgetsArr=array();
-		$widgetsDir=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/widgets/";
+		$widgetsDir=$configs['path']['includes']."widgets/";
 		$dir=opendir($widgetsDir);
 		while(@($file=readdir($dir)))
 			if(preg_match("/(.*)\.widget\.php$/si",$file,$matches) && (@$matches))
@@ -837,7 +864,7 @@ class adminCP extends SimpleModule
 		{
 			preg_match("/delete_(.*)/si",$delKey,$matches);
 			$widgetname=$matches[1];
-			$widget=$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/widgets/$widgetname.widget.php";
+			$widget=$configs['path']['includes']."widgets/$widgetname.widget.php";
 			@unlink($widget);
 		}
 	}
@@ -849,7 +876,7 @@ class adminCP extends SimpleModule
 		if(preg_match("/([^\/])*.widget.php/si",$filename,$match) && $match[0]!="")
 			$widgetname=str_replace(".widget.php","",$match[0]);
 		else $error=1;
-		if(copy($tmpname,$_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/widgets/$widgetname.widget.php"))
+		if(copy($tmpname,$configs['path']['includes']."widgets/$widgetname.widget.php"))
 			unlink($tmpname);
 		else $error=1;
 		return $error;
@@ -906,7 +933,7 @@ class adminCP extends SimpleModule
 		$results=array();
 		if(!(is_dir($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['templates']))) // Check if templates directory exists, if not flag it
 			$results[]="<ul>Templates directory does not exist.  How are you seeing this?";
-		if(!(is_dir($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods/"))) // Check if module directory exists, if not flag it
+		if(!(is_dir($configs['path']['includes']."mods/"))) // Check if module directory exists, if not flag it
 			$results[]="<ul>Modules directory does not exist, therefore no mods will be used.";
 		if(!(is_file($configs['path']['configs']))) // Check if config file exists, if not flag it
 			$results[]="<ul>Configuration file does not exist.";
@@ -922,7 +949,7 @@ class adminCP extends SimpleModule
 			$results[]="<ul>Module templates directory is not writable, any modules you upload will not have the required templates.";
 		if(!(is_writable($_SERVER['DOCUMENT_ROOT'].$configs['path']['root'].$configs['path']['custom_templates']))) // Check if custom templates directory is writable, if not flag it
 			$results[]="<ul>Custom templates directory is not writable, you will not be able to upload any files there.";
-		if(!(is_writable($_SERVER['DOCUMENT_ROOT'].$configs['path']['root']."includes/mods"))) // Check if modules directory is writable, if not flag it
+		if(!(is_writable($configs['path']['includes']."mods"))) // Check if modules directory is writable, if not flag it
 			$results[]="<ul>Modules directory is not writable, you will not be able to upload any modules.";
 		if($results==array())
 			$results[]="No dependency or file permission errors, everything should work fine.";
