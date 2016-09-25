@@ -8,6 +8,8 @@ include("../../includes/interfaces/SimpleRole/simpleRoleI.php");
 include("../../includes/abstracts/simpleuser.abstract.php");
 include("../../includes/abstracts/SimpleRole/SimpleRole.php");
 include("../../includes/classes/SimpleDB/SimpleDB.php");
+include("../../includes/classes/SimpleDB/SDBTable.php");
+include("../../includes/classes/SimpleDB/SDBRes.php");
 include("../../includes/classes/SimpleRole/SSRole.php");
 include("../../includes/classes/ssuser.class.php");
 
@@ -66,7 +68,7 @@ foreach($usersDeleted as $username) {
 	$user3=new SSUser($username, null, $configs, false);
 	$user3->delete();
 }
-/*
+
 // Get user info
 print_r($user->getInfo());
 print_r($user->getInfo());
@@ -84,5 +86,5 @@ if($user->hasPrivilege("View Site")) {
 	}
 } else {
 	echo "No.\n";
-}*/
+}
 ?>

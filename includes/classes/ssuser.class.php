@@ -45,6 +45,7 @@ class SSUser extends SimpleUser
 	public function __construct($username=null, $password=null, $dbconf=array(), $require_password=true)
 	{
 		$this->dbconf=$dbconf;
+		$db=new SimpleDB($dbconf);
 		if(!is_null($username)) {
 			parent::__construct($username, $password, $require_password);
 		}
@@ -52,7 +53,7 @@ class SSUser extends SimpleUser
 
 	public static function getByID($id, $dbconf)
 	{
-		$db=new SimpleDB($dbconf);
+		$db = SimpleDB::getConnection("Main");
 		$tbl=$db->openTable("users");
 		if($tbl->select('username', array('AND'=>array('id'=>array('op'=>'=', 'val'=>$id))))) {
 			$user=$tbl->sdbGetRows();
@@ -454,6 +455,7 @@ class SSUser extends SimpleUser
 				                     )
 		);
 		$roleClass=self::$roleClass;
+		SimpleUtils::installReqTbls($tables, array("database"=>$this->dbconf));
 		return ($roleClass::install($this->dbconf) && SimpleUtils::installReqTbls($tables, array("database"=>$this->dbconf)));
 	}
 }
