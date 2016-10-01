@@ -47,7 +47,7 @@ class Guestbook extends SimpleModule
 		if((preg_match("/{ENTRIES}/si",$content,$match)))
 		{
 			$guestbook="";
-			$cols=array("name","message");
+			$cols=array("Guestbook"=>array("name","message"));
 			$this->db->openTable("Guestbook");
 			$table=$this->db->sdbGetTable("Guestbook");
 			$table->select($cols);
