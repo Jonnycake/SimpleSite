@@ -206,13 +206,12 @@ v0.3.0 (Released 9/25/16):
     - Issue #150 (bugfix): Ensure All References to includes Directory Are Replaced by Config
     - Issue #153 (bugfix): adminCP: Modules Are Listed as Both Enabled and Disabled
 
-v1.0.0 (Released ??/??/??):
+v0.3.2 (Released 10/10/2016):
 ====================
-    - Issue #49 (enhancement): SimpleUser
-    - Issue #124 (enhancement): 
-    - Issue #42 (enhancement):
-    - Issue #135 (enhancement): 
-    - Issue #112 (enhancement):
-    - Issue #99 (enhancement):
-    - Issue #155 (enhancement): Make Bootstrapper File
+    - Issue #45 (bugfix): adminCP: DBAdmin Returns Blank Page Loading information_schema
+    - Issue #42 (enhancement): Create Assets Directory
+    - Issue #135 (enhancement): Update paths to use assets/
+    - Issue #112 (enhancement): PHPDoc Docblocks
+    - Issue #99 (enhancement): Configuration Storage: Create Config Directory
+    - Issue #183 (bugfix): Guestbook Doesn't Display Entries
     - Issue #144 (enhancement): Add DBAbstraction Interface

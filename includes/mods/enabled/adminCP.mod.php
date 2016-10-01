@@ -640,7 +640,7 @@ class adminCP extends SimpleModule
 		$content=str_replace("{BLOCKTBL}",$table,$content);
 		return $content;
 	}
-	
+
 	// Module Administration
 	public function modAdmin($content,$configs)
 	{
@@ -740,9 +740,16 @@ class adminCP extends SimpleModule
 	{
 		$file=$configs['path']['includes']."mods/".((strtolower($currentState)=="yes")?"enabled":"disabled")."/$module.mod.php";
 		$newfile=$configs['path']['includes']."mods/".((strtolower($currentState)=="yes")?"disabled":"enabled")."/$module.mod.php";
-		if(is_file($file))
-			if(copy($file,$newfile))
+		if(is_file($file)) {
+			if(copy($file,$newfile)) {
 				unlink($file);
+			}
+		}
+		$modConfigs = json_decode(file_get_contents($configs['path']['includes'] . "mods/mods.json"), true);
+		$modConfigs[$module]['enabled'] = (strtolower($currentState) != "yes");
+		$f=fopen($configs['path']['includes'] . "mods/mods.json","w");
+		fwrite($f, json_encode($modConfigs));
+		fclose($f);
 	}
 	public function uploadMod($configs)
 	{
