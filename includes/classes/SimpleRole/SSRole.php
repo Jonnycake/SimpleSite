@@ -139,13 +139,16 @@ class SSRole extends SimpleRole
 	 */
 	public function save($new=false)
 	{
-		if($new || !$this->getID()) {
-			$tbl = $this->db->openTable("roles");
+		$tbl = $this->db->openTable("roles");
+		if($new || !$this->getID(true)) {
 			$tbl->insert(array('name' => (string)$this->name, 'description' => (string)$this->description, 'is_admin' => (bool)$this->is_admin));
 			$this->id = $this->getID(true);
 		}
 		else {
 			// Update
+			$tbl->update(array('name' => (string) $this->name, 'description' => (string) $this->description, 'is_admin' => (bool) $this->is_admin), array('AND'=> array('id' => array('op' => '=', 'val' => $this->getID(true)))));
+			print_r((array('name' => (string) $this->name, 'description' => (string) $this->description, 'is_admin' => (bool) $this->is_admin)));
+			print_r((array('AND'=> array('id' => array('op' => '=', 'val' => $this->getID(true))))));
 		}
 	}
 
