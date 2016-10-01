@@ -1,8 +1,8 @@
-v0.1 (Released 12/07/12):
+v(0.)0.1 (Released 12/07/12):
 =========================
    * SimpleSite Started
 
-v1.0 (Released 03/01/13):
+v(0.)1.0 (Released 03/01/13):
 =========================
    General:
    --------
@@ -32,7 +32,7 @@ v1.0 (Released 03/01/13):
       * Added template based session variable access - ex. {SESSION_varname}
       * Added template based user input (GET/POST) access - ex. {GET_varname} {POST_varname}
 
-v1.1 (Released 4/25/13):
+v(0.)1.1 (Released 4/25/13):
 ========================
    General:
    --------
@@ -76,12 +76,12 @@ v1.1 (Released 4/25/13):
       * {CONFIG_*} Updated
          - Bugfix: Couldn't access {CONFIGS_path_mod_templates}. "/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9]*)}/si" => "/{CONFIGS_([A-Za-z0-9]*)_([A-Za-z0-9_]*)}/si"
 
-v1.5 (Released 5/4/14):
+v(0.)1.5 (Released 5/4/14):
 ======================
 * Major changes: SimpleDB class added
 * Minor changes: Unknown at this time (disorganized & interrupted development).
 
-v1.7 (Released 7/21/14):
+v(0.)1.7 (Released 7/21/14):
 ====================
 * Major changes: Re-organized directory structure - new tree:
 	./
@@ -179,13 +179,13 @@ v1.7 (Released 7/21/14):
     - Issue #5 (enhancement): adminCP Unusable Without Database 
     - Issue #6 (bugfix): Mod Admin in adminCP Should Show Info
 
-v1.7-Rev1 (Released 7/21/14):
+v(0.)1.7-Rev1 (Released 7/21/14):
 ====================
 * Issues Addressed:
     - Issue #33 (bugfix): 1.7 Module Administration
     - Issue #34 (bugfix): adminCP - Environment Test Always Fails
 
-v2.0 (Released 9/28/14):
+v(0.)2.0 (Released 9/28/14):
 ====================
     - Issue #33 (bugfix): 1.7 Module Administration
     - Issue #52 (bugfix): Guestbook: XSS
@@ -206,7 +206,7 @@ v0.3.0 (Released 9/25/16):
     - Issue #150 (bugfix): Ensure All References to includes Directory Are Replaced by Config
     - Issue #153 (bugfix): adminCP: Modules Are Listed as Both Enabled and Disabled
 
-v0.3.2 (Released 10/10/2016):
+v0.4.0 (Released 10/10/2016):
 ====================
     - Issue #45 (bugfix): adminCP: DBAdmin Returns Blank Page Loading information_schema
     - Issue #42 (enhancement): Create Assets Directory
