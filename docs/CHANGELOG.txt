@@ -216,3 +216,4 @@ v1.0.0 (Released ??/??/??):
     - Issue #112 (enhancement):
     - Issue #99 (enhancement):
     - Issue #155: Make Bootstrapper File
+    - Issue #183 (bugfix): Guestbook Doesn't Display Entries
