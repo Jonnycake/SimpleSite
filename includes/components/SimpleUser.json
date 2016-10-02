@@ -1,0 +1,13 @@
+{
+	"include_files":[
+		"classes":[
+			"SSUser":"SSUser.php",
+		],
+		"abstracts":[
+			"SimpleUser":"SimpleUser.php",
+		],
+		"interfaces":[
+			"simpleUserI":"simpleUserI.php"
+		]
+	]
+}
