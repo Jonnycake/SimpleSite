@@ -75,7 +75,7 @@ class SSUser extends SimpleUser
 	 */
 	protected function _login($username, $password, $require_password=true)
 	{
-		$db=new SimpleDB($this->dbconf);
+		$db=SimpleDB::getConnection("Main");
 		$userTbl=$db->openTable("users");
 		$conditions=array(
 			'AND'=>array(
@@ -142,10 +142,12 @@ class SSUser extends SimpleUser
 			$tbl->select('*', array('AND'=>array('uid'=>array('op'=>'=','val'=>$this->userInfo->getId()))));
 			$rows=$tbl->sdbGetRows();
 			$roleClass=self::$roleClass;
-			foreach($rows as $row) {
-				$role=$roleClass::getByID($row->getRid(), $dbconf);
-				if(is_object($role)) {
-					$roles[]=$role->getName();
+			if(is_array($rows)) {
+				foreach($rows as $row) {
+					$role=$roleClass::getByID($row->getRid(), $dbconf);
+					if(is_object($role)) {
+						$roles[]=$role->getName();
+					}
 				}
 			}
 		}
@@ -161,7 +163,7 @@ class SSUser extends SimpleUser
 	public function getInfo($attribute=null, $force_reload=false)
 	{
 		if($force_reload || is_null($this->attributes)) {
-			$db=new SimpleDB($this->dbconf);
+			$db=SimpleDB::getConnection("Main");
 			$tbl=$db->openTable("user_info");
 			$attributes=array();
 			if(!is_null($this->userInfo)) {
@@ -179,7 +181,17 @@ class SSUser extends SimpleUser
 		} else {
 			$attributes=$this->attributes;
 		}
-		return $attributes;
+		if(is_null($attribute)) {
+			return $attributes;
+		}
+		else {
+			if(isset($attributes[$attribute])) {
+				return $attributes[$attribute];
+			}
+			else {
+				return false;
+			}
+		}
 	}
 
 	/**
@@ -268,7 +280,7 @@ class SSUser extends SimpleUser
 	 */
 	public function save($new=false)
 	{
-		$db=new SimpleDB($this->dbconf);
+		$db=SimpleDB::getConnection("Main");
 /*
 		$tables=array(
 				"users"      => array(
@@ -367,8 +379,10 @@ class SSUser extends SimpleUser
 		// Check to see what attributes are already in the database
 		$tbl->select('aid', array('AND'=>array('uid'=>array('op'=>'=', 'val'=>$userId))));
 		$attribRows=$tbl->sdbGetRows();
-		foreach($attribRows as $row) {
-			$attribInDB[]=$row->getAid();
+		if(is_array($attribRows)) {
+			foreach($attribRows as $row) {
+				$attribInDB[]=$row->getAid();
+			}
 		}
 
 		// Actually do the inserts/updates
@@ -393,7 +407,7 @@ class SSUser extends SimpleUser
 	public function delete($archive=false)
 	{
 		// Archiving may require added field
-		$db=new SimpleDB($this->dbconf);
+		$db=SimpleDB::getConnection("Main");
 
 
 		// User roles

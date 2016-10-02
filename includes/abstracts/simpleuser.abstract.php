@@ -73,13 +73,21 @@ abstract class SimpleUser implements simpleUserI
 		{
 			$this->install();
 		}
-		if($this->_login($username, $password, $require_password))
-		{
-			$this->is_logged_in=true;
-			$this->uid=$this->userInfo->getId();
-			$this->is_admin=$this->userInfo->getIs_admin();
-			$this->username=$username;
-			$this->password=$password;
+		if($require_password) {
+			if($this->_login($username, $password, $require_password))
+			{
+				$this->is_logged_in=true;
+				$this->uid=$this->userInfo->getId();
+				$this->is_admin=$this->userInfo->getIs_admin();
+				$this->username=$username;
+				$this->password=$password;
+			}
+		}
+		else {
+			$this->is_logged_in = false;
+			$this->is_admin = false;
+			$this->username = $username;
+			$this->password = $password;
 		}
 		$this->getRoles();
 	}
@@ -128,6 +136,11 @@ abstract class SimpleUser implements simpleUserI
 		$this->name=null;
 		$this->userInfo=null;
 		$this->roles=null;
+	}
+
+	public function getId()
+	{
+		return $this->uid;
 	}
 
 	public static function getRoleClass()

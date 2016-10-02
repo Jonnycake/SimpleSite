@@ -24,68 +24,57 @@ $stdin=fopen("php://stdin","r");
 echo "DB Type: ";
 $configs['type']=trim(fgets($stdin));
 echo "DB Hostname: ";
-$configs['host']=trim(fgets($stdin));
+$configs['host']= trim(fgets($stdin));
 echo "DB Login: ";
-$configs['username']=trim(fgets($stdin));
+$configs['username']= trim(fgets($stdin));
 echo "DB Password: ";
 $configs['password']=trim(fgets($stdin));
 echo "DB Database: ";
 $configs['database']=trim(fgets($stdin));
 echo "DB Table Prefix: ";
 $configs['tbl_prefix']=trim(fgets($stdin));
-echo "Username: ";
-$username=trim(fgets($stdin));
-echo "Password: ";
-$password=trim(fgets($stdin));
-$user=new SSUser($username, $password, $configs);
-echo "New Password: ";
-$newpassword=trim(fgets($stdin));
-$user->password=$newpassword;
-echo "Current Roles:\n";
-print_r($user->getRoles());
-echo "Removed Role(s): ";
-$removedRoles=explode(';', trim(fgets($stdin)));
-$user->removeRole($removedRoles);
-echo "New Role(s): ";
-$newRoles=explode(';', trim(fgets($stdin)));
-$user->addRole($newRoles);
-$user->save();
+
+// Test adding a new user
 echo "New Username: ";
-$newuser=trim(fgets($stdin));
-echo "Password for ${newuser}: ";
-$newuserpass=trim(fgets($stdin));
-echo "New User Role: ";
-$newuserrole=trim(fgets($stdin));
-$user2=new SSUser(null, null, $configs);
-$user2->roles[]=$newuserrole;
-print_r($user2->roles);
-$user2->username=$newuser;
-$user2->password=$newuserpass;
-$user2->save(true);
-echo "User(s) to Delete: ";
-$usersDeleted=explode(';', trim(fgets($stdin)));
-fclose($stdin);
-foreach($usersDeleted as $username) {
-	$user3=new SSUser($username, null, $configs, false);
-	$user3->delete();
+$newUsername = trim(fgets($stdin));
+echo "New User Passsword: ";
+$newPassword = trim(fgets($stdin));
+echo "New User Description: ";
+$description = trim(fgets($stdin));
+
+// $username=null, $password=null, $dbconf=array(), $require_password=true
+$userObj = new SSUser($newUsername, $newPassword, $configs, false);
+$userObj->save(true);
+
+//  Test logging in as that user
+$userObjLoggedIn = new SSUser($newUsername, $newPassword, $configs);
+$userObjGuest = new SSUser($newUsername, $newPassword . "fail", $configs);
+if($userObjLoggedIn->isGuest()) {
+	echo "Failed to log in properly.\n";
+}
+else {
+	echo "Logged in properly :D\n";
 }
 
-// Get user info
-print_r($user->getInfo());
-print_r($user->getInfo());
-
-// Get user's roles
-print_r($user->roles);
-
-//$user->delete();
-
-/// Check their permissions
-if($user->hasPrivilege("View Site")) {
-	echo "Yes they can view the site.\n";
-	if($user->hasPrivilege("Edit Templates")) {
-		echo "Yes they can edit templates.\n";
-	}
-} else {
-	echo "No.\n";
+if(!$userObjGuest->isGuest()) {
+	echo "Failed to prevent log in with wrong password.\n";
 }
+else {
+	echo "Prevented login with wrong password :D\n";
+}
+
+// Test updating that user's profile
+foreach($userObjLoggedIn->getInfo() as $attr => $val) {
+	echo "$attr: ";
+	$userObjLoggedIn->setInfo($attr, trim(fgets($stdin)));
+}
+$userObjLoggedIn->save();
+
+foreach($userObjLoggedIn->getInfo(null, true) as $attr => $val) {
+	echo "$attr: $val\n";
+}
+
+
+//  Test deleting that user
+$userObjLoggedIn->delete();
 ?>
