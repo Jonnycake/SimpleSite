@@ -212,4 +212,12 @@ class SSRole extends SimpleRole
 
 		return SimpleUtils::installReqTbls($tables, array("database" => ((is_null($dbconf))?$this->dbconf:$dbconf)));
 	}
+
+	/**
+	 * Uninstall the rolee table
+	 */
+	public function uninstall()
+	{
+		SimpleDB::getConnection("Main")->openTable("roles")->drop();
+	}
 }

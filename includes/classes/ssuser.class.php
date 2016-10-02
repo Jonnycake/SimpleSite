@@ -351,6 +351,7 @@ class SSUser extends SimpleUser
 		// Get a list of all possible attributes
 		$attribTbl->select('*');
 		$possibleAttributes=$attribTbl->sdbGetRows();
+		sleep(20);
 		foreach($possibleAttributes as $attribute) {
 			$attributeNames[$attribute->getName()]=$attribute;
 		}
@@ -442,7 +443,8 @@ class SSUser extends SimpleUser
 				                ),
 				"user_attributes" => array(
 							"id"       => "int NOT NULL AUTO_INCREMENT PRIMARY KEY",
-							"name"     => "varchar(50) UNIQUE"
+							"name"     => "varchar(50) UNIQUE",
+							"description" => "varchar(250) NOT NULL"
 				                     ),
 				"user_info"       => array(
 							"uid"      => "int NOT NULL",
@@ -452,7 +454,36 @@ class SSUser extends SimpleUser
 		);
 		$roleClass=self::$roleClass;
 		SimpleUtils::installReqTbls($tables, array("database"=>$this->dbconf));
+
+		// Default attributes
+		// First name
+		// Last name
+		// E-mail address
+		// Phone number
+		// Timezone
+		$tbl = SimpleDB::getConnection("Main")->openTable("user_attributes");
+		$tbl->insert(array("name" => "First Name", "description" => "The first name of the user."));
+		$tbl->insert(array("name" => "Last Name", "description" => "The last name of the user."));
+		$tbl->insert(array("name" => "E-Mail Address", "description" => "The user's e-mail address"));
+		$tbl->insert(array("name" => "Phone Number", "description" => "The user's phone number."));
+		$tbl->insert(array("name" => "Timezone", "description" => "The timezone the user is in."));
+
+
 		return ($roleClass::install($this->dbconf) && SimpleUtils::installReqTbls($tables, array("database"=>$this->dbconf)));
+	}
+
+	public function uninstall()
+	{
+		$tables=array(
+				"users",
+				"user_roles",
+				"user_attributes",
+				"user_info"
+		);
+		foreach($tables as $table)
+		{
+			SimpleDB::getConnection("Main")->openTable($table)->drop();
+		}
 	}
 }
 ?>

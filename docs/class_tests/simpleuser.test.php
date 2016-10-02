@@ -77,4 +77,8 @@ foreach($userObjLoggedIn->getInfo(null, true) as $attr => $val) {
 
 //  Test deleting that user
 $userObjLoggedIn->delete();
+
+
+// Uninstall
+$userObjLoggedIn->uninstall();
 ?>

@@ -48,4 +48,7 @@ echo $roleAfterSave->getId() . " - " . $roleAfterSave->description . "\n";
 $roleAfterSave->delete();
 $roleAfterDelete = new SSRole($roleName, $configs);
 echo $roleAfterDelete->getId() . "\n";
+
+// Uninstall
+$roleAfterSave->uninstall();
 ?>

@@ -308,6 +308,12 @@ class SDBTable extends SimpleDB
 		$stmt=$this->connection->prepare($query);
 		return $stmt->execute($params);
 	}
+	public function drop()
+	{
+		$query = "DROP TABLE `".($this->configs['tbl_prefix']) .$this->sdbGetName()."`";
+		$stmt = $this->connection->prepare($query);
+		$stmt->execute();
+	}
 
 	// Getters
 	public function sdbGetName()

@@ -178,13 +178,6 @@ abstract class SimpleUser implements simpleUserI
 	 */
 	abstract public function getRoles();
 
-	/**
-	 *
-	 *
-	 *
-	 *
-	 */
-	abstract public function hasPrivilege($privilege);
 
 	/**
 	 * Should return if the user system is properly installed
