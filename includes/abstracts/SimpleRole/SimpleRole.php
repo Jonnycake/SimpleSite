@@ -26,12 +26,6 @@ abstract class SimpleRole implements simpleRoleI
 	 */
 	public $is_admin=false;
 
-	/**
-	 * What privileges the role has
-	 *
-	 * @var array $privileges
-	 */
-	private $privileges=array();
 
 	/**
 	 * The name of the role
@@ -48,45 +42,11 @@ abstract class SimpleRole implements simpleRoleI
 	 *
 	 * @return void
 	 */
-	public function __construct($name="Guest", $admin=false)
+	public function __construct($name="Guest")
 	{
-		$this->is_admin=$admin;
-		$this->name=$name;
-		$this->privileges=$this->getPrivileges();
 		$this->id=$this->getID();
-	}
-
-	/**
-	 * Check if the user has the specified privilege
-	 *
-	 * @param string|array $privilege The name(s) of the privilege to be checked.
-	 *
-	 * @return bool Whether or not the role has the specified privilege
-	 */
-	public function hasPrivilege($privilege)
-	{
-		if(is_string($privilege)) {
-			return (in_array($privilege, $this->privileges) || $this->isAdmin());
-		} else if(is_array($privilege)) {
-			$hasPriv=true;
-			foreach($privilege as $priv) {
-				if(!(in_array($privilege, $this->privileges) || $this->isAdmin())) {
-					$hasPriv=false;
-				}
-			}
-			return $hasPriv;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns whether the role is an administrative role
-	 *
-	 * @return bool Whether or not the role is an administrative role
-	 */
-	public function isAdmin()
-	{
-		return $this->is_admin;
+		$this->name=$name;
+		$this->description = $this->getDescription();
 	}
 
 	/**
@@ -115,6 +75,9 @@ abstract class SimpleRole implements simpleRoleI
 	 */
 	abstract public function save($new=false);
 
+	abstract public static function getByName($name);
+	abstract public static function getById($id);
+
 	/**
 	 *
 	 *
@@ -122,13 +85,6 @@ abstract class SimpleRole implements simpleRoleI
 	 *
 	 */
 	abstract public function delete();
-
-	/**
-	 * Should return the privileges array as well as set it in $this->privileges
-	 *
-	 * @return array Array of privileges
-	 */
-	abstract public function getPrivileges();
 
 	/**
 	 * Should return if the role system is properly installed

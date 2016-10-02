@@ -205,24 +205,6 @@ class SSUser extends SimpleUser
 		$this->attributes[$attribute]=$value;
 	}
 
-	/**
-	 *
-	 *
-	 *
-	 *
-	 *
-	 */
-	public function hasPrivilege($privilege)
-	{
-		$roleClass=self::$roleClass;
-		foreach($this->roles as $role) {
-			$roleObj=new $roleClass($role, $this->dbconf);
-			if($roleObj->hasPrivilege($privilege)) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	public function addRole($role)
 	{

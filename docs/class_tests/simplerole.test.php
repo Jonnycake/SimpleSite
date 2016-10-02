@@ -28,29 +28,24 @@ echo "DB Table Prefix: ";
 $configs['tbl_prefix']=trim(fgets($stdin));
 echo "User Role: ";
 $roleName=trim(fgets($stdin));
-echo "Privilege Name: ";
-$permName=trim(fgets($stdin));
+echo "Description: ";
+$description = trim(fgets($stdin));
+
+// Test save
 $role=new SSRole($roleName, $configs);
+$role->description = $description;
+$role->save();
+$roleAfterSave = new SSRole($roleName,$configs);
+echo $role->getId() . " - " . $roleAfterSave->description . "\n";
 
-if($role->hasPrivilege($permName))
-{
-	echo "Yeah they can do that.\n";
-}
-else
-{
-	echo "Nope...\n";
-}
-print_r($role->getPrivileges());
+// Test update
+$roleAfterSave->description = "Description updated";
+$roleAfterSave->save();
+$roleAfterSave = new SSRole($roleName, $configs);
+echo $roleAfterSave->getId() . " - " . $roleAfterSave->description . "\n";
 
-echo "Another Privilege: ";
-$permName2=trim(fgets($stdin));
-fclose($stdin);
-if($role->hasPrivilege(array($permName,$permName2)))
-{
-	echo "Yeah they can do both.\n";
-}
-else
-{
-	echo "Nope...\n";
-}
+// Test delete
+$roleAfterSave->delete();
+$roleAfterDelete = new SSRole($roleName, $configs);
+echo $roleAfterDelete->getId() . "\n";
 ?>
