@@ -1,5 +1,8 @@
 {
 	"include_files":{
+		"interfaces":{
+			"simpleDBI":"simpleDBI.php"
+		},
 		"classes":{
 			"SimpleDB":"SimpleDB.php",
 			"SDBTable":"SDBTable.php",

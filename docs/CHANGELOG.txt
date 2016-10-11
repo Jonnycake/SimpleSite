@@ -214,3 +214,4 @@ v0.4.0 (Released 10/10/2016):
     - Issue #112 (enhancement): PHPDoc Docblocks
     - Issue #99 (enhancement): Configuration Storage: Create Config Directory
     - Issue #183 (bugfix): Guestbook Doesn't Display Entries
+    - Issue #144 (enhancement): Add DBAbstraction Interface

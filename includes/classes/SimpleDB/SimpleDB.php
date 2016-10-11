@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SimpleDB
+class SimpleDB implements simpleDBI
 {
 	private static $connections = null;
 
