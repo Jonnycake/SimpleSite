@@ -1,3 +1,5 @@
+**January 17, 2019** I haven't touched this besides creating an issue in 2 years.  I just recently tried using it on a web host and my god...it's awful.  Archiving this repo and likely making a successor to it when I have time.  _R.I.P. SimpleSite_
+
 **October 5, 2015** Got my job back around 6 months ago, so most of my time is spent with that.  I am still developing SimpleSite in my spare time, however.  **Important Note** master branch will be unstable until I flesh out the 1.0.0 release more as I accidentally pulled in some 1.0.0 changes.
 
 **1.0.0 Development Continues - Starting to pick back up on 1.0.0, I'll be doing an intermediary release later today/tomorrow, looks like we're getting on track so expect for 1.0.0 to be released September 28.  As an aside, we're coming up on a year of being on GitHub!  A lot has changed since then - we're becoming stable!**
